@@ -40,13 +40,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-lg tracking-tight text-gold-gradient">
-                NEXUS
+                NexusHOS
               </span>
               <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/20">
-                Hotel OS
+                Hotel Operating System
               </span>
             </div>
-            <p className="text-[11px] text-gray-400 font-medium">AI Operating System</p>
+            <p className="text-[11px] text-gray-400 font-medium">Enterprise AI Core</p>
           </div>
         </div>
 
