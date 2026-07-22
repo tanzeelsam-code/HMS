@@ -40,16 +40,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
         {/* Brand */}
         <div className="flex flex-col items-center text-center gap-3">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-200 flex items-center justify-center shadow-lg shadow-amber-500/20 text-slate-950 font-black text-2xl tracking-tighter animate-pulse-glow">
-            A
+            N
           </div>
           <div>
             <div className="flex items-center justify-center gap-2">
-              <span className="font-extrabold text-2xl tracking-tight text-gold-gradient">AuraHMS</span>
+              <span className="font-extrabold text-2xl tracking-tight text-gold-gradient">NexusHOS</span>
               <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/20">
-                Enterprise AI
+                Hotel Operating System
               </span>
             </div>
-            <p className="text-xs text-gray-400 font-medium mt-1">Property Management Suite — Staff Sign In</p>
+            <p className="text-xs text-gray-400 font-medium mt-1">Enterprise AI Core — Staff Sign In</p>
           </div>
         </div>
 

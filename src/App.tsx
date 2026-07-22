@@ -31,7 +31,7 @@ export const App: React.FC = () => {
   const [loadError, setLoadError] = useState('');
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('tape-chart');
-  const [selectedProperty, setSelectedProperty] = useState('Aura Luxury Resort & Spa (Main Property)');
+  const [selectedProperty, setSelectedProperty] = useState('Nexus Luxury Resort & Spa (Main Property)');
 
   // Main State
   const [rooms, setRooms] = useState<Room[]>([]);
