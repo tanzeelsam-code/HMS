@@ -1,64 +1,65 @@
-import React, { useState } from 'react';
-import { Sparkles, Send, Bot, User, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
-import { Room, Reservation, HousekeepingTask } from '../types';
+import React, { useEffect, useRef, useState } from 'react';
+import { Send, Bot, CheckCircle2, Zap, Loader2 } from 'lucide-react';
+import { api } from '../api';
+import { CopilotResponse } from '../types';
 
 interface StaffCopilotProps {
-  rooms: Room[];
-  reservations: Reservation[];
-  tasks: HousekeepingTask[];
-  onExecuteCommand: (actionType: string, payload?: any) => void;
+  onDataChanged: () => void;
 }
 
-export const StaffCopilot: React.FC<StaffCopilotProps> = ({
-  rooms,
-  reservations,
-  tasks,
-  onExecuteCommand
-}) => {
-  const [messages, setMessages] = useState([
+interface ChatMessage {
+  sender: 'user' | 'copilot';
+  text: string;
+}
+
+export const StaffCopilot: React.FC<StaffCopilotProps> = ({ onDataChanged }) => {
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       sender: 'copilot',
-      text: 'Greetings General Manager. I am your Operational AI Copilot. I can execute live actions across your front desk, room assignments, housekeeping queues, and folios. What would you like to run?'
+      text: 'Greetings General Manager. I am your Operational AI Copilot, connected to the live PMS database. I can answer occupancy/rate questions and execute real actions — housekeeping dispatch, VIP room moves, rate application, and check-ins. What would you like to run?'
     }
   ]);
+  const [actionLog, setActionLog] = useState<string[]>([]);
   const [inputQuery, setInputQuery] = useState('');
+  const [thinking, setThinking] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const quickPrompts = [
-    'Assign all VIP arrivals to high floors',
-    'Show today\'s arrivals with unpaid balances',
-    'Mark all dirty rooms on Floor 1 as clean',
-    'Scan system for night audit anomalies'
+    'What is occupancy today?',
+    'RevPAR this week',
+    'Clean floor 1',
+    'Assign VIP arrivals to high floors',
+    'Apply the recommended rates'
   ];
 
-  const handleSendQuery = (textToRun?: string) => {
-    const query = textToRun || inputQuery;
-    if (!query.trim()) return;
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+  }, [messages, thinking]);
 
-    const userMsg = { sender: 'user', text: query };
-    setMessages(prev => [...prev, userMsg]);
+  const handleSendQuery = async (textToRun?: string) => {
+    const query = (textToRun ?? inputQuery).trim();
+    if (!query || thinking) return;
+
+    setMessages(prev => [...prev, { sender: 'user', text: query }]);
     if (!textToRun) setInputQuery('');
+    setThinking(true);
 
-    // Simulate natural language intent extraction & live command execution
-    setTimeout(() => {
-      let botResponse = "Command processed across global PMS state bus.";
-      const lower = query.toLowerCase();
-
-      if (lower.includes('vip') || lower.includes('high floor')) {
-        botResponse = "Executed VIP Allocation Algorithm: 3 VIP arrivals (Elena Rostova #303, Victoria Sterling #203, Alexander Wright #101) prioritized and assigned to top floor ocean/skyline suites.";
-        onExecuteCommand('ASSIGN_VIPS');
-      } else if (lower.includes('unpaid') || lower.includes('balance')) {
-        botResponse = "Found 2 arrivals with outstanding deposits: Sophia Martinez (Room #104 - $680 deposit pending). Sent automated payment reminder link to guest mobile.";
-        onExecuteCommand('SHOW_UNPAID');
-      } else if (lower.includes('clean') || lower.includes('floor 1')) {
-        botResponse = "Housekeeping Auto-Dispatch: Dispatched priority cleaning task to Maria Santos for Room #103 on Floor 1.";
-        onExecuteCommand('CLEAN_FLOOR1');
-      } else if (lower.includes('audit') || lower.includes('anomaly')) {
-        botResponse = "Audit Safeguard Scan: Detected 2 ledger anomalies (Unposted rate on Room #105, manual discount variance on Room #203). Highlighted on Financials dashboard.";
-        onExecuteCommand('RUN_AUDIT_SCAN');
+    try {
+      const res = await api.post<CopilotResponse>('/ai/copilot', { message: query });
+      setMessages(prev => [...prev, { sender: 'copilot', text: res.reply }]);
+      if (res.actions.length > 0) {
+        setActionLog(prev => [...res.actions, ...prev]);
+        // The command mutated live PMS data — let App refetch affected collections
+        onDataChanged();
       }
-
-      setMessages(prev => [...prev, { sender: 'copilot', text: botResponse }]);
-    }, 600);
+    } catch (err) {
+      setMessages(prev => [
+        ...prev,
+        { sender: 'copilot', text: `⚠ ${err instanceof Error ? err.message : 'Copilot request failed'}` }
+      ]);
+    } finally {
+      setThinking(false);
+    }
   };
 
   return (
@@ -79,7 +80,7 @@ export const StaffCopilot: React.FC<StaffCopilotProps> = ({
 
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs font-semibold text-emerald-400">WebSocket Real-Time Listener Active</span>
+          <span className="text-xs font-semibold text-emerald-400">Connected to Live PMS Database</span>
         </div>
       </div>
 
@@ -88,9 +89,9 @@ export const StaffCopilot: React.FC<StaffCopilotProps> = ({
         {/* Left Column: Interactive Command Terminal */}
         <div className="lg:col-span-7 glass-panel p-5 flex flex-col justify-between h-[540px]">
           {/* Messages list */}
-          <div className="space-y-3 overflow-y-auto pr-2 flex-1">
+          <div ref={scrollRef} className="space-y-3 overflow-y-auto pr-2 flex-1">
             {messages.map((m, idx) => (
-              <div 
+              <div
                 key={idx}
                 className={`flex gap-3 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
@@ -109,6 +110,18 @@ export const StaffCopilot: React.FC<StaffCopilotProps> = ({
                 </div>
               </div>
             ))}
+
+            {thinking && (
+              <div className="flex gap-3 justify-start">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 flex-shrink-0">
+                  <Bot className="w-4 h-4" />
+                </div>
+                <div className="p-3 rounded-xl rounded-tl-none bg-slate-900 border border-white/10 text-gray-400 text-xs flex items-center gap-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                  Copilot is thinking…
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Prompt Suggestions */}
@@ -117,7 +130,8 @@ export const StaffCopilot: React.FC<StaffCopilotProps> = ({
               <button
                 key={i}
                 onClick={() => handleSendQuery(p)}
-                className="text-[11px] px-2.5 py-1 rounded-full bg-slate-900 border border-white/10 hover:border-amber-400/40 text-gray-300 hover:text-amber-300 transition-all text-left"
+                disabled={thinking}
+                className="text-[11px] px-2.5 py-1 rounded-full bg-slate-900 border border-white/10 hover:border-amber-400/40 text-gray-300 hover:text-amber-300 transition-all text-left disabled:opacity-50"
               >
                 ✨ {p}
               </button>
@@ -136,7 +150,8 @@ export const StaffCopilot: React.FC<StaffCopilotProps> = ({
             />
             <button
               onClick={() => handleSendQuery()}
-              className="btn-primary text-xs px-4 py-2.5"
+              disabled={thinking}
+              className="btn-primary text-xs px-4 py-2.5 disabled:opacity-60"
             >
               <Send className="w-3.5 h-3.5" /> Execute
             </button>
@@ -149,25 +164,23 @@ export const StaffCopilot: React.FC<StaffCopilotProps> = ({
             <Zap className="w-4 h-4 text-amber-400" /> Real-Time Executed Actions Log
           </h3>
 
-          <div className="space-y-3 text-xs">
-            <div className="p-3 rounded-xl bg-slate-900 border border-emerald-500/30">
-              <div className="font-bold text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5" /> VIP Auto-Room Allocation
+          <div className="space-y-3 text-xs max-h-[440px] overflow-y-auto pr-1">
+            {actionLog.length === 0 && (
+              <div className="p-3 rounded-xl bg-slate-900 border border-white/10 text-gray-400 text-[11px] leading-relaxed">
+                No actions executed yet. Try "clean floor 1", "assign VIP arrivals to high floors",
+                "apply recommended rates", or "check in &lt;guest name&gt;" — every mutation the Copilot
+                performs against the live database will be logged here.
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">Elena Rostova matched with Presidential Suite #303.</p>
-            </div>
+            )}
 
-            <div className="p-3 rounded-xl bg-slate-900 border border-amber-500/30">
-              <div className="font-bold text-amber-300 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Dynamic Rate Adjuster
+            {actionLog.map((a, i) => (
+              <div key={i} className="p-3 rounded-xl bg-slate-900 border border-emerald-500/30">
+                <div className="font-bold text-emerald-400 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Executed
+                </div>
+                <p className="text-[11px] text-gray-300 mt-1">{a}</p>
               </div>
-              <p className="text-[11px] text-gray-400 mt-1">Applied +22% rate surge multiplier across Deluxe Ocean inventory.</p>
-            </div>
-
-            <div className="p-3 rounded-xl bg-slate-900 border border-white/10">
-              <div className="font-bold text-gray-300">Staff Training SOP Knowledge Base</div>
-              <p className="text-[11px] text-gray-400 mt-1">Loaded 42 hotel standard operating procedure documents.</p>
-            </div>
+            ))}
           </div>
         </div>
       </div>

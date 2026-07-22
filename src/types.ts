@@ -145,3 +145,109 @@ export interface AnomalyItem {
   amount: number;
   actionRequired: string;
 }
+
+// --- ERP (GL / Inventory / Procurement / HR) & AI MODELS ---
+
+export interface GLAccount {
+  id: string;
+  code: string;
+  name: string;
+  type: 'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Expense';
+}
+
+export interface JournalLine {
+  id: string;
+  accountId: string;
+  accountCode: string;
+  accountName: string;
+  debit: number;
+  credit: number;
+}
+
+export interface JournalEntry {
+  id: string;
+  date: string; // YYYY-MM-DD
+  description: string;
+  source: string;
+  lines: JournalLine[];
+}
+
+export interface NightAuditSummary {
+  foliosPosted: number;
+  totalRoomRevenue: number;
+  journalEntryId: string | null;
+  ranAt: string;
+}
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: string;
+  unit: string;
+  onHand: number;
+  parLevel: number;
+  costPerUnit: number;
+}
+
+export interface Vendor {
+  id: string;
+  name: string;
+  contact: string;
+  category: string;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  vendorId: string;
+  itemId: string;
+  qty: number;
+  unitCost: number;
+  status: 'Open' | 'Received';
+  orderDate: string;
+  vendorName?: string;
+  itemName?: string;
+}
+
+export interface Employee {
+  id: string;
+  name: string;
+  role: string;
+  department: string;
+  shift: string;
+  hourlyRate: number;
+  status: 'Active' | 'On Leave' | 'Terminated';
+}
+
+export interface Shift {
+  id: string;
+  employeeId: string;
+  date: string; // YYYY-MM-DD
+  start: string; // HH:MM
+  end: string; // HH:MM
+  employeeName?: string;
+}
+
+export interface AnomalyAlert {
+  severity: 'High' | 'Medium' | 'Low';
+  message: string;
+}
+
+export interface PricingForecast {
+  roomType: RoomType;
+  baseRate: number;
+  recommendedRate: number;
+  demandMultiplier: number;
+  occupancyForecast: number; // % over next 14 days
+  reasoning: string[];
+}
+
+export interface DemandForecastDay {
+  date: string; // YYYY-MM-DD
+  expectedOccupancy: number; // %
+  arrivals: number;
+}
+
+export interface CopilotResponse {
+  reply: string;
+  actions: string[];
+}

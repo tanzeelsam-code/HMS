@@ -11,6 +11,8 @@ interface NavbarProps {
   onRunNightAudit: () => void;
   selectedProperty: string;
   setSelectedProperty: (prop: string) => void;
+  userName?: string;
+  userRole?: string;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -18,8 +20,16 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenNewBooking,
   onRunNightAudit,
   selectedProperty,
-  setSelectedProperty
+  setSelectedProperty,
+  userName = 'General Manager',
+  userRole = 'Front Desk Admin'
 }) => {
+  const initials = userName
+    .split(' ')
+    .map(part => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || 'GM';
   const [showPropertyDropdown, setShowPropertyDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -171,11 +181,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* User Profile */}
         <div className="flex items-center gap-2 pl-2 border-l border-white/10">
           <div className="w-8 h-8 rounded-lg bg-slate-800 border border-amber-400/30 flex items-center justify-center text-xs font-bold text-amber-300">
-            GM
+            {initials}
           </div>
           <div className="hidden xl:block text-left">
-            <div className="text-xs font-semibold text-gray-200">General Manager</div>
-            <div className="text-[10px] text-gray-400">Shift: Front Desk Admin</div>
+            <div className="text-xs font-semibold text-gray-200">{userName}</div>
+            <div className="text-[10px] text-gray-400">Shift: {userRole}</div>
           </div>
         </div>
       </div>

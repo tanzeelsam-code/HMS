@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   CalendarDays, Users, Sparkles, Globe, CreditCard, 
   TrendingUp, Settings, HelpCircle, Utensils, ClipboardCheck, PhoneCall,
-  Bot, Heart, Wrench
+  Bot, Heart, Wrench, Calculator, Boxes, Briefcase
 } from 'lucide-react';
 
 export type ActiveTab = 
@@ -14,6 +14,9 @@ export type ActiveTab =
   | 'channel-manager'
   | 'pos-charges'
   | 'analytics'
+  | 'accounting'
+  | 'procurement'
+  | 'hr'
   | 'staff-copilot'
   | 'guest-cdp'
   | 'maintenance';
@@ -104,6 +107,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'analytics' as ActiveTab,
       label: 'Financials & RevPAR',
       icon: TrendingUp,
+    },
+    {
+      id: 'accounting' as ActiveTab,
+      label: 'Finance & GL',
+      icon: Calculator,
+      badge: 'Live GL',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+    },
+    {
+      id: 'procurement' as ActiveTab,
+      label: 'Procurement & Stock',
+      icon: Boxes,
+      badge: 'Par Levels',
+      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
+    },
+    {
+      id: 'hr' as ActiveTab,
+      label: 'Staff & Shifts',
+      icon: Briefcase,
+      badge: 'Roster',
+      badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
     }
   ];
 

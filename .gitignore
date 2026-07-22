@@ -23,3 +23,6 @@ dist-isolation
 *.njsproj
 *.sln
 *.sw?
+shots/
+server/hms.db
+server/hms.db-*
