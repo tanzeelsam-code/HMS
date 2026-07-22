@@ -7,7 +7,10 @@ const vite = fileURLToPath(new URL('../node_modules/vite/bin/vite.js', import.me
 const services = [
   {
     name: 'api',
-    args: ['server/index.js'],
+    // Keep the API in sync with backend edits during local development. Vite
+    // already hot-reloads the client; Node's watcher prevents an older auth or
+    // schema implementation from remaining attached to the current database.
+    args: ['--watch', 'server/index.js'],
     env: { ...process.env, PORT: '4000' },
   },
   {
