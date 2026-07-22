@@ -7,7 +7,11 @@ interface MultiPropertyAnalyticsProps {
 }
 
 export const MultiPropertyAnalytics: React.FC<MultiPropertyAnalyticsProps> = ({ properties }) => {
-  const totalPortfolioRev = properties.reduce((acc, p) => acc + p.totalRevenue, 0);
+  const formatMoney = (value: number, currency = 'USD') => new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 2,
+  }).format(value);
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -26,10 +30,11 @@ export const MultiPropertyAnalytics: React.FC<MultiPropertyAnalyticsProps> = ({ 
         </div>
 
         <div className="text-right">
-          <div className="text-xs text-gray-400">Total Portfolio Daily Revenue</div>
+          <div className="text-xs text-gray-400">Properties Reporting</div>
           <div className="text-2xl font-extrabold text-amber-300 font-mono">
-            ${totalPortfolioRev.toLocaleString()}
+            {properties.length}
           </div>
+          <div className="text-[10px] text-gray-500">Revenue remains in local currency until FX consolidation is configured.</div>
         </div>
       </div>
 
@@ -54,21 +59,22 @@ export const MultiPropertyAnalytics: React.FC<MultiPropertyAnalyticsProps> = ({ 
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">ADR (Avg Rate)</span>
-                <span className="font-bold text-gray-200">${p.adr}</span>
+                <span className="font-bold text-gray-200">{formatMoney(p.adr, p.currency)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">RevPAR</span>
-                <span className="font-bold text-amber-300 font-mono">${p.revPar}</span>
+                <span className="font-bold text-amber-300 font-mono">{formatMoney(p.revPar, p.currency)}</span>
               </div>
               <div className="flex justify-between border-t border-white/5 pt-2">
                 <span className="text-gray-400">GOPPAR (Gross Operating Profit)</span>
-                <span className="font-bold text-purple-300 font-mono">${p.goppar}</span>
+                <span className="font-bold text-purple-300 font-mono">{formatMoney(p.goppar, p.currency)}</span>
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-900/90 border border-white/5 text-center">
               <div className="text-[10px] text-gray-400">Today's Gross Revenue</div>
-              <div className="text-base font-extrabold text-emerald-400 font-mono mt-0.5">${p.totalRevenue.toLocaleString()}</div>
+              <div className="text-base font-extrabold text-emerald-400 font-mono mt-0.5">{formatMoney(p.totalRevenue, p.currency)}</div>
+              {p.source && <div className="text-[10px] text-gray-500 mt-1">{p.source}</div>}
             </div>
           </div>
         ))}

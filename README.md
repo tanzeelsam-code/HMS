@@ -1,0 +1,112 @@
+# NexusHOS
+
+NexusHOS is a full-stack hotel operating-system prototype. It combines a public direct-booking engine, front-desk and reservation operations, folios, housekeeping, maintenance, guest profiles, POS posting, revenue rules, portfolio records, inventory-holding group blocks, reputation workflows, ESG requests, double-entry accounting, procurement, HR, a permissioned workflow engine, administrator access control, immutable API auditing, signed outbound webhooks, and an OpenAPI developer portal.
+
+## Quick start
+
+Requirements: **Node.js 22.5 or newer** (the API uses Node's built-in `node:sqlite`).
+
+```bash
+npm install
+npm run dev
+```
+
+This starts the API at `http://localhost:4000` and Vite at `http://localhost:3000`. Vite proxies browser requests from `/api` to the API. Stop both processes with `Ctrl+C`.
+
+The staff workspace opens at the root URL. The guest-facing booking engine is available from **Book a Guest Stay** on the sign-in screen or directly at `http://localhost:3000/book`.
+
+## Demo accounts
+
+These credentials are seeded into a new local database and are for development only.
+
+| Role | Email | Password |
+| --- | --- | --- |
+| General Manager | `gm@aura.com` | `admin123` |
+| Front Desk | `frontdesk@aura.com` | `front123` |
+| Housekeeping | `house@aura.com` | `house123` |
+| Finance | `finance@aura.com` | `fin123` |
+
+## Architecture
+
+```text
+React 18 + TypeScript + Tailwind CSS
+                |
+          Vite /api proxy
+                |
+                 Express 5 REST API
+       /          |          |            \
+ public IBE    hotel/ERP   workflow     platform API
+  + quotes      + GL      durable events  audit/webhooks
+       \          |          |            /
+                 Node node:sqlite
+```
+
+- `src/` contains the Vite client, API wrapper, screens, and shared types.
+- `server/index.js` wires secure sessions, throttling, authentication evidence, fail-closed production configuration, durable delivery workers, and the modular hotel, ERP, AI, booking, portfolio, workflow, administration, developer, and platform route groups.
+- `server/db.js` initializes the SQLite schema and seed data. The default development database is `server/hms.db`; `HMS_DB_PATH` selects another database for isolated runs.
+- `server/security.js`, `server/audit.js`, and `server/webhooks.js` provide request IDs, response hardening, persistent rate-limit buckets, an HMAC-chained append-only audit log, encrypted webhook secrets, signed delivery, expiring worker leases, retries, and SSRF controls.
+- `server/inventory.js` accounts for reservations and active group holds by room type and stay date, so public quotes, final booking, and group contracting share one transactional availability model.
+- `server/routes/booking.js` owns public availability, server-authoritative 15-minute quotes, transactional booking, and idempotent confirmation.
+- `server/routes/workflows.js` owns versioned automations, risk-based approvals, immutable run evidence, task execution, and a leased transactional event outbox.
+- `server/routes/admin.js` provides General-Manager-only user lifecycle, property memberships, session revocation, and forced temporary-password rotation. `server/routes/developer.js` publishes the OpenAPI 3.1 contract and live integration readiness.
+- The property business date uses `Europe/Copenhagen` by default; set `HMS_TIME_ZONE` to another IANA time-zone name when running a property elsewhere.
+- Copy `.env.example` into the runtime secret/configuration system when preparing a deployment. Production rejects absent, weak, placeholder, or reused audit, webhook-encryption, and rate-limit secrets; it also requires exact HTTPS CORS origins.
+- `test/` starts real isolated APIs and migration-era databases. Its 25 integration tests cover browser and bearer sessions, authentication evidence, throttling, production bootstrap safety, administrator controls, OpenAPI discovery, public booking and replay safety, group inventory, event/outbox crash recovery, webhook leases, portfolio workflows, approval gates, audit-chain verification, role redaction, reservations, settlement, accounting, procurement, and Night Audit idempotency.
+
+The “AI” features are transparent deterministic rules calculated from current database data; this project does not call an external model or require an AI API key.
+
+## Demo operating policies
+
+- Cancellations are accepted before the arrival business date and fully reverse the local folio. From the arrival date onward, an unarrived confirmed booking uses **Mark No-Show**; the demo's no-penalty policy also reverses the folio and releases inventory.
+- Early departures retain the full contracted room and tax total. Checkout posts every unposted contract night, recognizes future-night contract charges on the current business date, and records `actualCheckOut` separately so operational departure counts do not recur on the former scheduled date.
+- Advance deposits are evaluated against projected contracted room charges, so they are not shown or accepted as refundable credit before the room contract is posted.
+- General-ledger balances are shown as of the property business date; future-dated estimates remain available in the journal but do not affect current dashboard balances.
+- POS requests from the dashboard carry an idempotency key, so a safe retry cannot create a second room, folio, or GL charge.
+- Maintenance dispatch uses the same safe-retry pattern, and receiving a purchase order posts Inventory/AP double-entry alongside the stock update.
+- The public booking engine never trusts a browser-supplied price. It persists a short-lived quote, rechecks inventory inside the booking transaction, records the tax estimate, emits a signed-event outbox record, and creates a follow-up task through the workflow engine.
+- High- and critical-risk workflows cannot bypass manager approval. Every run keeps its template snapshot, policy decision, idempotency key, task output, and immutable evidence.
+- Browser authentication uses a `HttpOnly`, `SameSite=Strict` session cookie. Bearer tokens remain available for test and future integration clients but are no longer written to browser storage.
+- New and reset accounts must replace their temporary password before any operational route is available. Disabled users lose active sessions immediately, and all authentication outcomes are added to the signed audit chain without storing credentials or raw network identifiers.
+- Tentative and definite groups consume dated room-type inventory. Released and cancelled groups restore it; stale public quotes and overlapping group contracts are rejected transactionally.
+- Reservation and safety triggers commit to a durable outbox with the business change. Workflow and webhook workers use expiring ownership leases, bounded exponential retries, crash reclamation, and stable idempotency identifiers.
+
+## First production administrator
+
+Public demo identities are never created when `NODE_ENV=production`, and the API refuses to start against a production database with no administrator. For a new database, supply the one-use `NEXUSHOS_BOOTSTRAP_*` values shown in `.env.example` through the deployment secret manager, run:
+
+```bash
+NODE_ENV=production npm run bootstrap:admin
+```
+
+The command creates one organization, one property shell, and one active General Manager without printing the password. First login requires rotation; remove the bootstrap inputs from the runtime environment immediately afterward. It deliberately does not invent saleable rooms or rates—those still require an approved migration/configuration process before opening inventory.
+
+## Scripts
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the API and Vite together; either process stopping also stops the other. |
+| `npm run dev:client` | Start only Vite (useful when the API is already running). |
+| `npm run server` | Start only the API. |
+| `npm test` | Run isolated API integration tests with Node's built-in test runner. |
+| `npm run build` | Type-check the client and create a production bundle in `dist/`. |
+| `npm run preview` | Serve the built client locally. |
+| `npm run backup` | Create an online SQLite snapshot with an immediate integrity check. |
+| `npm run backup:verify -- /path/to/backup.sqlite` | Re-open a backup read-only, run SQLite integrity checks, and report critical record counts. |
+| `NODE_ENV=production npm run bootstrap:admin` | One-time creation of the first production property and General Manager from secret-managed inputs. |
+
+GitHub Actions runs the production build and isolated API suite on every pull request and push to `main`.
+
+## Current limitations
+
+- The organization, property, membership, and portfolio records are persisted, but operational hotel tables are still scoped to the main property. This is not yet tenant-isolated multi-property production architecture.
+- The synchronous `node:sqlite` API remains experimental and single-process oriented. A production release still needs PostgreSQL, formal versioned migrations, tested backups/restore, queues, high availability, observability, and deployment runbooks.
+- Passwords, secure cookie sessions, throttling, account administration, forced password rotation, session revocation, fixed roles, audit evidence, and integration scopes are implemented. Invitation/recovery delivery, MFA/passkeys, SSO/SAML/OIDC, SCIM, configurable permissions, retention controls, and compliance evidence automation remain.
+- Direct booking is a real pay-at-property reservation flow, not a card-payment flow. Tokenization, 3DS/SCA, authorization/capture/refunds, terminals, virtual cards, payouts, disputes, and PCI-isolated provider integration require a payment provider and merchant credentials.
+- Signed webhooks, crash-recoverable delivery, and an OpenAPI/event portal exist, but OTA/channel, SiteMinder, review publication, messaging, digital key, BMS/IoT, accounting, tax/fiscal, and email providers are not connected. Channel sync and guest portal screens remain clearly labeled demonstrations.
+- Groups are persisted room-block contracts, not a complete MICE product. Rooming lists, function-space inventory, BEOs, sales pipeline, concessions, deposits, routing, commissions, and displacement analysis remain.
+- Reputation responses are stored and approved but not externally published. ESG actions are queued but deliberately do not claim device execution without a BMS connector.
+- Workflow templates run manually or from durable reservation and safety events; the production API enables a continuous leased processor by default. A distributed queue/worker tier and broader domain trigger coverage remain necessary for high-availability automation.
+- Revenue recommendations remain transparent deterministic rules. External demand/compset feeds, statistical forecasting, backtesting, confidence intervals, guarded rate publishing, group displacement, and profit optimization remain future work.
+- The local `npm run dev` launcher intentionally uses ports 3000 and 4000, matching the Vite proxy configuration.
+
+The staged path from this release to competitive parity is tracked in [`PRODUCT_ROADMAP.md`](./PRODUCT_ROADMAP.md).

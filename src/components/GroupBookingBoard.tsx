@@ -2,9 +2,15 @@ import React, { useState } from 'react';
 import { GroupBooking } from '../types';
 import { Building, Users, Calendar, DollarSign, Plus, CheckCircle2, AlertCircle } from 'lucide-react';
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+const dateFromNow = (days: number) => new Date(Date.now() + days * DAY_MS).toISOString().slice(0, 10);
+const addDays = (value: string, days: number) => new Date(
+  Date.parse(`${value}T00:00:00.000Z`) + days * DAY_MS,
+).toISOString().slice(0, 10);
+
 interface GroupBookingBoardProps {
   groups: GroupBooking[];
-  onAddGroup: (grp: GroupBooking) => void;
+  onAddGroup: (grp: GroupBooking) => boolean | Promise<boolean>;
 }
 
 export const GroupBookingBoard: React.FC<GroupBookingBoardProps> = ({
@@ -18,15 +24,22 @@ export const GroupBookingBoard: React.FC<GroupBookingBoardProps> = ({
   const [roomsAllocated, setRoomsAllocated] = useState('10');
   const [groupRate, setGroupRate] = useState('280');
   const [cateringTotal, setCateringTotal] = useState('5000');
+  const [startDate, setStartDate] = useState(dateFromNow(30));
+  const [endDate, setEndDate] = useState(dateFromNow(33));
+  const [releaseDate, setReleaseDate] = useState(dateFromNow(16));
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!groupName || !companyName) return;
 
     const rooms = parseInt(roomsAllocated) || 10;
     const rate = parseFloat(groupRate) || 280;
     const catering = parseFloat(cateringTotal) || 5000;
-    const totalVal = (rooms * rate * 3) + catering;
+    const nights = Math.max(1, Math.round(
+      (Date.parse(`${endDate}T00:00:00.000Z`) - Date.parse(`${startDate}T00:00:00.000Z`)) / DAY_MS,
+    ));
+    const totalVal = (rooms * rate * nights) + catering;
 
     const newGroup: GroupBooking = {
       id: `grp-${Date.now()}`,
@@ -36,17 +49,27 @@ export const GroupBookingBoard: React.FC<GroupBookingBoardProps> = ({
       contactEmail,
       roomsAllocated: rooms,
       roomsPickedUp: 0,
-      startDate: '2026-08-15',
-      endDate: '2026-08-18',
+      startDate,
+      endDate,
+      releaseDate,
       status: 'Tentative Hold',
       groupRate: rate,
       banquetCateringTotal: catering,
       totalValue: totalVal
     };
 
-    onAddGroup(newGroup);
-    setGroupName('');
-    setCompanyName('');
+    setSubmitting(true);
+    try {
+      const saved = await onAddGroup(newGroup);
+      if (saved) {
+        setGroupName('');
+        setCompanyName('');
+        setContactPerson('');
+        setContactEmail('');
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -111,6 +134,18 @@ export const GroupBookingBoard: React.FC<GroupBookingBoardProps> = ({
               </div>
             </div>
 
+            <div>
+              <label htmlFor="group-contact-email" className="block text-gray-400 font-semibold mb-1">Contact Email</label>
+              <input
+                id="group-contact-email"
+                type="email"
+                placeholder="events@example.com"
+                value={contactEmail}
+                onChange={(event) => setContactEmail(event.target.value)}
+                className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-400/50"
+              />
+            </div>
+
             <div className="grid grid-cols-3 gap-2">
               <div>
                 <label className="block text-gray-400 font-semibold mb-1">Rooms</label>
@@ -141,8 +176,52 @@ export const GroupBookingBoard: React.FC<GroupBookingBoardProps> = ({
               </div>
             </div>
 
-            <button type="submit" className="btn-primary text-xs w-full py-2.5 justify-center">
-              <Plus className="w-4 h-4" /> Create Group Contract
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label htmlFor="group-start-date" className="block text-gray-400 font-semibold mb-1">Arrival</label>
+                <input
+                  id="group-start-date"
+                  type="date"
+                  min={dateFromNow(0)}
+                  value={startDate}
+                  onChange={(event) => {
+                    const nextStart = event.target.value;
+                    setStartDate(nextStart);
+                    if (endDate <= nextStart) setEndDate(addDays(nextStart, 1));
+                    if (releaseDate > nextStart) setReleaseDate(nextStart);
+                  }}
+                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="group-end-date" className="block text-gray-400 font-semibold mb-1">Departure</label>
+                <input
+                  id="group-end-date"
+                  type="date"
+                  min={addDays(startDate, 1)}
+                  value={endDate}
+                  onChange={(event) => setEndDate(event.target.value)}
+                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="group-release-date" className="block text-gray-400 font-semibold mb-1">Release date</label>
+                <input
+                  id="group-release-date"
+                  type="date"
+                  max={startDate}
+                  value={releaseDate}
+                  onChange={(event) => setReleaseDate(event.target.value)}
+                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                  required
+                />
+              </div>
+            </div>
+
+            <button type="submit" disabled={submitting} className="btn-primary text-xs w-full py-2.5 justify-center disabled:opacity-60">
+              <Plus className="w-4 h-4" /> {submitting ? 'Creating Contract…' : 'Create Group Contract'}
             </button>
           </form>
         </div>
@@ -165,7 +244,9 @@ export const GroupBookingBoard: React.FC<GroupBookingBoardProps> = ({
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-extrabold text-sm text-gray-100">{g.groupName}</div>
-                      <div className="text-[11px] text-gray-400 mt-0.5">{g.companyName} • Contact: {g.contactPerson}</div>
+                      <div className="text-[11px] text-gray-400 mt-0.5">
+                        {g.companyName} • Contact: {g.contactPerson || 'Unassigned'}{g.contactEmail ? ` · ${g.contactEmail}` : ''}
+                      </div>
                     </div>
                     <span className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] border ${
                       g.status === 'Definite Block' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'

@@ -175,6 +175,8 @@ export const INITIAL_POS_CHARGES: PosCharge[] = [
 ];
 
 export const INITIAL_METRICS: HotelMetrics = {
+  financialMetricsAvailable: true,
+  businessDate: '2026-07-22',
   occupancyRate: 85.7,
   adr: 384.50,
   revPar: 329.50,

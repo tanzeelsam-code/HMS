@@ -4,7 +4,7 @@ import { Wrench, Clock, AlertTriangle, CheckCircle2, Plus, ShieldAlert, User } f
 
 interface MaintenanceBoardProps {
   orders: MaintenanceWorkOrder[];
-  onAddOrder: (order: MaintenanceWorkOrder) => void;
+  onAddOrder: (order: MaintenanceWorkOrder) => void | boolean | Promise<void | boolean>;
   onResolveOrder: (orderId: string) => void;
 }
 
@@ -17,26 +17,55 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
   const [category, setCategory] = useState<MaintenanceWorkOrder['category']>('Plumbing');
   const [priority, setPriority] = useState<MaintenanceWorkOrder['priority']>('High');
   const [issueDescription, setIssueDescription] = useState('');
+  const [safetyCritical, setSafetyCritical] = useState(false);
+  const [posting, setPosting] = useState(false);
+  const [error, setError] = useState('');
+  const [pendingRequestId, setPendingRequestId] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const resetPendingRequest = () => {
+    setPendingRequestId('');
+    setError('');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!issueDescription) return;
+    if (posting) return;
+    if (!issueDescription.trim()) {
+      setError('Describe the maintenance issue before dispatching it.');
+      return;
+    }
 
+    const requestId = pendingRequestId || `maint-client-${crypto.randomUUID()}`;
+    setPendingRequestId(requestId);
     const newOrder: MaintenanceWorkOrder = {
-      id: `maint-${Date.now()}`,
+      id: requestId,
       roomNumber,
-      issueDescription,
+      issueDescription: issueDescription.trim(),
       category,
       priority,
       status: 'Open',
       reportedBy: 'Front Desk Admin',
       assignedEngineer: 'Engineering Team',
       slaMinutes: 60,
-      reportedTime: 'Just now'
+      reportedTime: 'Just now',
+      safetyCritical,
     };
 
-    onAddOrder(newOrder);
-    setIssueDescription('');
+    setPosting(true);
+    setError('');
+    try {
+      const result = await onAddOrder(newOrder);
+      if (result !== false) {
+        setIssueDescription('');
+        setPendingRequestId('');
+      } else {
+        setError('The work order was not created. Correct the issue or retry; the same request ID will be reused.');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to dispatch the work order.');
+    } finally {
+      setPosting(false);
+    }
   };
 
   return (
@@ -64,23 +93,50 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
           </h3>
 
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+            {error && (
+              <div role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-rose-200">
+                {error}
+              </div>
+            )}
             <div>
               <label className="block text-gray-400 font-semibold mb-1">Room #</label>
               <input
                 type="text"
                 value={roomNumber}
-                onChange={(e) => setRoomNumber(e.target.value)}
+                onChange={(e) => {
+                  setRoomNumber(e.target.value);
+                  resetPendingRequest();
+                }}
                 className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-amber-300 font-bold font-mono focus:outline-none focus:border-purple-400/50"
                 required
               />
             </div>
+
+            <label className="flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/5 p-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={safetyCritical}
+                onChange={(event) => {
+                  setSafetyCritical(event.target.checked);
+                  resetPendingRequest();
+                }}
+                className="mt-0.5 h-4 w-4 accent-rose-500"
+              />
+              <span>
+                <span className="block font-bold text-rose-200">Safety-critical escalation</span>
+                <span className="mt-0.5 block text-[11px] leading-4 text-gray-400">Creates a critical workflow that must be approved by a General Manager before its engineering task executes.</span>
+              </span>
+            </label>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-gray-400 font-semibold mb-1">Category</label>
                 <select
                   value={category}
-                  onChange={(e) => setCategory(e.target.value as any)}
+                  onChange={(e) => {
+                    setCategory(e.target.value as MaintenanceWorkOrder['category']);
+                    resetPendingRequest();
+                  }}
                   className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
                 >
                   <option value="Plumbing">Plumbing</option>
@@ -95,7 +151,10 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
                 <label className="block text-gray-400 font-semibold mb-1">SLA Priority</label>
                 <select
                   value={priority}
-                  onChange={(e) => setPriority(e.target.value as any)}
+                  onChange={(e) => {
+                    setPriority(e.target.value as MaintenanceWorkOrder['priority']);
+                    resetPendingRequest();
+                  }}
                   className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
                 >
                   <option value="Urgent">Urgent (30m SLA)</option>
@@ -111,14 +170,17 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
                 rows={3}
                 placeholder="Describe problem (e.g. Water leak under sink, AC thermostat offline...)"
                 value={issueDescription}
-                onChange={(e) => setIssueDescription(e.target.value)}
+                onChange={(e) => {
+                  setIssueDescription(e.target.value);
+                  resetPendingRequest();
+                }}
                 className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-purple-400/50"
                 required
               />
             </div>
 
-            <button type="submit" className="btn-primary text-xs w-full py-2.5 justify-center">
-              <Plus className="w-4 h-4" /> Dispatch Work Order
+            <button type="submit" disabled={posting} className="btn-primary text-xs w-full py-2.5 justify-center disabled:opacity-50">
+              <Plus className="w-4 h-4" /> {posting ? 'Dispatching…' : 'Dispatch Work Order'}
             </button>
           </form>
         </div>
@@ -148,6 +210,11 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
                       }`}>
                         {o.priority}
                       </span>
+                      {o.safetyCritical && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase bg-rose-500/20 text-rose-200 border border-rose-500/40">
+                          Safety
+                        </span>
+                      )}
                     </div>
 
                     <p className="text-gray-300 text-xs mt-1">{o.issueDescription}</p>

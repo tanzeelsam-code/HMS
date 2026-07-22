@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { Sidebar, ActiveTab } from './components/Sidebar';
 import { TapeChart } from './components/TapeChart';
@@ -17,246 +17,573 @@ import { ReputationBoard } from './components/ReputationBoard';
 import { EsgDashboard } from './components/EsgDashboard';
 import { MultiPropertyAnalytics } from './components/MultiPropertyAnalytics';
 import { MigrationWizard } from './components/MigrationWizard';
+import { AccountingDashboard } from './components/AccountingDashboard';
+import { ProcurementBoard } from './components/ProcurementBoard';
+import { HrBoard } from './components/HrBoard';
 import { BookingModal } from './components/BookingModal';
 import { FolioModal } from './components/FolioModal';
 import { LoginScreen } from './components/LoginScreen';
+import { ChangePasswordScreen } from './components/ChangePasswordScreen';
 
-import { 
-  INITIAL_ROOMS, 
-  INITIAL_RESERVATIONS, 
-  INITIAL_HOUSEKEEPING, 
-  INITIAL_DYNAMIC_PRICING, 
-  INITIAL_CHANNELS, 
-  INITIAL_POS_CHARGES, 
-  INITIAL_METRICS,
-  INITIAL_GUEST_PROFILES,
-  INITIAL_MAINTENANCE_ORDERS,
-  INITIAL_GROUP_BOOKINGS,
-  INITIAL_REVIEWS,
-  INITIAL_ESG_METRICS,
-  INITIAL_PORTFOLIO_COMPARISON
-} from './mockData';
-import { Room, Reservation, FolioItem, HousekeepingTask, PosCharge, GuestProfile, MaintenanceWorkOrder, GroupBooking, ReviewItem, EsgMetric } from './types';
-import { getStoredUser, logout, AuthUser } from './api';
+import { api, getStoredUser, logout, restoreSession, ApiError, AuthUser, AUTH_EXPIRED_EVENT } from './api';
+import {
+  Room,
+  Reservation,
+  FolioItem,
+  HousekeepingTask,
+  PosCharge,
+  GuestProfile,
+  MaintenanceWorkOrder,
+  HotelMetrics,
+  DynamicPricingRule,
+  ChannelStatus,
+  GroupBooking,
+  ReviewItem,
+  EsgMetric,
+  PropertyComparison,
+} from './types';
+
+type Notice = { tone: 'success' | 'error'; message: string };
+const isPublicBookingLocation = () => window.location.pathname === '/book' || window.location.hash === '#book';
+
+const BookingEngine = lazy(() => import('./components/BookingEngine').then((module) => ({
+  default: module.BookingEngine,
+})));
+const WorkflowStudio = lazy(() => import('./components/WorkflowStudio').then((module) => ({
+  default: module.WorkflowStudio,
+})));
+const PlatformControlCenter = lazy(() => import('./components/PlatformControlCenter').then((module) => ({
+  default: module.PlatformControlCenter,
+})));
+const AccessAdministration = lazy(() => import('./components/AccessAdministration').then((module) => ({
+  default: module.AccessAdministration,
+})));
+const DeveloperPortal = lazy(() => import('./components/DeveloperPortal').then((module) => ({
+  default: module.DeveloperPortal,
+})));
+
+const ModuleLoading = () => (
+  <div className="glass-panel min-h-48 flex items-center justify-center text-sm font-semibold text-gray-400" role="status">
+    Loading workspace…
+  </div>
+);
 
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(getStoredUser());
+  const [authReady, setAuthReady] = useState(false);
+  const [publicBooking, setPublicBooking] = useState(isPublicBookingLocation());
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const [notice, setNotice] = useState<Notice | null>(null);
+  const [reservationSearch, setReservationSearch] = useState('');
+
   const [activeTab, setActiveTab] = useState<ActiveTab>('tape-chart');
-  const [selectedProperty, setSelectedProperty] = useState('Nexus Luxury Resort & Spa (Main Property)');
+  const selectedProperty = 'Nexus Luxury Resort & Spa (Main Property)';
 
-  // Main State
-  const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
-  const [reservations, setReservations] = useState<Reservation[]>(INITIAL_RESERVATIONS);
-  const [housekeepingTasks, setHousekeepingTasks] = useState<HousekeepingTask[]>(INITIAL_HOUSEKEEPING);
-  const [dynamicRules, setDynamicRules] = useState(INITIAL_DYNAMIC_PRICING);
-  const [channels, setChannels] = useState(INITIAL_CHANNELS);
-  const [posCharges, setPosCharges] = useState<PosCharge[]>(INITIAL_POS_CHARGES);
-  const [metrics, setMetrics] = useState(INITIAL_METRICS);
-  const [guestProfiles, setGuestProfiles] = useState<GuestProfile[]>(INITIAL_GUEST_PROFILES);
-  const [maintenanceOrders, setMaintenanceOrders] = useState<MaintenanceWorkOrder[]>(INITIAL_MAINTENANCE_ORDERS);
-  const [groupBookings, setGroupBookings] = useState<GroupBooking[]>(INITIAL_GROUP_BOOKINGS);
-  const [reviews, setReviews] = useState<ReviewItem[]>(INITIAL_REVIEWS);
-  const [esgMetric, setEsgMetric] = useState<EsgMetric>(INITIAL_ESG_METRICS);
+  // Live API-backed property state.
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [housekeepingTasks, setHousekeepingTasks] = useState<HousekeepingTask[]>([]);
+  const [dynamicRules, setDynamicRules] = useState<DynamicPricingRule[]>([]);
+  const [channels, setChannels] = useState<ChannelStatus[]>([]);
+  const [posCharges, setPosCharges] = useState<PosCharge[]>([]);
+  const [metrics, setMetrics] = useState<HotelMetrics | null>(null);
+  const [guestProfiles, setGuestProfiles] = useState<GuestProfile[]>([]);
+  const [maintenanceOrders, setMaintenanceOrders] = useState<MaintenanceWorkOrder[]>([]);
 
-  // Modals
+  const [groupBookings, setGroupBookings] = useState<GroupBooking[]>([]);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [esgMetric, setEsgMetric] = useState<EsgMetric | null>(null);
+  const [portfolio, setPortfolio] = useState<PropertyComparison[]>([]);
+
   const [selectedReservationForFolio, setSelectedReservationForFolio] = useState<Reservation | null>(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [bookingRoomNumber, setBookingRoomNumber] = useState<string | undefined>(undefined);
+  const [bookingRoomNumber, setBookingRoomNumber] = useState<string | undefined>();
+  const [bookingStartDate, setBookingStartDate] = useState<string | undefined>();
+  const currentRole = currentUser?.role;
+  const canReadReservations = ['General Manager', 'Front Desk', 'Finance'].includes(currentRole || '');
+  const canReadPricing = ['General Manager', 'Finance'].includes(currentRole || '');
+  const canReadChannels = ['General Manager', 'Front Desk', 'Finance'].includes(currentRole || '');
+  const canReadPos = ['General Manager', 'Front Desk', 'Finance'].includes(currentRole || '');
+  const canReadGuests = ['General Manager', 'Front Desk', 'Finance'].includes(currentRole || '');
+  const canReadCommercial = ['General Manager', 'Front Desk'].includes(currentRole || '');
+  const canReadPortfolio = ['General Manager', 'Finance'].includes(currentRole || '');
 
-  if (!currentUser) {
-    return <LoginScreen onLogin={(user) => setCurrentUser(user)} />;
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(null), 5000);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+
+  useEffect(() => {
+    const handleExpiredSession = () => setCurrentUser(null);
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleExpiredSession);
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handleExpiredSession);
+  }, []);
+
+  useEffect(() => {
+    const handleLocationChange = () => setPublicBooking(isPublicBookingLocation());
+    window.addEventListener('hashchange', handleLocationChange);
+    window.addEventListener('popstate', handleLocationChange);
+    return () => {
+      window.removeEventListener('hashchange', handleLocationChange);
+      window.removeEventListener('popstate', handleLocationChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    void restoreSession()
+      .then((user) => { if (active) setCurrentUser(user); })
+      .finally(() => { if (active) setAuthReady(true); });
+    return () => { active = false; };
+  }, []);
+
+  const handleAuthError = useCallback((err: unknown) => {
+    if (err instanceof ApiError && err.status === 401) {
+      logout();
+      setCurrentUser(null);
+      setNotice({ tone: 'error', message: 'Your session expired. Please sign in again.' });
+      return true;
+    }
+    return false;
+  }, []);
+
+  const perform = useCallback(async (fn: () => Promise<void>, successMessage?: string) => {
+    try {
+      await fn();
+      if (successMessage) setNotice({ tone: 'success', message: successMessage });
+      return true;
+    } catch (err) {
+      if (!handleAuthError(err)) {
+        setNotice({ tone: 'error', message: err instanceof Error ? err.message : 'Operation failed' });
+      }
+      return false;
+    }
+  }, [handleAuthError]);
+
+  const refreshRooms = useCallback(async () => setRooms(await api.get<Room[]>('/rooms')), []);
+  const refreshReservations = useCallback(async () => {
+    const list = await api.get<Reservation[]>('/reservations');
+    setReservations(list);
+    setSelectedReservationForFolio((previous) =>
+      previous ? list.find((reservation) => reservation.id === previous.id) || null : null,
+    );
+  }, []);
+  const refreshHousekeeping = useCallback(async () => {
+    setHousekeepingTasks(await api.get<HousekeepingTask[]>('/housekeeping'));
+  }, []);
+  const refreshMetrics = useCallback(async () => setMetrics(await api.get<HotelMetrics>('/metrics')), []);
+
+  const refreshOperationalData = useCallback(async () => {
+    await Promise.all([
+      refreshRooms(),
+      ...(canReadReservations ? [refreshReservations()] : []),
+      refreshHousekeeping(),
+      refreshMetrics(),
+    ]);
+  }, [canReadReservations, refreshRooms, refreshReservations, refreshHousekeeping, refreshMetrics]);
+
+  const loadAll = useCallback(async () => {
+    setLoading(true);
+    setLoadError('');
+    try {
+      const [rms, rez, hk, rules, chs, pos, met, guests, maint, groups, reputation, esg, properties] = await Promise.all([
+        api.get<Room[]>('/rooms'),
+        canReadReservations ? api.get<Reservation[]>('/reservations') : Promise.resolve([]),
+        api.get<HousekeepingTask[]>('/housekeeping'),
+        canReadPricing ? api.get<DynamicPricingRule[]>('/pricing-rules') : Promise.resolve([]),
+        canReadChannels ? api.get<ChannelStatus[]>('/channels') : Promise.resolve([]),
+        canReadPos ? api.get<PosCharge[]>('/pos-charges') : Promise.resolve([]),
+        api.get<HotelMetrics>('/metrics'),
+        canReadGuests ? api.get<GuestProfile[]>('/guests') : Promise.resolve([]),
+        api.get<MaintenanceWorkOrder[]>('/maintenance'),
+        canReadCommercial ? api.get<GroupBooking[]>('/groups') : Promise.resolve([]),
+        canReadCommercial ? api.get<ReviewItem[]>('/reputation/reviews') : Promise.resolve([]),
+        canReadPortfolio ? api.get<EsgMetric>('/esg/metrics') : Promise.resolve(null),
+        canReadPortfolio ? api.get<PropertyComparison[]>('/portfolio/properties') : Promise.resolve([]),
+      ]);
+      setRooms(rms);
+      setReservations(rez);
+      setHousekeepingTasks(hk);
+      setDynamicRules(rules);
+      setChannels(chs);
+      setPosCharges(pos);
+      setMetrics(met);
+      setGuestProfiles(guests);
+      setMaintenanceOrders(maint);
+      setGroupBookings(groups);
+      setReviews(reputation);
+      setEsgMetric(esg);
+      setPortfolio(properties);
+    } catch (err) {
+      if (!handleAuthError(err)) {
+        setLoadError(err instanceof Error ? err.message : 'Failed to load property data');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [canReadChannels, canReadCommercial, canReadGuests, canReadPortfolio, canReadPos, canReadPricing, canReadReservations, handleAuthError]);
+
+  useEffect(() => {
+    if (currentUser && !currentUser.mustChangePassword) void loadAll();
+  }, [currentUser, loadAll]);
+
+  const handleCheckIn = (reservationId: string) => perform(async () => {
+    await api.post(`/reservations/${reservationId}/check-in`);
+    await Promise.all([refreshRooms(), refreshReservations(), refreshMetrics()]);
+  }, 'Guest checked in and room status updated.');
+
+  const handleCheckOut = (reservationId: string) => perform(async () => {
+    try {
+      await api.post(`/reservations/${reservationId}/check-out`);
+    } finally {
+      // Checkout may post missing room nights and then return 409 while the
+      // guest settles the updated folio, so refresh after both outcomes.
+      await refreshOperationalData();
+    }
+  }, 'Guest checked out and a housekeeping task was created.');
+
+  const handleCancelReservation = (reservationId: string) => perform(async () => {
+    await api.post(`/reservations/${reservationId}/cancel`);
+    await Promise.all([refreshReservations(), refreshRooms(), refreshMetrics()]);
+  }, 'Reservation cancelled, local folio reversed, and room inventory released.');
+
+  const handleNoShowReservation = (reservationId: string) => perform(async () => {
+    await api.post(`/reservations/${reservationId}/no-show`);
+    await Promise.all([refreshReservations(), refreshRooms(), refreshMetrics()]);
+  }, 'Reservation marked No-Show, local folio reversed, and room inventory released.');
+
+  const handleCompleteHousekeepingTask = (taskId: string) => perform(async () => {
+    await api.patch(`/housekeeping/${taskId}`, { status: 'Completed' });
+    await Promise.all([refreshHousekeeping(), refreshRooms(), refreshMetrics()]);
+  }, 'Housekeeping task completed.');
+
+  const handleUpdateRoomStatus = (roomNumber: string, status: Room['status']) => perform(async () => {
+    const activeCleaningTask = status === 'Vacant Clean'
+      ? housekeepingTasks.find((task) => task.roomNumber === roomNumber
+        && task.taskType !== 'Maintenance Inspect'
+        && ['Pending', 'In-Progress'].includes(task.status))
+      : undefined;
+    if (activeCleaningTask) {
+      await api.patch(`/housekeeping/${activeCleaningTask.id}`, { status: 'Completed' });
+    } else {
+      await api.patch(`/rooms/${roomNumber}`, { status });
+    }
+    await Promise.all([refreshHousekeeping(), refreshRooms(), refreshMetrics()]);
+  }, `Room ${roomNumber} marked ${status}.`);
+
+  const handleSaveNewReservation = (newReservation: Reservation) => perform(async () => {
+    const paymentAmount = -newReservation.folioItems
+      .filter((item) => item.category === 'Payment')
+      .reduce((sum, item) => sum + item.amount, 0);
+    await api.post('/reservations', {
+      guestName: newReservation.guestName,
+      guestEmail: newReservation.guestEmail,
+      guestPhone: newReservation.guestPhone,
+      vipTier: newReservation.vipTier,
+      roomNumber: newReservation.roomNumber,
+      roomType: newReservation.roomType,
+      checkIn: newReservation.checkIn,
+      checkOut: newReservation.checkOut,
+      guestsCount: newReservation.guestsCount,
+      channel: newReservation.channel,
+      totalAmount: newReservation.totalAmount,
+      paymentAmount,
+      specialRequests: newReservation.specialRequests,
+    });
+    await Promise.all([refreshReservations(), refreshRooms(), refreshMetrics()]);
+    setIsBookingModalOpen(false);
+  }, `Reservation created for ${newReservation.guestName}.`);
+
+  const handleAddFolioItem = (reservationId: string, item: FolioItem) => perform(async () => {
+    const updated = await api.post<Reservation>(`/reservations/${reservationId}/folio-items`, {
+      description: item.description,
+      category: item.category,
+      amount: item.amount,
+    });
+    setReservations((previous) => previous.map((reservation) => (
+      reservation.id === reservationId ? updated : reservation
+    )));
+    setSelectedReservationForFolio((previous) => (
+      previous?.id === reservationId ? updated : previous
+    ));
+    await refreshMetrics();
+  }, 'Folio entry posted.');
+
+  const handleAddPosCharge = (charge: PosCharge) => perform(async () => {
+    await api.post('/pos-charges', {
+      requestId: charge.id,
+      roomNumber: charge.roomNumber,
+      outlet: charge.outlet,
+      items: charge.items,
+    });
+    const [updatedCharges] = await Promise.all([
+      api.get<PosCharge[]>('/pos-charges'),
+      refreshReservations(),
+      refreshMetrics(),
+    ]);
+    setPosCharges(updatedCharges);
+  }, 'POS charge posted to the in-house folio.');
+
+  const handleAddMaintenanceOrder = (order: MaintenanceWorkOrder) => perform(async () => {
+    await api.post('/maintenance', {
+      requestId: order.id,
+      roomNumber: order.roomNumber,
+      issueDescription: order.issueDescription,
+      category: order.category,
+      priority: order.priority,
+      reportedBy: order.reportedBy,
+      assignedEngineer: order.assignedEngineer,
+      slaMinutes: order.slaMinutes,
+      safetyCritical: order.safetyCritical,
+    });
+    setMaintenanceOrders(await api.get<MaintenanceWorkOrder[]>('/maintenance'));
+  }, `Maintenance work order opened for room ${order.roomNumber}.`);
+
+  const handleResolveMaintenanceOrder = (orderId: string) => perform(async () => {
+    const updated = await api.patch<MaintenanceWorkOrder>(`/maintenance/${orderId}/resolve`);
+    setMaintenanceOrders((previous) => previous.map((order) => order.id === orderId ? updated : order));
+  }, 'Maintenance work order resolved.');
+
+  const handleToggleAutoApply = (ruleId: string) => perform(async () => {
+    const rule = dynamicRules.find((candidate) => candidate.id === ruleId);
+    if (!rule) return;
+    const updated = await api.patch<DynamicPricingRule>(`/pricing-rules/${ruleId}`, {
+      autoApply: !rule.autoApply,
+    });
+    setDynamicRules((previous) => previous.map((candidate) => candidate.id === ruleId ? updated : candidate));
+  });
+
+  const handleApplyRecommendedRate = (ruleId: string) => perform(async () => {
+    const targetRule = dynamicRules.find((rule) => rule.id === ruleId);
+    if (!targetRule) return;
+    await api.post(`/pricing-rules/${ruleId}/apply`);
+    await refreshRooms();
+  }, 'Recommended rates applied to available inventory.');
+
+  const handleTriggerSync = (channelId: string) => perform(async () => {
+    setChannels(await api.post<ChannelStatus[]>('/channels/sync', { id: channelId }));
+  }, channelId === 'all' ? 'All demo sync timestamps updated.' : 'Demo sync timestamp updated.');
+
+  const handleRunNightAudit = () => perform(async () => {
+    const summary = await api.post<{
+      foliosPosted: number;
+      foliosSkipped?: number;
+      totalRoomRevenue: number;
+    }>('/night-audit');
+    await Promise.all([refreshReservations(), refreshMetrics()]);
+    setNotice({
+      tone: 'success',
+      message: `Night audit complete: ${summary.foliosPosted} folio(s) posted, ${summary.foliosSkipped || 0} already posted, $${summary.totalRoomRevenue.toFixed(2)} revenue.`,
+    });
+  });
+
+  const handleAddGroup = (group: GroupBooking) => perform(async () => {
+    const created = await api.post<GroupBooking>('/groups', {
+      propertyId: 'prop-main',
+      groupName: group.groupName,
+      companyName: group.companyName,
+      contactPerson: group.contactPerson,
+      contactEmail: group.contactEmail,
+      roomsAllocated: group.roomsAllocated,
+      startDate: group.startDate,
+      endDate: group.endDate,
+      releaseDate: group.releaseDate,
+      status: group.status,
+      groupRate: group.groupRate,
+      banquetCateringTotal: group.banquetCateringTotal,
+    });
+    setGroupBookings((previous) => [created, ...previous]);
+  }, `Group block created for ${group.groupName}.`);
+
+  const handleRespondToReview = (reviewId: string, responseText: string) => perform(async () => {
+    const updated = await api.post<ReviewItem>(`/reputation/reviews/${reviewId}/respond`, { responseText });
+    setReviews((previous) => previous.map((review) => review.id === reviewId ? updated : review));
+  }, 'Response saved. It will publish after a review-platform connector is configured.');
+
+  const handleHvacSetback = () => perform(async () => {
+    await api.post('/esg/actions/hvac-setback', { target: 'Eligible vacant rooms' });
+  }, 'HVAC setback request queued. Device execution awaits a building-management connector.');
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // Local cleanup still signs out if the server is unavailable.
+    } finally {
+      logout();
+      setCurrentUser(null);
+      setMetrics(null);
+    }
+  };
+
+  if (publicBooking) {
+    return (
+      <div className="min-h-screen bg-slate-950 p-2 sm:p-4">
+        <Suspense fallback={<ModuleLoading />}>
+          <BookingEngine
+            propertyName="Nexus Luxury Resort & Spa"
+            locationLabel="Copenhagen, Denmark"
+            onExit={() => {
+              window.history.pushState({}, '', '/');
+              setPublicBooking(false);
+            }}
+          />
+        </Suspense>
+      </div>
+    );
   }
 
-  // Handlers
-  const handleCheckIn = (resId: string) => {
-    setReservations(prev => prev.map(r => {
-      if (r.id === resId) {
-        setRooms(rms => rms.map(rm => rm.number === r.roomNumber ? { ...rm, status: 'Occupied', currentGuestName: r.guestName } : rm));
-        return { ...r, status: 'Checked-In' };
-      }
-      return r;
-    }));
-  };
+  if (!authReady) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-gray-100 gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-200 flex items-center justify-center shadow-lg shadow-amber-500/20 text-slate-950 font-black text-xl tracking-tighter animate-pulse-glow">
+          N
+        </div>
+        <p className="text-sm text-gray-400 font-medium" role="status">Restoring your secure session…</p>
+      </div>
+    );
+  }
 
-  const handleCheckOut = (resId: string) => {
-    setReservations(prev => prev.map(r => {
-      if (r.id === resId) {
-        setRooms(rms => rms.map(rm => rm.number === r.roomNumber ? { ...rm, status: 'Vacant Dirty', currentGuestName: undefined } : rm));
-        
-        const newTask: HousekeepingTask = {
-          id: `hk-${Date.now()}`,
-          roomNumber: r.roomNumber,
-          roomType: r.roomType,
-          floor: parseInt(r.roomNumber[0]),
-          taskType: 'Full Clean',
-          status: 'Pending',
-          assignedTo: 'Unassigned',
-          priority: 'Urgent',
-          etaMinutes: 30
-        };
-        setHousekeepingTasks(prevHk => [newTask, ...prevHk]);
+  if (!currentUser) {
+    return <LoginScreen
+      onBookStay={() => {
+        window.history.pushState({}, '', '/book');
+        setPublicBooking(true);
+      }}
+      onLogin={(user) => {
+        setActiveTab('tape-chart');
+        setCurrentUser(user);
+      }}
+    />;
+  }
 
-        return { ...r, status: 'Checked-Out' };
-      }
-      return r;
-    }));
-  };
+  if (currentUser.mustChangePassword) {
+    return (
+      <ChangePasswordScreen
+        user={currentUser}
+        onChanged={setCurrentUser}
+        onLogout={() => { void handleLogout(); }}
+      />
+    );
+  }
 
-  const handleCompleteHousekeepingTask = (taskId: string) => {
-    setHousekeepingTasks(prev => prev.map(t => {
-      if (t.id === taskId) {
-        setRooms(rms => rms.map(rm => rm.number === t.roomNumber ? { ...rm, status: 'Vacant Clean' } : rm));
-        return { ...t, status: 'Completed' };
-      }
-      return t;
-    }));
-  };
+  if (loading && !metrics) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-gray-100 gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-200 flex items-center justify-center shadow-lg shadow-amber-500/20 text-slate-950 font-black text-xl tracking-tighter animate-pulse-glow">
+          N
+        </div>
+        <p className="text-sm text-gray-400 font-medium" role="status">Loading live property data…</p>
+      </div>
+    );
+  }
 
-  const handleUpdateRoomStatus = (roomNumber: string, status: Room['status']) => {
-    setRooms(prev => prev.map(r => r.number === roomNumber ? { ...r, status } : r));
-  };
+  if (loadError && !metrics) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-gray-100 gap-4 p-4">
+        <p className="text-sm text-rose-300 font-semibold" role="alert">{loadError}</p>
+        <div className="flex gap-3">
+          <button onClick={() => void loadAll()} className="btn-primary text-xs px-4 py-2">Retry</button>
+          <button onClick={() => void handleLogout()} className="btn-secondary text-xs px-4 py-2">Sign Out</button>
+        </div>
+      </div>
+    );
+  }
 
-  const handleSaveNewReservation = (newRes: Reservation) => {
-    setReservations(prev => [newRes, ...prev]);
-    setRooms(prev => prev.map(r => r.number === newRes.roomNumber ? { ...r, status: 'Reserved' } : r));
-    setIsBookingModalOpen(false);
-  };
-
-  const handleAddFolioItem = (resId: string, item: FolioItem) => {
-    setReservations(prev => prev.map(r => {
-      if (r.id === resId) {
-        const updatedItems = [...r.folioItems, item];
-        const updatedRes = { ...r, folioItems: updatedItems };
-        if (selectedReservationForFolio && selectedReservationForFolio.id === resId) {
-          setSelectedReservationForFolio(updatedRes);
-        }
-        return updatedRes;
-      }
-      return r;
-    }));
-  };
-
-  const handleAddPosCharge = (charge: PosCharge) => {
-    setPosCharges(prev => [charge, ...prev]);
-    const matchingRes = reservations.find(r => r.roomNumber === charge.roomNumber && r.status === 'Checked-In');
-    if (matchingRes) {
-      handleAddFolioItem(matchingRes.id, {
-        id: `f-pos-${Date.now()}`,
-        date: new Date().toISOString().split('T')[0],
-        description: `${charge.outlet} - Charge`,
-        category: 'F&B Restaurant',
-        amount: charge.total,
-        postedBy: 'POS Terminal'
-      });
-    }
-  };
-
-  const handleExecuteCopilotCommand = (actionType: string) => {
-    if (actionType === 'ASSIGN_VIPS') {
-      alert("AI Copilot: VIP arrivals allocated to high floor suite inventory.");
-    } else if (actionType === 'CLEAN_FLOOR1') {
-      setHousekeepingTasks(prev => prev.map(t => t.floor === 1 ? { ...t, status: 'In-Progress', assignedTo: 'Maria Santos' } : t));
-    }
-  };
-
-  const handleAddMaintenanceOrder = (order: MaintenanceWorkOrder) => {
-    setMaintenanceOrders(prev => [order, ...prev]);
-  };
-
-  const handleResolveMaintenanceOrder = (orderId: string) => {
-    setMaintenanceOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'Resolved' } : o));
-  };
-
-  const handleAddGroupBooking = (grp: GroupBooking) => {
-    setGroupBookings(prev => [grp, ...prev]);
-  };
-
-  const handleRespondToReview = (reviewId: string, responseText: string) => {
-    setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, aiDraftedResponse: responseText, responded: true } : r));
-    alert("AI Response published to review portal!");
-  };
-
-  const handleToggleAutoApply = (ruleId: string) => {
-    setDynamicRules(prev => prev.map(r => r.id === ruleId ? { ...r, autoApply: !r.autoApply } : r));
-  };
-
-  const handleApplyRecommendedRate = (ruleId: string) => {
-    const targetRule = dynamicRules.find(r => r.id === ruleId);
-    if (!targetRule) return;
-
-    setRooms(prev => prev.map(r => r.type === targetRule.roomType ? { ...r, currentPrice: targetRule.recommendedRate } : r));
-    alert(`Applied AI recommended rate ($${targetRule.recommendedRate}) to all ${targetRule.roomType} inventory!`);
-  };
-
-  const handleTriggerSync = (channelId: string) => {
-    setChannels(prev => prev.map(c => c.id === channelId || channelId === 'all' ? { ...c, lastSync: 'Just now' } : c));
-  };
-
-  const handleRunNightAudit = () => {
-    alert("Running Automated Daily Financial Audit...\n\n✓ Room charges & taxes posted to 12 active folios.\n✓ Credit card batch settlement submitted.\n✓ Daily USALI Revenue Report generated.");
-  };
-
-  const pendingArrivalsCount = reservations.filter(r => r.status === 'Confirmed').length;
-  const dirtyRoomsCount = rooms.filter(r => r.status === 'Vacant Dirty').length;
+  const pendingArrivalsCount = reservations.filter((reservation) => reservation.status === 'Confirmed').length;
+  const dirtyRoomsCount = rooms.filter((room) => room.status === 'Vacant Dirty').length;
+  const canManageReservations = ['General Manager', 'Front Desk'].includes(currentUser.role);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-gray-100">
-      {/* Top Bar */}
-      <Navbar
-        metrics={metrics}
-        onOpenNewBooking={() => {
-          setBookingRoomNumber(undefined);
-          setIsBookingModalOpen(true);
-        }}
-        onRunNightAudit={handleRunNightAudit}
-        selectedProperty={selectedProperty}
-        setSelectedProperty={setSelectedProperty}
-      />
+      {metrics && (
+        <Navbar
+          metrics={metrics}
+          onOpenNewBooking={() => {
+            setBookingRoomNumber(undefined);
+            setBookingStartDate(undefined);
+            setIsBookingModalOpen(true);
+          }}
+          onRunNightAudit={handleRunNightAudit}
+          onSearch={(query) => {
+            setReservationSearch(query);
+            setActiveTab('reservations');
+          }}
+          onLogout={handleLogout}
+          selectedProperty={selectedProperty}
+          userName={currentUser.name}
+          userRole={currentUser.role}
+        />
+      )}
 
-      {/* Main Layout Container */}
-      <div className="flex flex-1">
-        {/* Left Sidebar */}
+      {notice && (
+        <div
+          role={notice.tone === 'error' ? 'alert' : 'status'}
+          className={`fixed right-4 top-20 z-50 max-w-md rounded-xl border px-4 py-3 text-xs font-semibold shadow-2xl ${
+            notice.tone === 'success'
+              ? 'bg-emerald-950/95 border-emerald-500/40 text-emerald-200'
+              : 'bg-rose-950/95 border-rose-500/40 text-rose-200'
+          }`}
+        >
+          {notice.message}
+        </div>
+      )}
+
+      <div className="flex flex-1 flex-col md:flex-row">
         <Sidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           pendingArrivalsCount={pendingArrivalsCount}
           dirtyRoomsCount={dirtyRoomsCount}
+          userRole={currentUser.role}
         />
 
-        {/* Content Body */}
         <main className="flex-1 p-4 md:p-6 overflow-y-auto max-w-[1600px] mx-auto w-full">
           {activeTab === 'tape-chart' && (
             <TapeChart
               rooms={rooms}
               reservations={reservations}
-              onSelectReservation={(res) => setSelectedReservationForFolio(res)}
-              onOpenNewBooking={(roomNum) => {
-                setBookingRoomNumber(roomNum);
+              onSelectReservation={setSelectedReservationForFolio}
+              onOpenNewBooking={(roomNumber, startDate) => {
+                setBookingRoomNumber(roomNumber);
+                setBookingStartDate(startDate);
                 setIsBookingModalOpen(true);
               }}
+              canCreateReservation={canManageReservations}
+              businessDate={metrics?.businessDate}
             />
           )}
 
           {activeTab === 'staff-copilot' && (
-            <StaffCopilot
-              rooms={rooms}
-              reservations={reservations}
-              tasks={housekeepingTasks}
-              onExecuteCommand={handleExecuteCopilotCommand}
-            />
+            <StaffCopilot onDataChanged={refreshOperationalData} />
           )}
 
-          {activeTab === 'guest-cdp' && (
-            <GuestCdp
-              profiles={guestProfiles}
-            />
+          {activeTab === 'workflow-studio' && (
+            <Suspense fallback={<ModuleLoading />}><WorkflowStudio /></Suspense>
           )}
+
+          {activeTab === 'platform-control' && (
+            <Suspense fallback={<ModuleLoading />}>
+              <PlatformControlCenter user={currentUser} />
+            </Suspense>
+          )}
+
+          {activeTab === 'access-admin' && (
+            <Suspense fallback={<ModuleLoading />}>
+              <AccessAdministration user={currentUser} />
+            </Suspense>
+          )}
+
+          {activeTab === 'developer-portal' && (
+            <Suspense fallback={<ModuleLoading />}><DeveloperPortal /></Suspense>
+          )}
+
+          {activeTab === 'guest-cdp' && <GuestCdp profiles={guestProfiles} />}
 
           {activeTab === 'groups' && (
-            <GroupBookingBoard
-              groups={groupBookings}
-              onAddGroup={handleAddGroupBooking}
-            />
+            <GroupBookingBoard groups={groupBookings} onAddGroup={handleAddGroup} />
           )}
 
           {activeTab === 'reputation' && (
@@ -269,13 +596,19 @@ export const App: React.FC = () => {
           {activeTab === 'reservations' && (
             <ReservationsList
               reservations={reservations}
-              onSelectReservation={(res) => setSelectedReservationForFolio(res)}
+              onSelectReservation={setSelectedReservationForFolio}
               onCheckIn={handleCheckIn}
               onCheckOut={handleCheckOut}
+              onCancel={handleCancelReservation}
+              onNoShow={handleNoShowReservation}
               onOpenNewBooking={() => {
                 setBookingRoomNumber(undefined);
+                setBookingStartDate(undefined);
                 setIsBookingModalOpen(true);
               }}
+              initialSearchTerm={reservationSearch}
+              canManageReservations={canManageReservations}
+              businessDate={metrics?.businessDate}
             />
           )}
 
@@ -296,28 +629,21 @@ export const App: React.FC = () => {
             />
           )}
 
-          {activeTab === 'esg' && (
-            <EsgDashboard
-              metric={esgMetric}
-              onTriggerHvacSetback={() => alert("Auto HVAC Eco Setback triggered on checked-out room inventory.")}
-            />
+          {activeTab === 'esg' && esgMetric && (
+            <EsgDashboard metric={esgMetric} onTriggerHvacSetback={() => { void handleHvacSetback(); }} />
           )}
 
           {activeTab === 'multi-property' && (
-            <MultiPropertyAnalytics
-              properties={INITIAL_PORTFOLIO_COMPARISON}
-            />
+            <MultiPropertyAnalytics properties={portfolio} />
           )}
 
           {activeTab === 'migration' && (
-            <MigrationWizard
-              onCommitImport={(cnt) => alert(`Successfully imported ${cnt} guest contracts into NexusHOS!`)}
-            />
+            <MigrationWizard onCommitImport={(count) => {
+              setNotice({ tone: 'success', message: `${count} guest contracts validated for import.` });
+            }} />
           )}
 
-          {activeTab === 'guest-portal' && (
-            <GuestPortalSimulator />
-          )}
+          {activeTab === 'guest-portal' && <GuestPortalSimulator />}
 
           {activeTab === 'ai-revenue' && (
             <AiRevenueManager
@@ -328,34 +654,43 @@ export const App: React.FC = () => {
           )}
 
           {activeTab === 'channel-manager' && (
-            <ChannelManager
-              channels={channels}
-              onTriggerSync={handleTriggerSync}
-            />
+            <ChannelManager channels={channels} onTriggerSync={handleTriggerSync} />
           )}
 
           {activeTab === 'pos-charges' && (
             <PosPosting
               charges={posCharges}
               rooms={rooms}
+              reservations={reservations}
               onAddPosCharge={handleAddPosCharge}
             />
           )}
 
-          {activeTab === 'analytics' && (
-            <FinancialAnalytics
+          {activeTab === 'analytics' && metrics && (
+            <FinancialAnalytics metrics={metrics} onRunNightAudit={handleRunNightAudit} />
+          )}
+
+          {activeTab === 'accounting' && (
+            <AccountingDashboard
               metrics={metrics}
-              onRunNightAudit={handleRunNightAudit}
+              onDataChanged={async () => {
+                await Promise.all([refreshReservations(), refreshMetrics()]);
+              }}
             />
           )}
+
+          {activeTab === 'procurement' && <ProcurementBoard />}
+          {activeTab === 'hr' && <HrBoard />}
         </main>
       </div>
 
-      {/* Modals */}
       {isBookingModalOpen && (
         <BookingModal
           rooms={rooms}
+          reservations={reservations}
           initialRoomNumber={bookingRoomNumber}
+          initialCheckIn={bookingStartDate}
+          businessDate={metrics?.businessDate}
           onClose={() => setIsBookingModalOpen(false)}
           onSaveReservation={handleSaveNewReservation}
         />

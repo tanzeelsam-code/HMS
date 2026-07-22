@@ -10,7 +10,7 @@ export const GuestPortalSimulator: React.FC = () => {
   const [messages, setMessages] = useState([
     { sender: 'ai', text: 'Hello Mr. Wright! Welcome to Aura Luxury Resort. Your room #101 is pre-assigned. How can I assist your stay today?' },
     { sender: 'guest', text: 'What is the high-speed Wi-Fi password?' },
-    { sender: 'ai', text: 'The Wi-Fi network is "Aura_Guest_5G" and your password is: AuraVip2026. Enjoy 1Gbps fiber internet!' }
+    { sender: 'ai', text: 'Prototype response: the sample Wi-Fi network is "Aura_Guest_5G". No real network credentials are stored here.' }
   ]);
   const [inputMessage, setInputMessage] = useState('');
 
@@ -45,13 +45,13 @@ export const GuestPortalSimulator: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Contactless Guest Web Portal & AI Concierge</h2>
+            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Guest Portal Interaction Prototype</h2>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-              Mobile Key & LLM Concierge
+              Local UI · No Providers
             </span>
           </div>
           <p className="text-xs text-gray-400 mt-1">
-            Simulate the guest mobile phone experience: Self Check-in, NFC Key unlock, and AI WhatsApp messaging.
+            Explore a local, rule-based mockup of self check-in, mobile key, and concierge messaging. No lock, identity, WhatsApp, or model provider is connected.
           </p>
         </div>
       </div>
@@ -116,12 +116,12 @@ export const GuestPortalSimulator: React.FC = () => {
 
                   <div>
                     <h4 className="font-extrabold text-sm text-gray-100">
-                      {digitalKeyGenerated ? 'Digital Key Active' : 'Generate Mobile Key'}
+                      {digitalKeyGenerated ? 'Key Preview Active' : 'Preview Mobile Key'}
                     </h4>
                     <p className="text-[11px] text-gray-400 mt-1">
                       {digitalKeyGenerated 
-                        ? 'Hold phone near Room #101 door lock to unlock via NFC Bluetooth.' 
-                        : 'Tap below to authorize digital key to your device.'}
+                        ? 'The prototype now shows the success state; no door command was sent.'
+                        : 'Tap below to preview the successful key-activation state.'}
                     </p>
                   </div>
 
@@ -130,11 +130,11 @@ export const GuestPortalSimulator: React.FC = () => {
                       onClick={() => setDigitalKeyGenerated(true)}
                       className="btn-primary text-xs w-full py-2.5 flex items-center justify-center gap-2"
                     >
-                      <Zap className="w-4 h-4" /> Activate NFC Key
+                      <Zap className="w-4 h-4" /> Preview Key Activation
                     </button>
                   ) : (
                     <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4" /> Verified & Encrypted
+                      <ShieldCheck className="w-4 h-4" /> Simulated Success State
                     </div>
                   )}
                 </div>
@@ -183,7 +183,7 @@ export const GuestPortalSimulator: React.FC = () => {
                 <div className="space-y-3 text-left">
                   <div className="p-3 rounded-xl bg-slate-900 border border-emerald-500/30">
                     <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
-                      <CheckCircle2 className="w-4 h-4" /> Identity Verified
+                      <CheckCircle2 className="w-4 h-4" /> Sample Identity State
                     </div>
                     <p className="text-[11px] text-gray-400 mt-1">Passport / Driver License uploaded & pre-approved.</p>
                   </div>
@@ -213,10 +213,10 @@ export const GuestPortalSimulator: React.FC = () => {
           <div className="glass-panel p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-cyan-400" /> Live Front-Desk Mobile Key Operations
+                <UserCheck className="w-4 h-4 text-cyan-400" /> Sample Front-Desk Portal State
               </h3>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                Sync Active
+                Local Preview
               </span>
             </div>
 
@@ -227,14 +227,14 @@ export const GuestPortalSimulator: React.FC = () => {
                   <div className="text-[11px] text-gray-400">Pre-arrival registration completed via Web Link.</div>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  ID Approved
+                  Sample Approved
                 </span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/80 border border-white/10 flex items-center justify-between">
                 <div>
                   <div className="font-bold text-gray-200">Digital Key Encryption Key</div>
-                  <div className="text-[11px] text-gray-400">AES-256 NFC Token dispatched to guest device.</div>
+                  <div className="text-[11px] text-gray-400">Illustrative token state; no key was dispatched to a device.</div>
                 </div>
                 <span className="text-[10px] font-mono font-bold text-amber-300">
                   {digitalKeyGenerated ? 'TOKEN_ACTIVE' : 'TOKEN_PENDING'}

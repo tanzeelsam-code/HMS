@@ -4,11 +4,7 @@ import { api } from '../api';
 import { CopilotResponse } from '../types';
 
 interface StaffCopilotProps {
-  onDataChanged?: () => void;
-  rooms?: any;
-  reservations?: any;
-  tasks?: any;
-  onExecuteCommand?: (actionType: string) => void;
+  onDataChanged: () => void | Promise<void>;
 }
 
 interface ChatMessage {
@@ -16,7 +12,7 @@ interface ChatMessage {
   text: string;
 }
 
-export const StaffCopilot: React.FC<StaffCopilotProps> = ({ onDataChanged, onExecuteCommand }) => {
+export const StaffCopilot: React.FC<StaffCopilotProps> = ({ onDataChanged }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       sender: 'copilot',
@@ -32,7 +28,8 @@ export const StaffCopilot: React.FC<StaffCopilotProps> = ({ onDataChanged, onExe
     'What is occupancy today?',
     'RevPAR this week',
     'Clean floor 1',
-    'Assign VIP arrivals to high floors'
+    'Assign VIP arrivals to high floors',
+    'Apply the recommended rates'
   ];
 
   useEffect(() => {
@@ -47,32 +44,25 @@ export const StaffCopilot: React.FC<StaffCopilotProps> = ({ onDataChanged, onExe
     setThinking(true);
 
     try {
-      const res = await api.post<CopilotResponse>('/ai/copilot', { prompt: text });
+      const res = await api.post<CopilotResponse>('/ai/copilot', { message: text });
       const replyText = res.reply || res.answer || 'Command processed.';
       setMessages((prev) => [...prev, { sender: 'copilot', text: replyText }]);
       if (res.actions && res.actions.length > 0) {
-        for (const act of res.actions) {
-          setActionLog((prev) => [
-            `${new Date().toLocaleTimeString()} — ${act.label} (${act.action})`,
-            ...prev
-          ]);
-        }
-        if (onDataChanged) onDataChanged();
-      }
-      if (onExecuteCommand) {
-        onExecuteCommand(text);
+        const timestamp = new Date().toLocaleTimeString();
+        setActionLog((prev) => [
+          ...res.actions!.map((action) => `${timestamp} — ${action}`),
+          ...prev,
+        ]);
+        await onDataChanged();
       }
     } catch (err) {
       setMessages((prev) => [
         ...prev,
         {
           sender: 'copilot',
-          text: `Local fallback response: Executed query "${text}". Connected to NexusHOS state bus.`
+          text: `Unable to run that command: ${err instanceof Error ? err.message : 'Copilot request failed'}`
         }
       ]);
-      if (onExecuteCommand) {
-        onExecuteCommand(text);
-      }
     } finally {
       setThinking(false);
     }

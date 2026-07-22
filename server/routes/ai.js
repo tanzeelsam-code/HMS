@@ -2,27 +2,38 @@
 // All logic is deterministic and computed live from the DB (no fake labels).
 import { Router } from 'express';
 import { db, tx, uid, today } from '../db.js';
+import { requireRoles } from '../auth.js';
+import { assertReservationCanCheckIn } from './core.js';
 
 const r = Router();
+const requireFinanceRole = requireRoles('General Manager', 'Finance');
 const DAY_MS = 86400000;
 const addDays = (dateStr, n) => new Date(new Date(dateStr).getTime() + n * DAY_MS).toISOString().slice(0, 10);
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
 const occupancyStats = () => {
-  const rooms = db.prepare('SELECT status, currentPrice FROM rooms').all();
+  const rooms = db.prepare('SELECT status FROM rooms').all();
   const occupied = rooms.filter((x) => x.status === 'Occupied');
-  const occupancyRate = rooms.length ? +((occupied.length / rooms.length) * 100).toFixed(1) : 0;
-  const adr = occupied.length ? +(occupied.reduce((s, x) => s + x.currentPrice, 0) / occupied.length).toFixed(2) : 0;
-  return { totalRooms: rooms.length, occupiedRooms: occupied.length, occupancyRate, adr, revPar: +((adr * occupancyRate) / 100).toFixed(2) };
+  const availableRooms = rooms.filter((room) => room.status !== 'Out of Service').length;
+  const occupancyRate = availableRooms ? +((occupied.length / availableRooms) * 100).toFixed(1) : 0;
+  const rates = db.prepare(`
+    SELECT totalAmount / nights AS nightlyRate
+    FROM reservations
+    WHERE status = 'Checked-In' AND nights > 0 AND totalAmount >= 0
+  `).all();
+  const adr = rates.length
+    ? +(rates.reduce((sum, row) => sum + row.nightlyRate, 0) / rates.length).toFixed(2)
+    : 0;
+  return { totalRooms: availableRooms, occupiedRooms: occupied.length, occupancyRate, adr, revPar: +((adr * occupancyRate) / 100).toFixed(2) };
 };
 
 // -------------------------------------------------------- pricing forecast ----
-r.get('/ai/pricing-forecast', (req, res) => {
+r.get('/ai/pricing-forecast', requireFinanceRole, (req, res) => {
   const t = today();
   const horizon = addDays(t, 14);
-  const types = db.prepare('SELECT DISTINCT type FROM rooms ORDER BY type').all().map((x) => x.type);
+  const types = db.prepare("SELECT DISTINCT type FROM rooms WHERE status != 'Out of Service' ORDER BY type").all().map((x) => x.type);
   const forecast = types.map((type) => {
-    const rooms = db.prepare('SELECT * FROM rooms WHERE type = ?').all(type);
+    const rooms = db.prepare("SELECT * FROM rooms WHERE type = ? AND status != 'Out of Service'").all(type);
     const roomCount = rooms.length;
     const baseRate = rooms.reduce((s, x) => s + x.basePrice, 0) / roomCount;
     const occupiedNow = rooms.filter((x) => x.status === 'Occupied').length;
@@ -65,9 +76,9 @@ r.get('/ai/pricing-forecast', (req, res) => {
 });
 
 // --------------------------------------------------------- demand forecast ----
-r.get('/ai/demand-forecast', (req, res) => {
+r.get('/ai/demand-forecast', requireFinanceRole, (req, res) => {
   const t = today();
-  const totalRooms = db.prepare('SELECT COUNT(*) AS n FROM rooms').get().n;
+  const totalRooms = db.prepare("SELECT COUNT(*) AS n FROM rooms WHERE status != 'Out of Service'").get().n;
   const days = [];
   for (let i = 0; i < 14; i++) {
     const d = addDays(t, i);
@@ -79,7 +90,9 @@ r.get('/ai/demand-forecast', (req, res) => {
       WHERE checkIn = ? AND status IN ('Confirmed','Checked-In')`).get(d).n;
     days.push({
       date: d,
-      expectedOccupancy: +((occupied / totalRooms) * 100).toFixed(1),
+      expectedOccupancy: totalRooms
+        ? +(clamp(occupied / totalRooms, 0, 1) * 100).toFixed(1)
+        : 0,
       arrivals,
     });
   }
@@ -100,17 +113,23 @@ const copilotIntents = [
   },
   {
     test: (m) => /rev\s?par|adr/.test(m),
-    run: () => {
+    run: (_m, user) => {
+      if (!['General Manager', 'Finance'].includes(user?.role)) {
+        return { reply: 'ADR and RevPAR are restricted to General Manager and Finance roles.', actions: [] };
+      }
       const s = occupancyStats();
       return {
-        reply: `RevPAR is $${s.revPar} (ADR $${s.adr} at ${s.occupancyRate}% occupancy, computed from current room rates).`,
+        reply: `RevPAR is $${s.revPar} (ADR $${s.adr} at ${s.occupancyRate}% occupancy, computed from contracted in-house rates).`,
         actions: [],
       };
     },
   },
   {
     test: (m) => /(clean|start housekeeping)\s+floor\s+\d+/.test(m),
-    run: (m) => {
+    run: (m, user) => {
+      if (!['General Manager', 'Front Desk', 'Housekeeping'].includes(user?.role)) {
+        return { reply: 'Starting housekeeping requires a General Manager, Front Desk, or Housekeeping role.', actions: [] };
+      }
       const floor = parseInt(m.match(/(?:clean|start housekeeping)\s+floor\s+(\d+)/)[1], 10);
       const dirty = db.prepare("SELECT * FROM rooms WHERE floor = ? AND status = 'Vacant Dirty'").all(floor);
       if (dirty.length === 0) {
@@ -137,7 +156,10 @@ const copilotIntents = [
   },
   {
     test: (m) => /vip/.test(m) && /(arrival|assign|high floor)/.test(m),
-    run: () => {
+    run: (m, user) => {
+      if (!['General Manager', 'Front Desk'].includes(user?.role)) {
+        return { reply: 'Reassigning VIP arrivals requires a General Manager or Front Desk role.', actions: [] };
+      }
       const vips = db.prepare(`
         SELECT * FROM reservations
         WHERE status = 'Confirmed' AND vipTier IN ('Gold','Platinum') AND checkIn >= ?`).all(today());
@@ -147,17 +169,32 @@ const copilotIntents = [
       const actions = tx(() => {
         const out = [];
         for (const rez of vips) {
-          const current = db.prepare('SELECT floor FROM rooms WHERE number = ?').get(rez.roomNumber);
+          const current = db.prepare('SELECT * FROM rooms WHERE number = ?').get(rez.roomNumber);
           const candidate = db.prepare(`
-            SELECT * FROM rooms WHERE type = ? AND status = 'Vacant Clean' AND floor > ?
-            ORDER BY floor DESC, number DESC LIMIT 1`).get(rez.roomType, current ? current.floor : 0);
+            SELECT rm.* FROM rooms rm
+            WHERE rm.type = ? AND rm.status = 'Vacant Clean' AND rm.floor > ?
+              AND NOT EXISTS (
+                SELECT 1 FROM reservations other
+                WHERE other.roomNumber = rm.number
+                  AND other.status IN ('Confirmed','Checked-In')
+                  AND other.checkIn < ? AND other.checkOut > ?
+              )
+            ORDER BY rm.floor DESC, rm.number DESC LIMIT 1
+          `).get(rez.roomType, current ? current.floor : 0, rez.checkOut, rez.checkIn);
           if (!candidate) {
             out.push(`${rez.guestName} (${rez.vipTier}): no higher-floor ${rez.roomType} available, kept room ${rez.roomNumber}`);
             continue;
           }
           db.prepare('UPDATE reservations SET roomNumber = ? WHERE id = ?').run(candidate.number, rez.id);
           db.prepare("UPDATE rooms SET status = 'Reserved', status_since = ? WHERE number = ?").run(today(), candidate.number);
-          db.prepare("UPDATE rooms SET status = 'Vacant Clean', status_since = ? WHERE number = ?").run(today(), rez.roomNumber);
+          const oldRoomHasAnotherStay = db.prepare(`
+            SELECT 1 FROM reservations
+            WHERE roomNumber = ? AND id != ? AND status IN ('Confirmed','Checked-In')
+            LIMIT 1`).get(rez.roomNumber, rez.id);
+          if (current?.status === 'Reserved' && !oldRoomHasAnotherStay) {
+            db.prepare("UPDATE rooms SET status = 'Vacant Clean', status_since = ? WHERE number = ?")
+              .run(today(), rez.roomNumber);
+          }
           out.push(`${rez.guestName} (${rez.vipTier}): moved ${rez.roomNumber} -> ${candidate.number} (floor ${candidate.floor})`);
         }
         return out;
@@ -167,28 +204,58 @@ const copilotIntents = [
   },
   {
     test: (m) => /apply\s+(the\s+)?recommended\s+rates/.test(m),
-    run: () => {
+    run: (m, user) => {
+      if (!['General Manager', 'Finance'].includes(user?.role)) {
+        return { reply: 'Applying recommended rates requires a General Manager or Finance role.', actions: [] };
+      }
       const rules = db.prepare('SELECT * FROM pricing_rules WHERE autoApply = 1').all();
       if (rules.length === 0) return { reply: 'No pricing rules have autoApply enabled.', actions: [] };
       const actions = tx(() => rules.map((rule) => {
-        db.prepare('UPDATE rooms SET currentPrice = ? WHERE type = ?').run(rule.recommendedRate, rule.roomType);
-        return `${rule.roomType}: currentPrice set to $${rule.recommendedRate}`;
+        const result = db.prepare("UPDATE rooms SET currentPrice = ? WHERE type = ? AND status != 'Occupied'")
+          .run(rule.recommendedRate, rule.roomType);
+        return `${rule.roomType}: ${Number(result.changes)} non-occupied room rate(s) set to $${rule.recommendedRate}`;
       }));
       return { reply: `Applied recommended rates for ${rules.length} rule(s) with autoApply on.`, actions };
     },
   },
   {
     test: (m) => /check[- ]?in\s+[a-z]/i.test(m),
-    run: (m) => {
-      const name = m.match(/check[- ]?in\s+(.+)/i)[1].trim();
-      const rez = db.prepare("SELECT * FROM reservations WHERE status = 'Confirmed' AND lower(guestName) LIKE ? LIMIT 1")
-        .get(`%${name}%`);
-      if (!rez) return { reply: `No confirmed reservation found matching "${name}".`, actions: [] };
-      tx(() => {
-        db.prepare("UPDATE reservations SET status = 'Checked-In' WHERE id = ?").run(rez.id);
-        db.prepare("UPDATE rooms SET status = 'Occupied', currentGuestName = ?, status_since = ? WHERE number = ?")
-          .run(rez.guestName, today(), rez.roomNumber);
-      });
+    run: (m, user) => {
+      if (!['General Manager', 'Front Desk'].includes(user?.role)) {
+        return { reply: 'Guest check-in requires a General Manager or Front Desk role.', actions: [] };
+      }
+      const query = m.match(/check[- ]?in\s+(.+)/i)[1].trim();
+      const candidates = /^gh-/i.test(query)
+        ? db.prepare("SELECT * FROM reservations WHERE status = 'Confirmed' AND lower(code) = lower(?)").all(query)
+        : db.prepare("SELECT * FROM reservations WHERE status = 'Confirmed' AND lower(guestName) LIKE ? ORDER BY guestName, code")
+          .all(`%${query}%`);
+      const exactNameMatches = candidates.filter((candidate) => candidate.guestName.toLowerCase() === query);
+      const matches = exactNameMatches.length > 0 ? exactNameMatches : candidates;
+      if (matches.length === 0) {
+        return { reply: `No confirmed reservation found matching "${query}".`, actions: [] };
+      }
+      if (matches.length > 1) {
+        const choices = matches.slice(0, 5).map((candidate) => `${candidate.guestName} (${candidate.code})`).join(', ');
+        return {
+          reply: `Multiple confirmed reservations match "${query}": ${choices}. Use the exact reservation code, for example "check in ${matches[0].code}".`,
+          actions: [],
+        };
+      }
+      const [rez] = matches;
+      try {
+        tx(() => {
+          const current = db.prepare('SELECT * FROM reservations WHERE id = ?').get(rez.id);
+          assertReservationCanCheckIn(current);
+          db.prepare("UPDATE reservations SET status = 'Checked-In' WHERE id = ?").run(current.id);
+          db.prepare("UPDATE rooms SET status = 'Occupied', currentGuestName = ?, status_since = ? WHERE number = ?")
+            .run(current.guestName, today(), current.roomNumber);
+        });
+      } catch (error) {
+        if (error.status) {
+          return { reply: `Could not check in ${rez.guestName}: ${error.message}.`, actions: [] };
+        }
+        throw error;
+      }
       return {
         reply: `Checked in ${rez.guestName} (${rez.code}) into room ${rez.roomNumber}.`,
         actions: [`Reservation ${rez.id} -> Checked-In`, `Room ${rez.roomNumber} -> Occupied`],
@@ -214,7 +281,7 @@ r.post('/ai/copilot', (req, res) => {
   const actions = [];
   for (const intent of copilotIntents) {
     if (intent.test(lower)) {
-      const result = intent.run(lower);
+      const result = intent.run(lower, req.user);
       replies.push(result.reply);
       actions.push(...result.actions);
     }
@@ -229,17 +296,24 @@ r.post('/ai/copilot', (req, res) => {
 });
 
 // ---------------------------------------------------------------- anomalies ----
-r.get('/ai/anomalies', (req, res) => {
+r.get('/ai/anomalies', requireFinanceRole, (req, res) => {
   const anomalies = [];
 
   for (const row of db.prepare(`
-    SELECT res.id, res.guestName, res.roomNumber, SUM(f.amount) AS balance
-    FROM folio_items f JOIN reservations res ON res.id = f.reservation_id
+    SELECT res.id, res.guestName, res.roomNumber,
+      ROUND(
+        COALESCE(SUM(f.amount), 0)
+        + MAX(0, res.totalAmount - COALESCE(SUM(
+          CASE WHEN f.category = 'Room Charge' THEN f.amount ELSE 0 END
+        ), 0)),
+        2
+      ) AS balance
+    FROM reservations res LEFT JOIN folio_items f ON res.id = f.reservation_id
     WHERE res.status = 'Checked-In'
-    GROUP BY res.id HAVING balance < 0`).all()) {
+    GROUP BY res.id HAVING balance < -0.005`).all()) {
     anomalies.push({
       severity: 'High',
-      message: `Reservation ${row.id} (${row.guestName}, room ${row.roomNumber}) has a negative folio balance of $${row.balance.toFixed(2)}.`,
+      message: `Reservation ${row.id} (${row.guestName}, room ${row.roomNumber}) has a projected checkout credit of $${Math.abs(row.balance).toFixed(2)} after contracted room charges.`,
     });
   }
 

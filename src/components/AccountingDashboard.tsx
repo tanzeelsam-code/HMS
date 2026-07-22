@@ -8,6 +8,7 @@ import {
 
 interface AccountingDashboardProps {
   metrics: HotelMetrics | null;
+  onDataChanged?: () => void | Promise<void>;
 }
 
 interface DraftLine {
@@ -19,15 +20,15 @@ interface DraftLine {
 const emptyLine = (): DraftLine => ({ accountId: '', debit: '', credit: '' });
 
 const severityStyle = (sev: AnomalyAlert['severity']) =>
-  sev === 'High'
+  sev.toLowerCase() === 'high'
     ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-    : sev === 'Medium'
+    : sev.toLowerCase() === 'medium'
       ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
       : 'bg-blue-500/20 text-blue-300 border-blue-500/40';
 
 const fmt = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metrics }) => {
+export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metrics, onDataChanged }) => {
   const [accounts, setAccounts] = useState<GLAccount[]>([]);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [anomalies, setAnomalies] = useState<AnomalyAlert[]>([]);
@@ -35,7 +36,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
   const [error, setError] = useState('');
 
   // New journal entry form
-  const [jeDate, setJeDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [jeDate, setJeDate] = useState(() => metrics?.businessDate || new Date().toISOString().slice(0, 10));
   const [jeDescription, setJeDescription] = useState('');
   const [jeLines, setJeLines] = useState<DraftLine[]>([emptyLine(), emptyLine()]);
   const [jeError, setJeError] = useState('');
@@ -46,15 +47,16 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
   const [auditSummary, setAuditSummary] = useState<NightAuditSummary | null>(null);
 
   const refresh = useCallback(async () => {
+    const asOf = metrics?.businessDate;
     const [accts, jes, anoms] = await Promise.all([
       api.get<GLAccount[]>('/gl/accounts'),
-      api.get<JournalEntry[]>('/gl/journal-entries'),
+      api.get<JournalEntry[]>(`/gl/journal-entries${asOf ? `?asOf=${encodeURIComponent(asOf)}` : ''}`),
       api.get<AnomalyAlert[]>('/ai/anomalies'),
     ]);
     setAccounts(accts);
     setEntries(jes);
     setAnomalies(anoms);
-  }, []);
+  }, [metrics?.businessDate]);
 
   useEffect(() => {
     (async () => {
@@ -132,6 +134,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
       const summary = await api.post<NightAuditSummary>('/night-audit');
       setAuditSummary(summary);
       await refresh();
+      await onDataChanged?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Night audit failed');
     } finally {
@@ -155,11 +158,11 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-gray-100 tracking-tight">Finance & General Ledger</h2>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
-              Live ERP Accounting
+              As of {metrics?.businessDate || 'current business date'}
             </span>
           </div>
           <p className="text-xs text-gray-400 mt-1">
-            Double-entry GL, automated night-audit posting, and AI-driven anomaly detection.
+            Double-entry GL, idempotent night-audit posting, and rule-based anomaly detection. Future-dated entries are excluded from these balances.
           </p>
         </div>
 

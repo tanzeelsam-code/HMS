@@ -12,6 +12,9 @@ dist
 dist-isolation
 .DS_Store
 *.local
+.env
+.env.*
+!.env.example
 
 # Editor directories
 .vscode/*
@@ -24,5 +27,6 @@ dist-isolation
 *.sln
 *.sw?
 shots/
+backups/
 server/hms.db
 server/hms.db-*

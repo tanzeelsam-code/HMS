@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { ChannelStatus } from '../types';
-import { Globe, RefreshCw, CheckCircle2, Zap, ArrowRightLeft, ShieldCheck } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
 interface ChannelManagerProps {
   channels: ChannelStatus[];
-  onTriggerSync: (channelId: string) => void;
+  onTriggerSync: (channelId: string) => void | Promise<unknown>;
 }
 
 export const ChannelManager: React.FC<ChannelManagerProps> = ({
@@ -13,12 +13,13 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
 }) => {
   const [syncingId, setSyncingId] = useState<string | null>(null);
 
-  const handleSyncClick = (id: string) => {
+  const handleSyncClick = async (id: string) => {
     setSyncingId(id);
-    onTriggerSync(id);
-    setTimeout(() => {
+    try {
+      await onTriggerSync(id);
+    } finally {
       setSyncingId(null);
-    }, 1000);
+    }
   };
 
   return (
@@ -27,22 +28,23 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">2-Way OTA Channel Manager</h2>
+            <h2 className="text-xl font-bold text-gray-100 tracking-tight">OTA Channel Simulator</h2>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-300 border border-blue-500/30">
-              OpenTravel XML & API Hub
+              Demo dataset
             </span>
           </div>
           <p className="text-xs text-gray-400 mt-1">
-            Real-time rate, availability, and booking synchronization across global Online Travel Agencies (OTAs).
+            Review seeded channel data and exercise the local sync workflow. No external OTA account is connected.
           </p>
         </div>
 
         <button 
-          onClick={() => handleSyncClick('all')}
+          onClick={() => void handleSyncClick('all')}
+          disabled={syncingId !== null}
           className="btn-primary text-xs"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${syncingId === 'all' ? 'animate-spin' : ''}`} />
-          <span>Sync All OTAs Now</span>
+          <span>Update All Sync Times</span>
         </button>
       </div>
 
@@ -61,7 +63,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
                     <h3 className="font-extrabold text-sm text-gray-100">{ch.name}</h3>
                     <div className="text-[11px] text-gray-400 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      <span>{ch.connected ? '2-Way Connected' : 'Disconnected'}</span>
+                      <span>{ch.connected ? 'Enabled in demo' : 'Disabled'}</span>
                     </div>
                   </div>
                 </div>
@@ -86,7 +88,8 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
             <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
               <span className="text-[11px] text-gray-500">Last sync: {ch.lastSync}</span>
               <button 
-                onClick={() => handleSyncClick(ch.id)}
+                onClick={() => void handleSyncClick(ch.id)}
+                disabled={syncingId !== null}
                 className="btn-secondary text-[11px] px-2.5 py-1"
               >
                 <RefreshCw className={`w-3 h-3 text-blue-400 ${syncingId === ch.id ? 'animate-spin' : ''}`} />

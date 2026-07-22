@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DynamicPricingRule, PricingForecast, DemandForecastDay } from '../types';
 import { api } from '../api';
-import { Sparkles, TrendingUp, Zap, ShieldAlert, CheckCircle2, ArrowUpRight, DollarSign, Sliders, BrainCircuit, CalendarDays, RefreshCw } from 'lucide-react';
+import { Sparkles, Zap, Sliders, BrainCircuit, CalendarDays, RefreshCw } from 'lucide-react';
 
 interface AiRevenueManagerProps {
   rules: DynamicPricingRule[];
@@ -14,11 +14,14 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
   onToggleAutoApply,
   onApplyRecommendedRate
 }) => {
-  const [marketDemandScore] = useState(88); // 88/100 High demand score
   const [forecast, setForecast] = useState<PricingForecast[]>([]);
   const [demand, setDemand] = useState<DemandForecastDay[]>([]);
   const [forecastLoading, setForecastLoading] = useState(true);
   const [forecastError, setForecastError] = useState('');
+  const averageOccupancy = demand.length
+    ? Math.round(demand.reduce((sum, day) => sum + day.expectedOccupancy, 0) / demand.length)
+    : 0;
+  const paceLabel = averageOccupancy >= 75 ? 'High booking pace' : averageOccupancy >= 45 ? 'Moderate booking pace' : 'Low booking pace';
 
   useEffect(() => {
     (async () => {
@@ -43,25 +46,25 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">AI Dynamic Pricing & Revenue Optimization</h2>
+            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Rule-Based Pricing & Revenue Forecast</h2>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/30">
-              Autonomous Yield Engine
+              Deterministic model
             </span>
           </div>
           <p className="text-xs text-gray-400 mt-1">
-            Machine learning algorithm analyzing occupancy velocity, competitor rates, local event calendars, and booking lead time.
+            Transparent 14-day booking-pace calculations using live reservations, room capacity, base rates, and weekend mix.
           </p>
         </div>
 
         {/* Live Market Demand Score Banner */}
         <div className="flex items-center gap-4 bg-slate-900/90 px-4 py-2 rounded-xl border border-purple-500/30 shadow-lg shadow-purple-500/10">
           <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400 font-black text-base">
-            88
+            {forecastLoading ? '…' : averageOccupancy}
           </div>
           <div>
-            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Market Demand Index</div>
+            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">14-day occupancy outlook</div>
             <div className="text-xs font-extrabold text-purple-300 flex items-center gap-1">
-              High Surge Demand (+22% RevPAR)
+              {forecastLoading ? 'Calculating…' : `${paceLabel} · ${averageOccupancy}% average`}
             </div>
           </div>
         </div>
@@ -71,7 +74,7 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
       <div className="glass-panel p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <BrainCircuit className="w-4 h-4 text-purple-400" /> Live AI Pricing Forecast
+            <BrainCircuit className="w-4 h-4 text-purple-400" /> Live Booking-Pace Pricing Forecast
           </h3>
           <span className="text-xs text-gray-400">Computed live from bookings on the books (14-day horizon)</span>
         </div>
@@ -109,7 +112,7 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <div className="text-[10px] text-gray-400 uppercase font-bold">AI Rate</div>
+                        <div className="text-[10px] text-gray-400 uppercase font-bold">Forecast Rate</div>
                         <div className="text-base font-extrabold text-amber-300">
                           ${f.recommendedRate}
                           <span className={`text-[10px] font-bold ml-1 ${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -166,9 +169,9 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
       <div className="glass-panel p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-400" /> AI Rate Optimization Recommendations
+            <Sparkles className="w-4 h-4 text-purple-400" /> Configured Pricing Policy Rules
           </h3>
-          <span className="text-xs text-gray-400">Auto-pilot active for eligible categories</span>
+          <span className="text-xs text-gray-400">Apply uses the configured target below, independently of the live forecast above</span>
         </div>
 
         <div className="grid grid-cols-1 gap-4">
@@ -191,8 +194,8 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
                     <h4 className="font-extrabold text-sm text-gray-100">{rule.roomType}</h4>
                     <div className="flex items-center gap-3 text-xs text-gray-400 mt-1 flex-wrap">
                       <span>Base Rate: <strong className="text-gray-300">${rule.baseRate}</strong></span>
-                      <span>• Competitor Avg: <strong className="text-gray-300">${rule.competitorAvgRate}</strong></span>
-                      <span>• Demand Multiplier: <strong className="text-purple-300 font-bold">{rule.demandFactor}x</strong></span>
+                      <span>• Reference Benchmark: <strong className="text-gray-300">${rule.competitorAvgRate}</strong></span>
+                      <span>• Configured Multiplier: <strong className="text-purple-300 font-bold">{rule.demandFactor}x</strong></span>
                     </div>
                   </div>
                 </div>
@@ -200,7 +203,7 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
                 {/* Rates Comparison & Controls */}
                 <div className="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/10">
                   <div className="text-left lg:text-right">
-                    <div className="text-[10px] text-gray-400 uppercase font-bold">AI Optimized Rate</div>
+                    <div className="text-[10px] text-gray-400 uppercase font-bold">Configured Target Rate</div>
                     <div className="text-base font-extrabold text-amber-300 flex items-center gap-1">
                       ${rule.recommendedRate}
                       <span className="text-[10px] text-emerald-400 font-bold">(${rateDiff > 0 ? `+${rateDiff}` : rateDiff})</span>
@@ -217,14 +220,14 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
                       }`}
                     >
                       <Sliders className="w-3.5 h-3.5" />
-                      {rule.autoApply ? 'Auto-Pilot ON' : 'Manual Mode'}
+                      {rule.autoApply ? 'Bulk Apply Eligible' : 'Manual Only'}
                     </button>
 
                     <button
                       onClick={() => onApplyRecommendedRate(rule.id)}
                       className="btn-primary text-xs px-3 py-1.5"
                     >
-                      <Zap className="w-3.5 h-3.5" /> Apply Rate
+                      <Zap className="w-3.5 h-3.5" /> Apply Configured Rate
                     </button>
                   </div>
                 </div>

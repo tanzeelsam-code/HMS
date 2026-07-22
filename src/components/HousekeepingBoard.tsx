@@ -26,7 +26,7 @@ export const HousekeepingBoard: React.FC<HousekeepingBoardProps> = ({
         <div>
           <h2 className="text-xl font-bold text-gray-100 tracking-tight">Smart Housekeeping & Maintenance Hub</h2>
           <p className="text-xs text-gray-400 mt-1">
-            Real-time floor dispatch, automated room inspection queues, and staff task tracking.
+            API-backed floor dispatch, room-readiness workflows, and staff task tracking.
           </p>
         </div>
 

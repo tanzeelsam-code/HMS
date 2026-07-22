@@ -4,7 +4,7 @@ import { Sparkles, MessageSquare, Star, CheckCircle2, Send, Globe, ThumbsUp } fr
 
 interface ReputationBoardProps {
   reviews: ReviewItem[];
-  onRespondToReview: (reviewId: string, responseText: string) => void;
+  onRespondToReview: (reviewId: string, responseText: string) => boolean | Promise<boolean>;
 }
 
 export const ReputationBoard: React.FC<ReputationBoardProps> = ({
@@ -13,15 +13,20 @@ export const ReputationBoard: React.FC<ReputationBoardProps> = ({
 }) => {
   const [activeReviewId, setActiveReviewId] = useState<string | null>(null);
   const [editedResponse, setEditedResponse] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleOpenDraft = (rev: ReviewItem) => {
     setActiveReviewId(rev.id);
     setEditedResponse(rev.aiDraftedResponse || '');
   };
 
-  const handlePublish = (id: string) => {
-    onRespondToReview(id, editedResponse);
-    setActiveReviewId(null);
+  const handlePublish = async (id: string) => {
+    setSubmitting(true);
+    try {
+      if (await onRespondToReview(id, editedResponse)) setActiveReviewId(null);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -30,13 +35,13 @@ export const ReputationBoard: React.FC<ReputationBoardProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Reputation AI & Guest Review Assistant</h2>
+            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Reputation Inbox & Responses</h2>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-              Unified Review Inbox & AI Drafter
+              Persisted Workflow · Connector-ready
             </span>
           </div>
           <p className="text-xs text-gray-400 mt-1">
-            Aggregate guest feedback from Google, Booking.com, and TripAdvisor with 1-click brand-voice AI responses.
+            Review imported feedback, refine response drafts, and save an approval-ready response. External publication stays disabled until a review-platform connector is configured.
           </p>
         </div>
       </div>
@@ -91,9 +96,10 @@ export const ReputationBoard: React.FC<ReputationBoardProps> = ({
                   </button>
                   <button 
                     onClick={() => handlePublish(rev.id)}
-                    className="btn-primary text-xs px-4 py-1.5"
+                    disabled={submitting || !editedResponse.trim()}
+                    className="btn-primary text-xs px-4 py-1.5 disabled:opacity-60"
                   >
-                    <Send className="w-3.5 h-3.5" /> Publish Response
+                    <Send className="w-3.5 h-3.5" /> {submitting ? 'Saving…' : 'Save Approved Response'}
                   </button>
                 </div>
               </div>

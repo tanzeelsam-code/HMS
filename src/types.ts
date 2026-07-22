@@ -8,8 +8,8 @@ export interface Room {
   type: RoomType;
   floor: number;
   status: RoomStatus;
-  basePrice: number;
-  currentPrice: number;
+  basePrice?: number;
+  currentPrice?: number;
   amenities: string[];
   currentGuestId?: string;
   currentGuestName?: string;
@@ -22,7 +22,7 @@ export interface FolioItem {
   id: string;
   date: string;
   description: string;
-  category: 'Room Charge' | 'Tax' | 'F&B Restaurant' | 'Spa & Wellness' | 'Minibar' | 'Payment';
+  category: 'Room Charge' | 'Tax' | 'F&B Restaurant' | 'Spa & Wellness' | 'Minibar' | 'Other Income' | 'Payment';
   amount: number;
   postedBy: string;
 }
@@ -38,6 +38,7 @@ export interface Reservation {
   roomType: RoomType;
   checkIn: string;
   checkOut: string;
+  actualCheckOut?: string;
   nights: number;
   guestsCount: number;
   status: BookingStatus;
@@ -96,7 +97,9 @@ export interface PosCharge {
 }
 
 export interface HotelMetrics {
+  businessDate: string;
   occupancyRate: number;
+  financialMetricsAvailable: boolean;
   adr: number;
   revPar: number;
   totalRevenue: number;
@@ -132,6 +135,7 @@ export interface MaintenanceWorkOrder {
   assignedEngineer: string;
   slaMinutes: number;
   reportedTime: string;
+  safetyCritical?: boolean;
 }
 
 export interface AnomalyItem {
@@ -154,6 +158,7 @@ export interface GroupBooking {
   roomsPickedUp: number;
   startDate: string;
   endDate: string;
+  releaseDate?: string;
   status: 'Definite Block' | 'Tentative Hold' | 'Released';
   groupRate: number;
   banquetCateringTotal: number;
@@ -169,6 +174,8 @@ export interface ReviewItem {
   reviewText: string;
   sentiment: 'Positive' | 'Neutral' | 'Negative';
   aiDraftedResponse?: string;
+  responseText?: string;
+  respondedAt?: string;
   responded: boolean;
 }
 
@@ -179,9 +186,12 @@ export interface EsgMetric {
   hvacAutoSetbacksTriggered: number;
   waterConsumptionLiters: number;
   renewableEnergyPercentage: number;
+  source?: string;
 }
 
 export interface PropertyComparison {
+  id?: string;
+  code?: string;
   propertyName: string;
   totalRooms: number;
   occupancyRate: number;
@@ -189,6 +199,11 @@ export interface PropertyComparison {
   revPar: number;
   totalRevenue: number;
   goppar: number;
+  timezone?: string;
+  currency?: string;
+  locale?: string;
+  businessDate?: string;
+  source?: string;
 }
 
 // ERP & AI Types
@@ -222,21 +237,25 @@ export interface JournalEntry {
 }
 
 export interface AnomalyAlert {
-  id: string;
+  id?: string;
   severity: 'High' | 'Medium' | 'Low' | 'high' | 'medium' | 'low';
-  title: string;
-  detail: string;
-  message?: string;
+  title?: string;
+  detail?: string;
+  message: string;
 }
 
 export interface NightAuditSummary {
-  date: string;
+  date?: string;
+  businessDate?: string;
   totalRoomRevenue: number;
-  totalTax: number;
-  totalPosRevenue: number;
-  auditedBy: string;
+  totalTax?: number;
+  totalPosRevenue?: number;
+  auditedBy?: string;
+  reservationsProcessed?: number;
   foliosPosted: number;
-  journalEntryId: string;
+  foliosSkipped?: number;
+  alreadyRan?: boolean;
+  journalEntryId: string | null;
   ranAt: string;
 }
 
@@ -323,5 +342,5 @@ export interface PurchaseOrder {
 export interface CopilotResponse {
   answer?: string;
   reply?: string;
-  actions?: Array<{ label: string; action: string }>;
+  actions?: string[];
 }

@@ -1,44 +1,87 @@
-import React, { useState } from 'react';
-import { PosCharge, Room } from '../types';
+import React, { useEffect, useMemo, useState } from 'react';
+import { PosCharge, Room, Reservation } from '../types';
 import { Utensils, CreditCard, Plus, CheckCircle2, DollarSign, Receipt } from 'lucide-react';
 
 interface PosPostingProps {
   charges: PosCharge[];
   rooms: Room[];
-  onAddPosCharge: (charge: PosCharge) => void;
+  reservations: Reservation[];
+  onAddPosCharge: (charge: PosCharge) => void | boolean | Promise<void | boolean>;
 }
 
 export const PosPosting: React.FC<PosPostingProps> = ({
   charges,
   rooms,
+  reservations,
   onAddPosCharge
 }) => {
-  const [selectedRoom, setSelectedRoom] = useState('101');
+  const [selectedRoom, setSelectedRoom] = useState('');
   const [outlet, setOutlet] = useState<PosCharge['outlet']>('Savor Fine Dining');
   const [itemName, setItemName] = useState('');
   const [itemPrice, setItemPrice] = useState('');
+  const [posting, setPosting] = useState(false);
+  const [error, setError] = useState('');
+  const [pendingRequestId, setPendingRequestId] = useState('');
 
-  const handlePostCharge = (e: React.FormEvent) => {
+  const inHouseReservations = useMemo(
+    () => reservations.filter((reservation) => reservation.status === 'Checked-In'),
+    [reservations],
+  );
+
+  useEffect(() => {
+    if (!inHouseReservations.some((reservation) => reservation.roomNumber === selectedRoom)) {
+      setSelectedRoom(inHouseReservations[0]?.roomNumber || '');
+    }
+  }, [inHouseReservations, selectedRoom]);
+
+  const resetPendingRequest = () => {
+    setPendingRequestId('');
+    setError('');
+  };
+
+  const handlePostCharge = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!itemName || !itemPrice) return;
+    if (posting) return;
+    const price = Number(itemPrice);
+    if (!itemName.trim() || !selectedRoom || !Number.isFinite(price) || price <= 0) {
+      setError('Select an in-house room and enter a positive item amount.');
+      return;
+    }
 
     const matchedRoom = rooms.find(r => r.number === selectedRoom);
-    const guestName = matchedRoom?.currentGuestName || 'In-House Guest';
+    const matchedReservation = inHouseReservations.find((reservation) => reservation.roomNumber === selectedRoom);
+    if (!matchedReservation) return;
+    const guestName = matchedRoom?.currentGuestName || matchedReservation.guestName;
 
+    const requestId = pendingRequestId || `pos-client-${crypto.randomUUID()}`;
+    setPendingRequestId(requestId);
     const newCharge: PosCharge = {
-      id: `pos-${Date.now()}`,
+      id: requestId,
       time: 'Just now',
       roomNumber: selectedRoom,
       guestName,
       outlet,
-      items: [{ name: itemName, price: parseFloat(itemPrice), qty: 1 }],
-      total: parseFloat(itemPrice),
+      items: [{ name: itemName.trim(), price, qty: 1 }],
+      total: price,
       status: 'Posted to Room'
     };
 
-    onAddPosCharge(newCharge);
-    setItemName('');
-    setItemPrice('');
+    setPosting(true);
+    setError('');
+    try {
+      const result = await onAddPosCharge(newCharge);
+      if (result !== false) {
+        setItemName('');
+        setItemPrice('');
+        setPendingRequestId('');
+      } else {
+        setError('The charge was not posted. Review the message above and retry; the same request ID will be reused.');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to post the POS charge. Retry will not duplicate a completed request.');
+    } finally {
+      setPosting(false);
+    }
   };
 
   return (
@@ -66,11 +109,20 @@ export const PosPosting: React.FC<PosPostingProps> = ({
           </h3>
 
           <form onSubmit={handlePostCharge} className="space-y-4 text-xs">
+            {error && (
+              <div role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-rose-200">
+                {error}
+              </div>
+            )}
             <div>
-              <label className="block text-gray-400 font-semibold mb-1">Select Outlet</label>
+              <label htmlFor="pos-outlet" className="block text-gray-400 font-semibold mb-1">Select Outlet</label>
               <select
+                id="pos-outlet"
                 value={outlet}
-                onChange={(e) => setOutlet(e.target.value as any)}
+                onChange={(e) => {
+                  setOutlet(e.target.value as PosCharge['outlet']);
+                  resetPendingRequest();
+                }}
                 className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-400/50"
               >
                 <option value="Savor Fine Dining">Savor Fine Dining</option>
@@ -81,46 +133,62 @@ export const PosPosting: React.FC<PosPostingProps> = ({
             </div>
 
             <div>
-              <label className="block text-gray-400 font-semibold mb-1">Select Room # & Guest</label>
+              <label htmlFor="pos-room" className="block text-gray-400 font-semibold mb-1">Select Room # & Guest</label>
               <select
+                id="pos-room"
                 value={selectedRoom}
-                onChange={(e) => setSelectedRoom(e.target.value)}
+                onChange={(e) => {
+                  setSelectedRoom(e.target.value);
+                  resetPendingRequest();
+                }}
+                disabled={inHouseReservations.length === 0}
                 className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200 font-mono font-bold focus:outline-none focus:border-amber-400/50"
               >
-                {rooms.map((r) => (
-                  <option key={r.id} value={r.number}>
-                    Room #{r.number} - {r.currentGuestName || 'Vacant / Unassigned'}
+                {inHouseReservations.length === 0 && <option value="">No checked-in guests</option>}
+                {inHouseReservations.map((reservation) => (
+                  <option key={reservation.id} value={reservation.roomNumber}>
+                    Room #{reservation.roomNumber} — {reservation.guestName}
                   </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-gray-400 font-semibold mb-1">Item / Service Description</label>
+              <label htmlFor="pos-description" className="block text-gray-400 font-semibold mb-1">Item / Service Description</label>
               <input
+                id="pos-description"
                 type="text"
                 placeholder="e.g. Lobster Dinner & Wine, Spa Facial..."
                 value={itemName}
-                onChange={(e) => setItemName(e.target.value)}
+                onChange={(e) => {
+                  setItemName(e.target.value);
+                  resetPendingRequest();
+                }}
                 className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-400/50"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-gray-400 font-semibold mb-1">Amount ($ USD)</label>
+              <label htmlFor="pos-amount" className="block text-gray-400 font-semibold mb-1">Amount ($ USD)</label>
               <input
+                id="pos-amount"
                 type="number"
+                min="0.01"
+                step="0.01"
                 placeholder="0.00"
                 value={itemPrice}
-                onChange={(e) => setItemPrice(e.target.value)}
+                onChange={(e) => {
+                  setItemPrice(e.target.value);
+                  resetPendingRequest();
+                }}
                 className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-amber-300 font-bold font-mono focus:outline-none focus:border-amber-400/50 text-sm"
                 required
               />
             </div>
 
-            <button type="submit" className="btn-primary text-xs w-full py-2.5 justify-center">
-              <CreditCard className="w-4 h-4" /> Post Charge to Room Folio
+            <button type="submit" disabled={!selectedRoom || posting} className="btn-primary text-xs w-full py-2.5 justify-center disabled:opacity-50">
+              <CreditCard className="w-4 h-4" /> {posting ? 'Posting Charge…' : 'Post Charge to Room Folio'}
             </button>
           </form>
         </div>

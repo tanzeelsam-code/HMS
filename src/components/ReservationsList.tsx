@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Reservation, BookingStatus } from '../types';
-import { 
+import {
   Users, Search, Filter, Calendar, CheckCircle2, LogOut, 
-  Receipt, ShieldCheck, Plus, ArrowUpRight, Phone, Mail, Award 
+  Receipt, Plus, Phone, Mail, Award, Ban, UserX
 } from 'lucide-react';
 
 interface ReservationsListProps {
@@ -10,7 +10,12 @@ interface ReservationsListProps {
   onSelectReservation: (res: Reservation) => void;
   onCheckIn: (resId: string) => void;
   onCheckOut: (resId: string) => void;
+  onCancel: (resId: string) => void;
+  onNoShow: (resId: string) => void;
   onOpenNewBooking: () => void;
+  initialSearchTerm?: string;
+  canManageReservations?: boolean;
+  businessDate?: string;
 }
 
 export const ReservationsList: React.FC<ReservationsListProps> = ({
@@ -18,11 +23,26 @@ export const ReservationsList: React.FC<ReservationsListProps> = ({
   onSelectReservation,
   onCheckIn,
   onCheckOut,
-  onOpenNewBooking
+  onCancel,
+  onNoShow,
+  onOpenNewBooking,
+  initialSearchTerm = '',
+  canManageReservations = true,
+  businessDate,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const today = businessDate || (() => {
+    const current = new Date();
+    const month = String(current.getMonth() + 1).padStart(2, '0');
+    const day = String(current.getDate()).padStart(2, '0');
+    return `${current.getFullYear()}-${month}-${day}`;
+  })();
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [channelFilter, setChannelFilter] = useState<string>('All');
+
+  useEffect(() => {
+    setSearchTerm(initialSearchTerm);
+  }, [initialSearchTerm]);
 
   const filteredReservations = reservations.filter(res => {
     const matchesSearch = 
@@ -52,6 +72,7 @@ export const ReservationsList: React.FC<ReservationsListProps> = ({
       case 'Confirmed': return 'bg-amber-500/20 text-amber-300 border-amber-500/40';
       case 'Checked-Out': return 'bg-slate-700 text-slate-300 border-slate-600';
       case 'Cancelled': return 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+      case 'No-Show': return 'bg-orange-500/20 text-orange-300 border-orange-500/40';
       default: return 'bg-gray-800 text-gray-400';
     }
   };
@@ -67,12 +88,14 @@ export const ReservationsList: React.FC<ReservationsListProps> = ({
           </p>
         </div>
 
-        <button 
-          onClick={onOpenNewBooking}
-          className="btn-primary text-xs self-start md:self-auto"
-        >
-          <Plus className="w-4 h-4" /> New Booking
-        </button>
+        {canManageReservations && (
+          <button
+            onClick={onOpenNewBooking}
+            className="btn-primary text-xs self-start md:self-auto"
+          >
+            <Plus className="w-4 h-4" /> New Booking
+          </button>
+        )}
       </div>
 
       {/* Search & Filter Toolbar */}
@@ -80,6 +103,7 @@ export const ReservationsList: React.FC<ReservationsListProps> = ({
         <div className="relative flex-1 min-w-[240px]">
           <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
+            aria-label="Search reservations"
             type="text"
             placeholder="Search by Guest Name, Code (GH-XXXX), or Room #..."
             value={searchTerm}
@@ -101,6 +125,8 @@ export const ReservationsList: React.FC<ReservationsListProps> = ({
               <option value="Checked-In" className="bg-slate-900">Checked-In</option>
               <option value="Confirmed" className="bg-slate-900">Confirmed Arrival</option>
               <option value="Checked-Out" className="bg-slate-900">Checked-Out</option>
+              <option value="Cancelled" className="bg-slate-900">Cancelled</option>
+              <option value="No-Show" className="bg-slate-900">No-Show</option>
             </select>
           </div>
 
@@ -124,7 +150,23 @@ export const ReservationsList: React.FC<ReservationsListProps> = ({
       {/* Reservation Cards / Table Grid */}
       <div className="grid grid-cols-1 gap-3">
         {filteredReservations.map((res) => {
-          const totalBalance = res.folioItems.reduce((acc, item) => acc + item.amount, 0);
+          const totalBalance = Math.round(
+            res.folioItems.reduce((acc, item) => acc + item.amount, 0) * 100,
+          ) / 100;
+          const postedRoomRevenue = Math.round(
+            res.folioItems
+              .filter((item) => item.category === 'Room Charge')
+              .reduce((sum, item) => sum + item.amount, 0) * 100,
+          ) / 100;
+          const unpostedContractRoomRevenue = res.status === 'Checked-In'
+            ? Math.max(0, Math.round((res.totalAmount - postedRoomRevenue) * 100) / 100)
+            : 0;
+          const projectedCheckoutBalance = Math.round(
+            (totalBalance + unpostedContractRoomRevenue) * 100,
+          ) / 100;
+          const canCheckInNow = res.checkIn <= today && today < res.checkOut;
+          const canPrepareCheckout = unpostedContractRoomRevenue > 0.005;
+          const canCompleteCheckout = Math.abs(totalBalance) <= 0.005;
 
           return (
             <div 
@@ -153,6 +195,7 @@ export const ReservationsList: React.FC<ReservationsListProps> = ({
                     <span className="font-mono text-gray-300 font-semibold">{res.code}</span>
                     <span>• {res.roomType}</span>
                     <span>• {res.nights} Nights ({res.checkIn} → {res.checkOut})</span>
+                    {res.actualCheckOut && <span>• Actual departure: {res.actualCheckOut}</span>}
                   </div>
 
                   <div className="flex items-center gap-4 text-[11px] text-gray-500 mt-1 flex-wrap">
@@ -171,11 +214,24 @@ export const ReservationsList: React.FC<ReservationsListProps> = ({
               <div className="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/10">
                 {/* Folio Balance summary */}
                 <div className="text-left lg:text-right">
-                  <div className="text-[11px] text-gray-400 font-medium">Folio Total</div>
-                  <div className="text-sm font-bold text-gray-200">${res.totalAmount}</div>
+                  <div className="text-[11px] text-gray-400 font-medium">Contracted Room Total</div>
+                  <div className="text-sm font-bold text-gray-200">${res.totalAmount.toFixed(2)}</div>
                   <div className={`text-[10px] font-semibold ${totalBalance > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                    {totalBalance > 0 ? `Unpaid Balance: $${totalBalance}` : '✓ Fully Paid'}
+                    {totalBalance > 0.005
+                      ? `Unpaid Balance: $${totalBalance.toFixed(2)}`
+                      : totalBalance < -0.005
+                        ? `${canPrepareCheckout ? 'Advance Payment' : 'Account Credit'}: $${Math.abs(totalBalance).toFixed(2)}`
+                        : '✓ Folio Balanced'}
                   </div>
+                  {canPrepareCheckout && (
+                    <div className={`text-[10px] font-semibold ${projectedCheckoutBalance > 0.005 ? 'text-rose-300' : projectedCheckoutBalance < -0.005 ? 'text-cyan-300' : 'text-emerald-300'}`}>
+                      After ${unpostedContractRoomRevenue.toFixed(2)} contract posting: {projectedCheckoutBalance > 0.005
+                        ? `$${projectedCheckoutBalance.toFixed(2)} due`
+                        : projectedCheckoutBalance < -0.005
+                          ? `$${Math.abs(projectedCheckoutBalance).toFixed(2)} credit`
+                          : 'balanced'}
+                    </div>
+                  )}
                 </div>
 
                 {/* Workflow Buttons */}
@@ -189,23 +245,60 @@ export const ReservationsList: React.FC<ReservationsListProps> = ({
                     <span>Folio</span>
                   </button>
 
-                  {res.status === 'Confirmed' && (
-                    <button 
-                      onClick={() => onCheckIn(res.id)}
-                      className="btn-primary text-xs px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/20"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Check In</span>
-                    </button>
+                  {canManageReservations && res.status === 'Confirmed' && (
+                    <>
+                      <button
+                        onClick={() => onCheckIn(res.id)}
+                        disabled={!canCheckInNow}
+                        title={canCheckInNow ? 'Check in guest' : `Check-in opens on ${res.checkIn}`}
+                        className="btn-primary text-xs px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>{canCheckInNow ? 'Check In' : `Arrives ${res.checkIn}`}</span>
+                      </button>
+                      {today < res.checkIn ? (
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Cancel reservation ${res.code} for ${res.guestName}? Its local folio will be fully reversed.`)) onCancel(res.id);
+                          }}
+                          className="btn-secondary text-xs px-3 py-1.5 border-rose-500/30 text-rose-300 hover:bg-rose-500/10"
+                        >
+                          <Ban className="w-3.5 h-3.5" />
+                          <span>Cancel</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Mark ${res.code} for ${res.guestName} as No-Show? The demo policy fully reverses its folio and releases the room.`)) onNoShow(res.id);
+                          }}
+                          className="btn-secondary text-xs px-3 py-1.5 border-orange-500/30 text-orange-300 hover:bg-orange-500/10"
+                        >
+                          <UserX className="w-3.5 h-3.5" />
+                          <span>Mark No-Show</span>
+                        </button>
+                      )}
+                    </>
                   )}
 
-                  {res.status === 'Checked-In' && (
+                  {canManageReservations && res.status === 'Checked-In' && (
                     <button 
                       onClick={() => onCheckOut(res.id)}
-                      className="btn-secondary text-xs px-3 py-1.5 border-rose-500/30 text-rose-300 hover:bg-rose-500/10"
+                      disabled={!canPrepareCheckout && !canCompleteCheckout}
+                      title={canPrepareCheckout
+                        ? 'Post all remaining contracted room charges, then complete checkout if the projected folio is balanced'
+                        : canCompleteCheckout
+                          ? 'Check out guest'
+                          : 'Settle or refund the finalized folio before checkout'}
+                      className="btn-secondary text-xs px-3 py-1.5 border-rose-500/30 text-rose-300 hover:bg-rose-500/10 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <LogOut className="w-3.5 h-3.5 text-rose-400" />
-                      <span>Check Out</span>
+                      <span>{canPrepareCheckout
+                        ? 'Prepare Check Out'
+                        : totalBalance > 0.005
+                          ? 'Settle Folio'
+                          : totalBalance < -0.005
+                            ? 'Refund Credit'
+                            : 'Check Out'}</span>
                     </button>
                   )}
                 </div>

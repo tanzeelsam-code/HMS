@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Lock, Mail, LogIn, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { CalendarDays, Lock, Mail, LogIn, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { login, AuthUser } from '../api';
 
 interface LoginScreenProps {
   onLogin: (user: AuthUser) => void;
+  onBookStay?: () => void;
 }
 
 const SEED_CREDENTIALS = [
@@ -13,11 +14,12 @@ const SEED_CREDENTIALS = [
   { role: 'Finance', email: 'finance@aura.com', password: 'fin123' },
 ];
 
-export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
+export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const showDemoAccounts = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,17 +58,18 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
         {/* Login Card */}
         <form onSubmit={handleSubmit} className="glass-panel p-6 space-y-4 border border-white/10 shadow-2xl">
           {error && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold">
+            <div role="alert" className="flex items-center gap-2 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-gray-400 font-semibold mb-1.5 text-xs">Email Address</label>
+            <label htmlFor="login-email" className="block text-gray-400 font-semibold mb-1.5 text-xs">Email Address</label>
             <div className="relative">
               <Mail className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
+                id="login-email"
                 type="email"
                 placeholder="you@aura.com"
                 value={email}
@@ -74,21 +77,24 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-slate-900 border border-white/10 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-amber-400/50 transition-all"
                 required
                 autoFocus
+                autoComplete="username"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-gray-400 font-semibold mb-1.5 text-xs">Password</label>
+            <label htmlFor="login-password" className="block text-gray-400 font-semibold mb-1.5 text-xs">Password</label>
             <div className="relative">
               <Lock className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
+                id="login-password"
                 type="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-slate-900 border border-white/10 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-amber-400/50 transition-all"
                 required
+                autoComplete="current-password"
               />
             </div>
           </div>
@@ -101,10 +107,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
             <LogIn className="w-4 h-4" />
             {submitting ? 'Signing in…' : 'Sign In to Property'}
           </button>
+          {onBookStay && (
+            <button
+              type="button"
+              onClick={onBookStay}
+              className="btn-secondary w-full justify-center py-2.5 text-sm"
+            >
+              <CalendarDays className="w-4 h-4" />
+              Book a Guest Stay
+            </button>
+          )}
         </form>
 
         {/* Seed Credentials Hint */}
-        <div className="glass-panel p-4 border border-white/5">
+        {showDemoAccounts && <div className="glass-panel p-4 border border-white/5">
           <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
             <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> Demo Accounts
           </div>
@@ -122,7 +138,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
               </button>
             ))}
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );
