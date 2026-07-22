@@ -1,8 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Reservation, BookingStatus } from '../types';
 import {
-  Users, Search, Filter, Calendar, CheckCircle2, LogOut, 
-  Receipt, Plus, Phone, Mail, Award, Ban, UserX
+  Award,
+  Ban,
+  BedDouble,
+  CalendarDays,
+  CheckCircle2,
+  Filter,
+  LogOut,
+  Mail,
+  Phone,
+  Plus,
+  Receipt,
+  Search,
+  UserCheck,
+  UserX,
+  Users,
 } from 'lucide-react';
 
 interface ReservationsListProps {
@@ -17,6 +30,26 @@ interface ReservationsListProps {
   canManageReservations?: boolean;
   businessDate?: string;
 }
+
+const vipStyles: Record<Reservation['vipTier'], string> = {
+  Platinum: 'border-violet-400/20 bg-violet-400/10 text-violet-300',
+  Gold: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
+  Silver: 'border-sky-400/20 bg-sky-400/10 text-sky-300',
+  Member: 'border-white/10 bg-white/[0.04] text-slate-400',
+};
+
+const statusStyles: Record<BookingStatus, string> = {
+  'Checked-In': 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+  Confirmed: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
+  'Checked-Out': 'border-slate-400/20 bg-slate-400/10 text-slate-300',
+  Cancelled: 'border-rose-400/20 bg-rose-400/10 text-rose-300',
+  'No-Show': 'border-orange-400/20 bg-orange-400/10 text-orange-300',
+};
+
+const money = (value: number) => `$${value.toLocaleString('en-US', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})}`;
 
 export const ReservationsList: React.FC<ReservationsListProps> = ({
   reservations,
@@ -44,269 +77,307 @@ export const ReservationsList: React.FC<ReservationsListProps> = ({
     setSearchTerm(initialSearchTerm);
   }, [initialSearchTerm]);
 
-  const filteredReservations = reservations.filter(res => {
-    const matchesSearch = 
-      res.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      res.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      res.roomNumber.includes(searchTerm) ||
-      res.guestEmail.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredReservations = useMemo(() => reservations.filter((reservation) => {
+    const normalizedSearch = searchTerm.toLowerCase();
+    const matchesSearch =
+      reservation.guestName.toLowerCase().includes(normalizedSearch)
+      || reservation.code.toLowerCase().includes(normalizedSearch)
+      || reservation.roomNumber.includes(searchTerm)
+      || reservation.guestEmail.toLowerCase().includes(normalizedSearch);
 
-    const matchesStatus = statusFilter === 'All' || res.status === statusFilter;
-    const matchesChannel = channelFilter === 'All' || res.channel === channelFilter;
+    return matchesSearch
+      && (statusFilter === 'All' || reservation.status === statusFilter)
+      && (channelFilter === 'All' || reservation.channel === channelFilter);
+  }), [channelFilter, reservations, searchTerm, statusFilter]);
 
-    return matchesSearch && matchesStatus && matchesChannel;
-  });
+  const inHouseCount = reservations.filter((reservation) => reservation.status === 'Checked-In').length;
+  const arrivalsCount = reservations.filter(
+    (reservation) => reservation.status === 'Confirmed' && reservation.checkIn === today,
+  ).length;
+  const departuresCount = reservations.filter(
+    (reservation) => reservation.status === 'Checked-In' && reservation.checkOut === today,
+  ).length;
 
-  const getVipBadge = (tier: string) => {
-    switch (tier) {
-      case 'Platinum': return 'bg-purple-500/20 text-purple-300 border-purple-500/40';
-      case 'Gold': return 'bg-amber-500/20 text-amber-300 border-amber-500/40';
-      case 'Silver': return 'bg-blue-500/20 text-blue-300 border-blue-500/40';
-      default: return 'bg-gray-800 text-gray-400 border-gray-700';
-    }
-  };
-
-  const getStatusBadge = (status: BookingStatus) => {
-    switch (status) {
-      case 'Checked-In': return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
-      case 'Confirmed': return 'bg-amber-500/20 text-amber-300 border-amber-500/40';
-      case 'Checked-Out': return 'bg-slate-700 text-slate-300 border-slate-600';
-      case 'Cancelled': return 'bg-rose-500/20 text-rose-300 border-rose-500/40';
-      case 'No-Show': return 'bg-orange-500/20 text-orange-300 border-orange-500/40';
-      default: return 'bg-gray-800 text-gray-400';
-    }
-  };
+  const summaryCards = [
+    { label: 'Active bookings', value: reservations.filter((reservation) => ['Confirmed', 'Checked-In'].includes(reservation.status)).length, icon: BedDouble, tone: 'text-slate-100' },
+    { label: 'Arriving today', value: arrivalsCount, icon: CalendarDays, tone: 'text-amber-300' },
+    { label: 'Currently in house', value: inHouseCount, icon: UserCheck, tone: 'text-emerald-300' },
+    { label: 'Departing today', value: departuresCount, icon: LogOut, tone: 'text-sky-300' },
+  ];
 
   return (
-    <div className="space-y-5 animate-slide-up">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
-        <div>
-          <h2 className="text-xl font-bold text-gray-100 tracking-tight">Reservations & Guest Directory</h2>
-          <p className="text-xs text-gray-400 mt-1">
-            Manage incoming arrivals, in-house guests, folio ledgers, and check-in workflows.
-          </p>
-        </div>
-
-        {canManageReservations && (
-          <button
-            onClick={onOpenNewBooking}
-            className="btn-primary text-xs self-start md:self-auto"
-          >
-            <Plus className="w-4 h-4" /> New Booking
-          </button>
-        )}
-      </div>
-
-      {/* Search & Filter Toolbar */}
-      <div className="glass-panel p-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="relative flex-1 min-w-[240px]">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            aria-label="Search reservations"
-            type="text"
-            placeholder="Search by Guest Name, Code (GH-XXXX), or Room #..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-lg bg-slate-900/80 border border-white/10 text-xs text-gray-200 focus:outline-none focus:border-amber-400/50"
-          />
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-slate-900/80 px-3 py-2 rounded-lg border border-white/10 text-xs">
-            <Filter className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-gray-400">Status:</span>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-transparent text-gray-200 font-semibold focus:outline-none cursor-pointer"
-            >
-              <option value="All" className="bg-slate-900">All Statuses</option>
-              <option value="Checked-In" className="bg-slate-900">Checked-In</option>
-              <option value="Confirmed" className="bg-slate-900">Confirmed Arrival</option>
-              <option value="Checked-Out" className="bg-slate-900">Checked-Out</option>
-              <option value="Cancelled" className="bg-slate-900">Cancelled</option>
-              <option value="No-Show" className="bg-slate-900">No-Show</option>
-            </select>
+    <div className="mx-auto w-full max-w-[1680px] space-y-6 pb-10 animate-slide-up">
+      <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/65 shadow-[0_18px_50px_rgba(0,0,0,0.22)]">
+        <div className="flex flex-col gap-6 p-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300/80">
+              <Users className="h-4 w-4" /> Front office
+            </div>
+            <h2 className="text-2xl font-semibold tracking-tight text-white">Reservations</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Manage arrivals, in-house stays, guest folios, and departure readiness.
+            </p>
           </div>
+          {canManageReservations && (
+            <button onClick={onOpenNewBooking} className="btn-primary min-h-11 justify-center px-5 text-sm">
+              <Plus className="h-4 w-4" /> New reservation
+            </button>
+          )}
+        </div>
 
-          <div className="flex items-center gap-2 bg-slate-900/80 px-3 py-2 rounded-lg border border-white/10 text-xs">
-            <span className="text-gray-400">Channel:</span>
-            <select
-              value={channelFilter}
-              onChange={(e) => setChannelFilter(e.target.value)}
-              className="bg-transparent text-gray-200 font-semibold focus:outline-none cursor-pointer"
+        <div className="grid border-t border-white/[0.07] sm:grid-cols-2 xl:grid-cols-4">
+          {summaryCards.map(({ label, value, icon: Icon, tone }, index) => (
+            <div
+              key={label}
+              className={`flex items-center gap-3 px-6 py-4 ${index > 0 ? 'border-t border-white/[0.07] sm:border-l sm:border-t-0' : ''} ${index === 2 ? 'sm:border-l-0 xl:border-l' : ''}`}
             >
-              <option value="All" className="bg-slate-900">All OTA Channels</option>
-              <option value="Direct Web" className="bg-slate-900">Direct Web</option>
-              <option value="Booking.com" className="bg-slate-900">Booking.com</option>
-              <option value="Airbnb" className="bg-slate-900">Airbnb</option>
-              <option value="Expedia" className="bg-slate-900">Expedia</option>
-            </select>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04]">
+                <Icon className={`h-4 w-4 ${tone}`} />
+              </div>
+              <div>
+                <div className={`text-lg font-semibold leading-none ${tone}`}>{value}</div>
+                <div className="mt-1 text-xs text-slate-500">{label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-white/[0.08] bg-slate-900/55 p-4 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Search reservations</span>
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <input
+              aria-label="Search reservations"
+              type="text"
+              placeholder="Search guest, confirmation code, email, or room"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className="min-h-11 w-full rounded-xl border border-white/[0.09] bg-slate-950/50 py-2 pl-10 pr-4 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-600 focus:border-amber-300/40"
+            />
+          </label>
+
+          <div className="grid gap-3 sm:grid-cols-2 xl:w-auto">
+            <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/[0.09] bg-slate-950/50 px-3 text-sm">
+              <Filter className="h-4 w-4 text-amber-300" />
+              <span className="text-slate-500">Status</span>
+              <select
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+                className="min-w-36 bg-transparent font-medium text-slate-100 outline-none"
+              >
+                <option value="All" className="bg-slate-900">All statuses</option>
+                <option value="Checked-In" className="bg-slate-900">Checked in</option>
+                <option value="Confirmed" className="bg-slate-900">Confirmed</option>
+                <option value="Checked-Out" className="bg-slate-900">Checked out</option>
+                <option value="Cancelled" className="bg-slate-900">Cancelled</option>
+                <option value="No-Show" className="bg-slate-900">No-show</option>
+              </select>
+            </label>
+
+            <label className="flex min-h-11 items-center gap-2 rounded-xl border border-white/[0.09] bg-slate-950/50 px-3 text-sm">
+              <span className="text-slate-500">Channel</span>
+              <select
+                value={channelFilter}
+                onChange={(event) => setChannelFilter(event.target.value)}
+                className="min-w-36 bg-transparent font-medium text-slate-100 outline-none"
+              >
+                <option value="All" className="bg-slate-900">All channels</option>
+                <option value="Direct Web" className="bg-slate-900">Direct Web</option>
+                <option value="Booking.com" className="bg-slate-900">Booking.com</option>
+                <option value="Airbnb" className="bg-slate-900">Airbnb</option>
+                <option value="Expedia" className="bg-slate-900">Expedia</option>
+                <option value="Agoda" className="bg-slate-900">Agoda</option>
+              </select>
+            </label>
           </div>
         </div>
-      </div>
+        <div className="mt-3 text-xs text-slate-500">
+          Showing <span className="font-semibold text-slate-300">{filteredReservations.length}</span> of {reservations.length} reservations
+        </div>
+      </section>
 
-      {/* Reservation Cards / Table Grid */}
-      <div className="grid grid-cols-1 gap-3">
-        {filteredReservations.map((res) => {
+      <section className="space-y-4">
+        {filteredReservations.map((reservation) => {
           const totalBalance = Math.round(
-            res.folioItems.reduce((acc, item) => acc + item.amount, 0) * 100,
+            reservation.folioItems.reduce((acc, item) => acc + item.amount, 0) * 100,
           ) / 100;
           const postedRoomRevenue = Math.round(
-            res.folioItems
+            reservation.folioItems
               .filter((item) => item.category === 'Room Charge')
               .reduce((sum, item) => sum + item.amount, 0) * 100,
           ) / 100;
-          const unpostedContractRoomRevenue = res.status === 'Checked-In'
-            ? Math.max(0, Math.round((res.totalAmount - postedRoomRevenue) * 100) / 100)
+          const unpostedContractRoomRevenue = reservation.status === 'Checked-In'
+            ? Math.max(0, Math.round((reservation.totalAmount - postedRoomRevenue) * 100) / 100)
             : 0;
           const projectedCheckoutBalance = Math.round(
             (totalBalance + unpostedContractRoomRevenue) * 100,
           ) / 100;
-          const canCheckInNow = res.checkIn <= today && today < res.checkOut;
+          const canCheckInNow = reservation.checkIn <= today && today < reservation.checkOut;
           const canPrepareCheckout = unpostedContractRoomRevenue > 0.005;
           const canCompleteCheckout = Math.abs(totalBalance) <= 0.005;
 
           return (
-            <div 
-              key={res.id}
-              className="glass-panel p-4 hover:border-amber-400/40 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+            <article
+              key={reservation.id}
+              className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/60 shadow-[0_12px_35px_rgba(0,0,0,0.16)] transition-colors hover:border-white/[0.14]"
             >
-              {/* Guest & Room Info */}
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-slate-800 border border-white/10 flex flex-col items-center justify-center flex-shrink-0">
-                  <span className="text-[10px] text-gray-400 font-semibold uppercase">Room</span>
-                  <span className="font-extrabold text-base text-amber-300 font-mono">#{res.roomNumber}</span>
+              <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(260px,0.75fr)] xl:p-6">
+                <div className="flex min-w-0 items-start gap-4">
+                  <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl border border-white/[0.09] bg-slate-950/45">
+                    <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-500">Room</span>
+                    <span className="mt-0.5 font-mono text-base font-semibold text-amber-300">{reservation.roomNumber}</span>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="mr-1 text-base font-semibold text-white">{reservation.guestName}</h3>
+                      <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold ${vipStyles[reservation.vipTier]}`}>
+                        <Award className="h-3 w-3" /> {reservation.vipTier}
+                      </span>
+                      <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${statusStyles[reservation.status]}`}>
+                        {reservation.status}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 grid gap-3 text-sm text-slate-300 sm:grid-cols-3">
+                      <div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Confirmation</div>
+                        <div className="mt-1 font-mono font-medium">{reservation.code}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Stay</div>
+                        <div className="mt-1">{reservation.nights} night{reservation.nights === 1 ? '' : 's'} · {reservation.roomType}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Channel</div>
+                        <div className="mt-1">{reservation.channel}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-500">
+                      <span className="flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" /> {reservation.checkIn} → {reservation.checkOut}</span>
+                      {reservation.actualCheckOut && <span>Actual departure: {reservation.actualCheckOut}</span>}
+                      <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" /> {reservation.guestEmail}</span>
+                      <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> {reservation.guestPhone}</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <h3 className="font-extrabold text-sm text-gray-100">{res.guestName}</h3>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${getVipBadge(res.vipTier)} flex items-center gap-1`}>
-                      <Award className="w-3 h-3" /> {res.vipTier} VIP
-                    </span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${getStatusBadge(res.status)}`}>
-                      {res.status}
-                    </span>
+                <div className="rounded-xl border border-white/[0.07] bg-slate-950/35 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Contracted room total</div>
+                      <div className="mt-1 text-xl font-semibold text-white">{money(reservation.totalAmount)}</div>
+                    </div>
+                    <Receipt className="h-4 w-4 text-amber-300" />
                   </div>
-
-                  <div className="flex items-center gap-4 text-xs text-gray-400 mt-1 flex-wrap">
-                    <span className="font-mono text-gray-300 font-semibold">{res.code}</span>
-                    <span>• {res.roomType}</span>
-                    <span>• {res.nights} Nights ({res.checkIn} → {res.checkOut})</span>
-                    {res.actualCheckOut && <span>• Actual departure: {res.actualCheckOut}</span>}
-                  </div>
-
-                  <div className="flex items-center gap-4 text-[11px] text-gray-500 mt-1 flex-wrap">
-                    <span className="flex items-center gap-1">
-                      <Mail className="w-3 h-3 text-gray-400" /> {res.guestEmail}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Phone className="w-3 h-3 text-gray-400" /> {res.guestPhone}
-                    </span>
-                    <span className="text-amber-400/90 font-medium">Channel: {res.channel}</span>
+                  <div className="mt-4 border-t border-white/[0.06] pt-3">
+                    <div className={`text-xs font-medium ${totalBalance > 0.005 ? 'text-rose-300' : totalBalance < -0.005 ? 'text-cyan-300' : 'text-emerald-300'}`}>
+                      {totalBalance > 0.005
+                        ? `${money(totalBalance)} unpaid`
+                        : totalBalance < -0.005
+                          ? `${money(Math.abs(totalBalance))} ${canPrepareCheckout ? 'advance payment' : 'account credit'}`
+                          : 'Folio balanced'}
+                    </div>
+                    {canPrepareCheckout && (
+                      <p className="mt-1 text-[11px] leading-4 text-slate-500">
+                        After posting {money(unpostedContractRoomRevenue)} room revenue:{' '}
+                        <span className={projectedCheckoutBalance > 0.005 ? 'text-rose-300' : projectedCheckoutBalance < -0.005 ? 'text-cyan-300' : 'text-emerald-300'}>
+                          {projectedCheckoutBalance > 0.005
+                            ? `${money(projectedCheckoutBalance)} due`
+                            : projectedCheckoutBalance < -0.005
+                              ? `${money(Math.abs(projectedCheckoutBalance))} credit`
+                              : 'balanced'}
+                        </span>
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Financial Balance & Action Buttons */}
-              <div className="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/10">
-                {/* Folio Balance summary */}
-                <div className="text-left lg:text-right">
-                  <div className="text-[11px] text-gray-400 font-medium">Contracted Room Total</div>
-                  <div className="text-sm font-bold text-gray-200">${res.totalAmount.toFixed(2)}</div>
-                  <div className={`text-[10px] font-semibold ${totalBalance > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                    {totalBalance > 0.005
-                      ? `Unpaid Balance: $${totalBalance.toFixed(2)}`
-                      : totalBalance < -0.005
-                        ? `${canPrepareCheckout ? 'Advance Payment' : 'Account Credit'}: $${Math.abs(totalBalance).toFixed(2)}`
-                        : '✓ Folio Balanced'}
-                  </div>
-                  {canPrepareCheckout && (
-                    <div className={`text-[10px] font-semibold ${projectedCheckoutBalance > 0.005 ? 'text-rose-300' : projectedCheckoutBalance < -0.005 ? 'text-cyan-300' : 'text-emerald-300'}`}>
-                      After ${unpostedContractRoomRevenue.toFixed(2)} contract posting: {projectedCheckoutBalance > 0.005
-                        ? `$${projectedCheckoutBalance.toFixed(2)} due`
-                        : projectedCheckoutBalance < -0.005
-                          ? `$${Math.abs(projectedCheckoutBalance).toFixed(2)} credit`
-                          : 'balanced'}
-                    </div>
-                  )}
+              <div className="flex flex-col gap-3 border-t border-white/[0.07] bg-slate-950/20 px-5 py-4 sm:flex-row sm:items-center sm:justify-between xl:px-6">
+                <div className="text-xs text-slate-500">
+                  {reservation.specialRequests ? `Special request: ${reservation.specialRequests}` : 'No special requests recorded'}
                 </div>
-
-                {/* Workflow Buttons */}
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => onSelectReservation(res)}
-                    className="btn-secondary text-xs px-3 py-1.5"
-                    title="View & Edit Folio Charges"
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => onSelectReservation(reservation)}
+                    className="btn-secondary min-h-9 px-3 text-xs"
+                    title="View and edit folio charges"
                   >
-                    <Receipt className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Folio</span>
+                    <Receipt className="h-3.5 w-3.5 text-amber-300" /> Open folio
                   </button>
 
-                  {canManageReservations && res.status === 'Confirmed' && (
+                  {canManageReservations && reservation.status === 'Confirmed' && (
                     <>
                       <button
-                        onClick={() => onCheckIn(res.id)}
+                        onClick={() => onCheckIn(reservation.id)}
                         disabled={!canCheckInNow}
-                        title={canCheckInNow ? 'Check in guest' : `Check-in opens on ${res.checkIn}`}
-                        className="btn-primary text-xs px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                        title={canCheckInNow ? 'Check in guest' : `Check-in opens on ${reservation.checkIn}`}
+                        className="btn-primary min-h-9 px-3 text-xs disabled:cursor-not-allowed disabled:opacity-40"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>{canCheckInNow ? 'Check In' : `Arrives ${res.checkIn}`}</span>
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        {canCheckInNow ? 'Check in' : `Arrives ${reservation.checkIn}`}
                       </button>
-                      {today < res.checkIn ? (
+                      {today < reservation.checkIn ? (
                         <button
                           onClick={() => {
-                            if (window.confirm(`Cancel reservation ${res.code} for ${res.guestName}? Its local folio will be fully reversed.`)) onCancel(res.id);
+                            if (window.confirm(`Cancel reservation ${reservation.code} for ${reservation.guestName}? Its local folio will be fully reversed.`)) onCancel(reservation.id);
                           }}
-                          className="btn-secondary text-xs px-3 py-1.5 border-rose-500/30 text-rose-300 hover:bg-rose-500/10"
+                          className="btn-secondary min-h-9 border-rose-400/20 px-3 text-xs text-rose-300 hover:bg-rose-400/10"
                         >
-                          <Ban className="w-3.5 h-3.5" />
-                          <span>Cancel</span>
+                          <Ban className="h-3.5 w-3.5" /> Cancel
                         </button>
                       ) : (
                         <button
                           onClick={() => {
-                            if (window.confirm(`Mark ${res.code} for ${res.guestName} as No-Show? The demo policy fully reverses its folio and releases the room.`)) onNoShow(res.id);
+                            if (window.confirm(`Mark ${reservation.code} for ${reservation.guestName} as No-Show? The demo policy fully reverses its folio and releases the room.`)) onNoShow(reservation.id);
                           }}
-                          className="btn-secondary text-xs px-3 py-1.5 border-orange-500/30 text-orange-300 hover:bg-orange-500/10"
+                          className="btn-secondary min-h-9 border-orange-400/20 px-3 text-xs text-orange-300 hover:bg-orange-400/10"
                         >
-                          <UserX className="w-3.5 h-3.5" />
-                          <span>Mark No-Show</span>
+                          <UserX className="h-3.5 w-3.5" /> Mark no-show
                         </button>
                       )}
                     </>
                   )}
 
-                  {canManageReservations && res.status === 'Checked-In' && (
-                    <button 
-                      onClick={() => onCheckOut(res.id)}
+                  {canManageReservations && reservation.status === 'Checked-In' && (
+                    <button
+                      onClick={() => onCheckOut(reservation.id)}
                       disabled={!canPrepareCheckout && !canCompleteCheckout}
                       title={canPrepareCheckout
                         ? 'Post all remaining contracted room charges, then complete checkout if the projected folio is balanced'
                         : canCompleteCheckout
                           ? 'Check out guest'
                           : 'Settle or refund the finalized folio before checkout'}
-                      className="btn-secondary text-xs px-3 py-1.5 border-rose-500/30 text-rose-300 hover:bg-rose-500/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="btn-secondary min-h-9 border-sky-400/20 px-3 text-xs text-sky-200 hover:bg-sky-400/10 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      <LogOut className="w-3.5 h-3.5 text-rose-400" />
-                      <span>{canPrepareCheckout
-                        ? 'Prepare Check Out'
+                      <LogOut className="h-3.5 w-3.5" />
+                      {canPrepareCheckout
+                        ? 'Prepare checkout'
                         : totalBalance > 0.005
-                          ? 'Settle Folio'
+                          ? 'Settle folio'
                           : totalBalance < -0.005
-                            ? 'Refund Credit'
-                            : 'Check Out'}</span>
+                            ? 'Refund credit'
+                            : 'Check out'}
                     </button>
                   )}
                 </div>
               </div>
-            </div>
+            </article>
           );
         })}
-      </div>
+
+        {filteredReservations.length === 0 && (
+          <div className="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.1] bg-slate-900/35 px-6 text-center">
+            <Search className="h-8 w-8 text-slate-600" />
+            <h3 className="mt-4 font-semibold text-slate-200">No reservations found</h3>
+            <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">Adjust the search or filters to see more stays.</p>
+          </div>
+        )}
+      </section>
     </div>
   );
 };

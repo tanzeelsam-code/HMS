@@ -1,6 +1,15 @@
 import React from 'react';
 import { HousekeepingTask, Room } from '../types';
-import { ClipboardCheck, Sparkles, CheckCircle2, Clock, Wrench, ShieldAlert, User, Check } from 'lucide-react';
+import {
+  BedDouble,
+  Check,
+  CheckCircle2,
+  ClipboardCheck,
+  Clock,
+  DoorOpen,
+  Sparkles,
+  User,
+} from 'lucide-react';
 
 interface HousekeepingBoardProps {
   tasks: HousekeepingTask[];
@@ -9,145 +18,213 @@ interface HousekeepingBoardProps {
   onUpdateRoomStatus: (roomNumber: string, status: Room['status']) => void;
 }
 
+const roomStyles: Record<Room['status'], { card: string; dot: string }> = {
+  'Vacant Clean': {
+    card: 'border-emerald-400/20 bg-emerald-400/[0.07]',
+    dot: 'bg-emerald-400',
+  },
+  'Vacant Dirty': {
+    card: 'border-rose-400/20 bg-rose-400/[0.07]',
+    dot: 'bg-rose-400',
+  },
+  Occupied: {
+    card: 'border-sky-400/15 bg-sky-400/[0.05]',
+    dot: 'bg-sky-400',
+  },
+  Reserved: {
+    card: 'border-amber-400/15 bg-amber-400/[0.05]',
+    dot: 'bg-amber-400',
+  },
+  'Out of Service': {
+    card: 'border-violet-400/20 bg-violet-400/[0.07]',
+    dot: 'bg-violet-400',
+  },
+};
+
+const priorityStyles: Record<HousekeepingTask['priority'], string> = {
+  Urgent: 'border-rose-400/20 bg-rose-400/10 text-rose-300',
+  High: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
+  Normal: 'border-sky-400/20 bg-sky-400/10 text-sky-300',
+};
+
+const taskStatusStyles: Record<HousekeepingTask['status'], string> = {
+  Completed: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+  Inspected: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+  'In-Progress': 'border-amber-400/20 bg-amber-400/10 text-amber-300',
+  Pending: 'border-white/10 bg-white/[0.04] text-slate-300',
+};
+
 export const HousekeepingBoard: React.FC<HousekeepingBoardProps> = ({
   tasks,
   rooms,
   onCompleteTask,
-  onUpdateRoomStatus
+  onUpdateRoomStatus,
 }) => {
-  const dirtyCount = rooms.filter(r => r.status === 'Vacant Dirty').length;
-  const cleanCount = rooms.filter(r => r.status === 'Vacant Clean').length;
-  const oooCount = rooms.filter(r => r.status === 'Out of Service').length;
+  const dirtyCount = rooms.filter((room) => room.status === 'Vacant Dirty').length;
+  const cleanCount = rooms.filter((room) => room.status === 'Vacant Clean').length;
+  const occupiedCount = rooms.filter((room) => room.status === 'Occupied').length;
+  const oooCount = rooms.filter((room) => room.status === 'Out of Service').length;
+  const activeTasks = tasks.filter((task) => !['Completed', 'Inspected'].includes(task.status)).length;
+
+  const summaryCards = [
+    { label: 'Ready rooms', value: cleanCount, icon: Sparkles, tone: 'text-emerald-300' },
+    { label: 'Needs cleaning', value: dirtyCount, icon: BedDouble, tone: 'text-rose-300' },
+    { label: 'Occupied', value: occupiedCount, icon: DoorOpen, tone: 'text-sky-300' },
+    { label: 'Out of service', value: oooCount, icon: ClipboardCheck, tone: 'text-violet-300' },
+  ];
 
   return (
-    <div className="space-y-6 animate-slide-up">
-      {/* Header Summary */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
-        <div>
-          <h2 className="text-xl font-bold text-gray-100 tracking-tight">Smart Housekeeping & Maintenance Hub</h2>
-          <p className="text-xs text-gray-400 mt-1">
-            API-backed floor dispatch, room-readiness workflows, and staff task tracking.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="px-3.5 py-2 rounded-xl bg-slate-900/80 border border-rose-500/30 text-xs">
-            <span className="text-gray-400">Needs Cleaning: </span>
-            <span className="font-extrabold text-rose-400">{dirtyCount} Rooms</span>
+    <div className="mx-auto w-full max-w-[1680px] space-y-6 pb-10 animate-slide-up">
+      <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/65 shadow-[0_18px_50px_rgba(0,0,0,0.22)]">
+        <div className="flex flex-col gap-4 p-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300/80">
+              <Sparkles className="h-4 w-4" /> Rooms division
+            </div>
+            <h2 className="text-2xl font-semibold tracking-tight text-white">Housekeeping</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Coordinate room readiness, inspection status, and assigned cleaning work.
+            </p>
           </div>
-          <div className="px-3.5 py-2 rounded-xl bg-slate-900/80 border border-emerald-500/30 text-xs">
-            <span className="text-gray-400">Ready / Inspected: </span>
-            <span className="font-extrabold text-emerald-400">{cleanCount} Rooms</span>
+          <div className="rounded-xl border border-white/[0.08] bg-slate-950/35 px-4 py-3 text-sm">
+            <span className="text-slate-500">Active work queue</span>
+            <span className="ml-3 font-semibold text-white">{activeTasks} task{activeTasks === 1 ? '' : 's'}</span>
           </div>
         </div>
-      </div>
 
-      {/* Quick Room Grid Status Map */}
-      <div className="glass-panel p-5 space-y-3">
-        <h3 className="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-400" /> Room Turnaround Overview
-        </h3>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
-          {rooms.map((room) => {
-            const isDirty = room.status === 'Vacant Dirty';
-            const isClean = room.status === 'Vacant Clean';
-            const isOccupied = room.status === 'Occupied';
-            const isOOO = room.status === 'Out of Service';
-
-            return (
-              <div 
-                key={room.id}
-                className={`p-3 rounded-xl border flex flex-col justify-between transition-all ${
-                  isDirty ? 'bg-rose-500/10 border-rose-500/40 text-rose-200' :
-                  isClean ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-200' :
-                  isOccupied ? 'bg-blue-500/10 border-blue-500/30 text-blue-200' :
-                  'bg-purple-500/10 border-purple-500/30 text-purple-200'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold text-sm">#{room.number}</span>
-                  <span className="text-[10px] opacity-80">{room.type.split(' ')[0]}</span>
-                </div>
-
-                <div className="text-[11px] font-semibold mt-2 truncate">
-                  {room.status}
-                </div>
-
-                {isDirty && (
-                  <button 
-                    onClick={() => onUpdateRoomStatus(room.number, 'Vacant Clean')}
-                    className="mt-2 text-[10px] font-bold px-2 py-1 rounded bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition-all flex items-center justify-center gap-1"
-                  >
-                    <Check className="w-3 h-3" /> Mark Clean
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Active Cleaning Tasks Queue */}
-      <div className="glass-panel p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-gray-200 flex items-center gap-2">
-            <ClipboardCheck className="w-4 h-4 text-amber-400" /> Active Housekeeper Work Queue
-          </h3>
-          <span className="text-xs text-gray-400">{tasks.length} Assigned Tasks</span>
-        </div>
-
-        <div className="space-y-3">
-          {tasks.map((task) => (
-            <div 
-              key={task.id}
-              className="p-4 rounded-xl bg-slate-900/70 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-amber-400/30 transition-all"
+        <div className="grid border-t border-white/[0.07] sm:grid-cols-2 xl:grid-cols-4">
+          {summaryCards.map(({ label, value, icon: Icon, tone }, index) => (
+            <div
+              key={label}
+              className={`flex items-center gap-3 px-6 py-4 ${index > 0 ? 'border-t border-white/[0.07] sm:border-l sm:border-t-0' : ''} ${index === 2 ? 'sm:border-l-0 xl:border-l' : ''}`}
             >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-sm">
-                  #{task.roomNumber}
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2.5">
-                    <span className="font-bold text-sm text-gray-100">{task.taskType}</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                      task.priority === 'Urgent' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse' : 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
-                    }`}>
-                      {task.priority} Priority
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-400 mt-1 flex items-center gap-3">
-                    <span className="flex items-center gap-1">
-                      <User className="w-3 h-3 text-amber-400" /> Assigned: {task.assignedTo}
-                    </span>
-                    <span className="flex items-center gap-1 text-gray-500">
-                      <Clock className="w-3 h-3" /> Est. {task.etaMinutes} mins remaining
-                    </span>
-                  </div>
-                </div>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04]">
+                <Icon className={`h-4 w-4 ${tone}`} />
               </div>
-
-              <div className="flex items-center gap-3">
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${
-                  task.status === 'Completed' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                }`}>
-                  Status: {task.status}
-                </span>
-
-                {task.status !== 'Completed' && (
-                  <button 
-                    onClick={() => onCompleteTask(task.id)}
-                    className="btn-primary text-xs px-3 py-1.5"
-                  >
-                    <CheckCircle2 className="w-4 h-4" /> Finish & Inspect
-                  </button>
-                )}
+              <div>
+                <div className={`text-lg font-semibold leading-none ${tone}`}>{value}</div>
+                <div className="mt-1 text-xs text-slate-500">{label}</div>
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </section>
+
+      <section className="rounded-2xl border border-white/[0.08] bg-slate-900/55 p-5 shadow-[0_12px_35px_rgba(0,0,0,0.16)] xl:p-6">
+        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="font-semibold text-slate-100">Room readiness</h3>
+            <p className="mt-1 text-xs text-slate-500">Live status across all floors</p>
+          </div>
+          <div className="flex flex-wrap gap-4 text-[11px] text-slate-500">
+            {[
+              ['Ready', 'bg-emerald-400'],
+              ['Cleaning', 'bg-rose-400'],
+              ['Occupied', 'bg-sky-400'],
+              ['Unavailable', 'bg-violet-400'],
+            ].map(([label, color]) => (
+              <span key={label} className="flex items-center gap-1.5">
+                <span className={`h-1.5 w-1.5 rounded-full ${color}`} /> {label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {rooms.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7">
+            {rooms.map((room) => {
+              const isDirty = room.status === 'Vacant Dirty';
+              const style = roomStyles[room.status];
+
+              return (
+                <article key={room.id} className={`flex min-h-32 flex-col rounded-xl border p-3.5 ${style.card}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-mono text-base font-semibold text-white">{room.number}</div>
+                      <div className="mt-1 text-[10px] text-slate-500">Floor {room.floor}</div>
+                    </div>
+                    <span className={`mt-1 h-2 w-2 rounded-full ${style.dot}`} />
+                  </div>
+                  <div className="mt-3 min-w-0 flex-1">
+                    <p className="truncate text-[11px] text-slate-500">{room.type}</p>
+                    <p className="mt-1 text-xs font-medium text-slate-200">{room.status}</p>
+                  </div>
+                  {isDirty && (
+                    <button
+                      onClick={() => onUpdateRoomStatus(room.number, 'Vacant Clean')}
+                      className="mt-3 flex min-h-8 items-center justify-center gap-1.5 rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-2 text-[11px] font-semibold text-emerald-200 transition-colors hover:bg-emerald-400/20"
+                    >
+                      <Check className="h-3.5 w-3.5" /> Mark clean
+                    </button>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex min-h-52 flex-col items-center justify-center text-center">
+            <BedDouble className="h-8 w-8 text-slate-600" />
+            <h4 className="mt-4 font-semibold text-slate-200">No rooms available</h4>
+            <p className="mt-1 text-sm text-slate-500">Room readiness will appear here when inventory is loaded.</p>
+          </div>
+        )}
+      </section>
+
+      <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/55 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
+        <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-5 xl:px-6">
+          <div>
+            <h3 className="flex items-center gap-2 font-semibold text-slate-100">
+              <ClipboardCheck className="h-4 w-4 text-amber-300" /> Assigned work
+            </h3>
+            <p className="mt-1 text-xs text-slate-500">Prioritized by service urgency and room readiness</p>
+          </div>
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs text-slate-400">
+            {tasks.length} total
+          </span>
+        </div>
+
+        {tasks.length > 0 ? (
+          <div className="divide-y divide-white/[0.06]">
+            {tasks.map((task) => (
+              <article key={task.id} className="grid gap-4 px-5 py-5 transition-colors hover:bg-white/[0.02] md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center xl:px-6">
+                <div className="flex h-12 w-12 flex-col items-center justify-center rounded-xl border border-white/[0.09] bg-slate-950/40">
+                  <span className="text-[9px] uppercase tracking-wider text-slate-500">Room</span>
+                  <span className="font-mono text-sm font-semibold text-amber-300">{task.roomNumber}</span>
+                </div>
+
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h4 className="font-semibold text-slate-100">{task.taskType}</h4>
+                    <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${priorityStyles[task.priority]}`}>
+                      {task.priority} priority
+                    </span>
+                    <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${taskStatusStyles[task.status]}`}>
+                      {task.status}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500">
+                    <span className="flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> {task.assignedTo}</span>
+                    <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {task.etaMinutes} min estimate</span>
+                    <span>{task.roomType} · Floor {task.floor}</span>
+                  </div>
+                </div>
+
+                {task.status !== 'Completed' && (
+                  <button onClick={() => onCompleteTask(task.id)} className="btn-secondary min-h-10 justify-center px-4 text-xs text-emerald-200">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-300" /> Finish & inspect
+                  </button>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="flex min-h-56 flex-col items-center justify-center px-6 text-center">
+            <CheckCircle2 className="h-8 w-8 text-emerald-400/60" />
+            <h4 className="mt-4 font-semibold text-slate-200">Work queue is clear</h4>
+            <p className="mt-1 text-sm text-slate-500">New housekeeping assignments will appear here.</p>
+          </div>
+        )}
+      </section>
     </div>
   );
 };

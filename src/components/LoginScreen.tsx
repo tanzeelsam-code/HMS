@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { CalendarDays, Lock, Mail, LogIn, ShieldCheck, AlertTriangle } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowRight,
+  Building2,
+  CalendarCheck2,
+  CalendarDays,
+  CheckCircle2,
+  Lock,
+  Mail,
+  ShieldCheck,
+  Workflow,
+} from 'lucide-react';
 import { login, AuthUser } from '../api';
 
 interface LoginScreenProps {
@@ -14,6 +25,24 @@ const SEED_CREDENTIALS = [
   { role: 'Finance', email: 'finance@aura.com', password: 'fin123' },
 ];
 
+const platformHighlights = [
+  {
+    icon: CalendarCheck2,
+    title: 'Live property operations',
+    description: 'Reservations, rooms, folios, and service work in one current view.',
+  },
+  {
+    icon: Workflow,
+    title: 'Controlled automation',
+    description: 'Approval-aware workflows with durable delivery and clear ownership.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Evidence built in',
+    description: 'Role-scoped access, secure sessions, and an immutable activity trail.',
+  },
+];
+
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,125 +50,168 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
   const [submitting, setSubmitting] = useState(false);
   const showDemoAccounts = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!email || !password) return;
     setError('');
     setSubmitting(true);
     try {
-      const user = await login(email, password);
-      onLogin(user);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      onLogin(await login(email, password));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Login failed');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-gray-100 p-4">
-      <div className="w-full max-w-md space-y-5 animate-slide-up">
-        {/* Brand */}
-        <div className="flex flex-col items-center text-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-200 flex items-center justify-center shadow-lg shadow-amber-500/20 text-slate-950 font-black text-2xl tracking-tighter animate-pulse-glow">
-            N
-          </div>
-          <div>
-            <div className="flex items-center justify-center gap-2">
-              <span className="font-extrabold text-2xl tracking-tight text-gold-gradient">NexusHOS</span>
-              <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/20">
-                Hotel Operating System
-              </span>
+    <main className="min-h-screen bg-[#070b12] text-gray-100 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(520px,0.95fr)]">
+      <section className="relative hidden min-h-screen overflow-hidden border-r border-white/[0.07] lg:flex lg:flex-col lg:justify-between lg:p-14 xl:p-20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(214,170,80,0.14),transparent_28rem),radial-gradient(circle_at_75%_80%,rgba(74,104,163,0.12),transparent_30rem)]" />
+        <div className="relative">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#d6aa50] text-lg font-black text-[#090d14] shadow-[0_12px_30px_rgba(0,0,0,0.25)]">N</div>
+            <div>
+              <div className="text-base font-bold tracking-[-0.025em] text-white">NexusHOS</div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">Hotel operating system</div>
             </div>
-            <p className="text-xs text-gray-400 font-medium mt-1">Enterprise AI Core — Staff Sign In</p>
+          </div>
+
+          <div className="mt-24 max-w-2xl">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-300">Property operations, without the noise</p>
+            <h1 className="mt-5 text-5xl font-semibold leading-[1.08] tracking-[-0.055em] text-white xl:text-6xl">
+              Every stay, team, and decision in one calm workspace.
+            </h1>
+            <p className="mt-6 max-w-xl text-base leading-7 text-gray-400">
+              Run front office, service delivery, finance, and guest operations from a secure system designed for fast, confident work.
+            </p>
+          </div>
+
+          <div className="mt-14 grid max-w-2xl gap-4">
+            {platformHighlights.map(({ icon: Icon, title, description }) => (
+              <div key={title} className="flex items-start gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-300/10 text-amber-300">
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-gray-100">{title}</div>
+                  <p className="mt-1 text-xs leading-5 text-gray-500">{description}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Login Card */}
-        <form onSubmit={handleSubmit} className="glass-panel p-6 space-y-4 border border-white/10 shadow-2xl">
-          {error && (
-            <div role="alert" className="flex items-center gap-2 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-              {error}
-            </div>
-          )}
+        <div className="relative flex items-center gap-2 text-xs text-gray-500">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+          Local property services are operational
+        </div>
+      </section>
 
-          <div>
-            <label htmlFor="login-email" className="block text-gray-400 font-semibold mb-1.5 text-xs">Email Address</label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                id="login-email"
-                type="email"
-                placeholder="you@aura.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-slate-900 border border-white/10 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-amber-400/50 transition-all"
-                required
-                autoFocus
-                autoComplete="username"
-              />
+      <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
+        <div className="w-full max-w-[480px]">
+          <div className="mb-9 flex items-center gap-3 lg:hidden">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d6aa50] font-black text-[#090d14]">N</div>
+            <div>
+              <div className="font-bold text-white">NexusHOS</div>
+              <div className="text-[10px] uppercase tracking-[0.16em] text-gray-500">Hotel operating system</div>
             </div>
           </div>
 
-          <div>
-            <label htmlFor="login-password" className="block text-gray-400 font-semibold mb-1.5 text-xs">Password</label>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                id="login-password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-slate-900 border border-white/10 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-amber-400/50 transition-all"
-                required
-                autoComplete="current-password"
-              />
+          <div className="mb-8">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-[#111927] text-amber-300">
+              <Building2 className="h-5 w-5" />
             </div>
+            <h2 className="text-3xl font-semibold tracking-[-0.04em] text-white">Welcome back</h2>
+            <p className="mt-2 text-sm leading-6 text-gray-400">Sign in to continue to your property workspace.</p>
           </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="btn-primary w-full justify-center py-2.5 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <LogIn className="w-4 h-4" />
-            {submitting ? 'Signing in…' : 'Sign In to Property'}
-          </button>
-          {onBookStay && (
-            <button
-              type="button"
-              onClick={onBookStay}
-              className="btn-secondary w-full justify-center py-2.5 text-sm"
-            >
-              <CalendarDays className="w-4 h-4" />
-              Book a Guest Stay
+          <form onSubmit={handleSubmit} className="space-y-5" aria-label="Staff sign in">
+            {error && (
+              <div role="alert" className="flex items-start gap-3 rounded-xl border border-rose-400/25 bg-rose-400/[0.08] px-4 py-3 text-sm text-rose-200">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <label htmlFor="login-email" className="block text-xs font-semibold text-gray-300">
+              Work email
+              <span className="relative mt-2 block">
+                <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                <input
+                  id="login-email"
+                  type="email"
+                  placeholder="name@hotel.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="field-control h-12 !pl-10 text-sm"
+                  required
+                  autoFocus
+                  autoComplete="username"
+                />
+              </span>
+            </label>
+
+            <label htmlFor="login-password" className="block text-xs font-semibold text-gray-300">
+              Password
+              <span className="relative mt-2 block">
+                <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                <input
+                  id="login-password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="field-control h-12 !pl-10 text-sm"
+                  required
+                  autoComplete="current-password"
+                />
+              </span>
+            </label>
+
+            <button type="submit" disabled={submitting} className="btn-primary h-12 w-full text-sm">
+              {submitting ? 'Signing in…' : 'Continue to workspace'}
+              {!submitting && <ArrowRight className="h-4 w-4" />}
             </button>
-          )}
-        </form>
 
-        {/* Seed Credentials Hint */}
-        {showDemoAccounts && <div className="glass-panel p-4 border border-white/5">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
-            <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> Demo Accounts
-          </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
-            {SEED_CREDENTIALS.map((c) => (
-              <button
-                key={c.email}
-                type="button"
-                onClick={() => { setEmail(c.email); setPassword(c.password); setError(''); }}
-                className="text-left px-2 py-1.5 rounded-md hover:bg-white/5 transition-all group"
-                title="Click to autofill"
-              >
-                <span className="block text-gray-300 font-semibold group-hover:text-amber-300">{c.role}</span>
-                <span className="block text-gray-500 font-mono">{c.email} / {c.password}</span>
+            {onBookStay && (
+              <button type="button" onClick={onBookStay} className="btn-secondary h-12 w-full text-sm">
+                <CalendarDays className="h-4 w-4" />
+                Open guest booking
               </button>
-            ))}
-          </div>
-        </div>}
-      </div>
-    </div>
+            )}
+          </form>
+
+          {showDemoAccounts && (
+            <section className="mt-8 border-t border-white/[0.08] pt-6" aria-labelledby="demo-accounts-title">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <h3 id="demo-accounts-title" className="text-xs font-semibold text-gray-300">Local demo access</h3>
+                  <p className="mt-1 text-[11px] text-gray-500">Choose a role to fill the local credentials.</p>
+                </div>
+                <span className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.08] px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-emerald-300">Local only</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {SEED_CREDENTIALS.map((credential) => (
+                  <button
+                    key={credential.email}
+                    type="button"
+                    onClick={() => {
+                      setEmail(credential.email);
+                      setPassword(credential.password);
+                      setError('');
+                    }}
+                    className="rounded-xl border border-white/[0.07] bg-[#0d1521] px-3 py-3 text-left transition-colors hover:border-amber-300/30 hover:bg-[#121c2b]"
+                  >
+                    <span className="block text-xs font-semibold text-gray-200">{credential.role}</span>
+                    <span className="mt-1 block truncate text-[10px] text-gray-500">{credential.email}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      </section>
+    </main>
   );
 };

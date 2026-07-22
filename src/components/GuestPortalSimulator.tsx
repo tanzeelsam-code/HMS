@@ -1,11 +1,31 @@
 import React, { useState } from 'react';
-import { 
-  Smartphone, Key, ShieldCheck, Send, Sparkles, CheckCircle2, 
-  Wifi, Coffee, Utensils, Zap, HelpCircle, UserCheck 
+import {
+  Bot,
+  Check,
+  CheckCircle2,
+  Clock3,
+  KeyRound,
+  LockKeyhole,
+  MessageCircle,
+  Send,
+  ShieldCheck,
+  Smartphone,
+  Sparkles,
+  UserCheck,
+  Wifi,
+  Zap
 } from 'lucide-react';
 
+type PortalView = 'verify' | 'key' | 'chat';
+
+const portalTabs: Array<{ id: PortalView; label: string; icon: React.ElementType }> = [
+  { id: 'chat', label: 'Concierge', icon: MessageCircle },
+  { id: 'key', label: 'Mobile key', icon: KeyRound },
+  { id: 'verify', label: 'Check-in', icon: UserCheck }
+];
+
 export const GuestPortalSimulator: React.FC = () => {
-  const [activeStep, setActiveStep] = useState<'welcome' | 'verify' | 'key' | 'chat'>('chat');
+  const [activeStep, setActiveStep] = useState<PortalView>('chat');
   const [digitalKeyGenerated, setDigitalKeyGenerated] = useState(false);
   const [messages, setMessages] = useState([
     { sender: 'ai', text: 'Hello Mr. Wright! Welcome to Aura Luxury Resort. Your room #101 is pre-assigned. How can I assist your stay today?' },
@@ -17,242 +37,339 @@ export const GuestPortalSimulator: React.FC = () => {
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
 
-    const userText = inputMessage;
-    const newMsgs = [...messages, { sender: 'guest', text: userText }];
-    setMessages(newMsgs);
+    const userText = inputMessage.trim();
+    const newMessages = [...messages, { sender: 'guest', text: userText }];
+    setMessages(newMessages);
     setInputMessage('');
 
-    // Simulate AI Concierge Instant Intelligent Response
     setTimeout(() => {
       let reply = "I've logged your request with our 24/7 Butler Service desk. Is there anything else you need?";
       const lower = userText.toLowerCase();
 
       if (lower.includes('breakfast') || lower.includes('food') || lower.includes('eat')) {
-        reply = "Savor Fine Dining serves gourmet breakfast from 7:00 AM to 11:00 AM on Floor 1. Would you like me to reserve a private window table?";
+        reply = 'Savor Fine Dining serves gourmet breakfast from 7:00 AM to 11:00 AM on Floor 1. Would you like me to reserve a private window table?';
       } else if (lower.includes('pool') || lower.includes('spa')) {
-        reply = "The Serenity Infinity Pool & Spa is open daily from 6:00 AM to 10:00 PM. Towels and cabanas are complimentary for VIP guests.";
+        reply = 'The Serenity Infinity Pool & Spa is open daily from 6:00 AM to 10:00 PM. Towels and cabanas are complimentary for VIP guests.';
       } else if (lower.includes('checkout') || lower.includes('check out')) {
-        reply = "Express contactless check-out is active on your mobile key. Standard check-out is 12:00 PM. Would you like an extended 2:00 PM late check-out?";
+        reply = 'Express contactless check-out is active on your mobile key. Standard check-out is 12:00 PM. Would you like an extended 2:00 PM late check-out?';
       }
 
-      setMessages([...newMsgs, { sender: 'ai', text: reply }]);
+      setMessages((current) => [...current, { sender: 'ai', text: reply }]);
     }, 600);
   };
 
   return (
-    <div className="space-y-6 animate-slide-up">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Guest Portal Interaction Prototype</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-              Local UI · No Providers
-            </span>
+    <div className="mx-auto w-full max-w-[1600px] space-y-6 p-1 pb-8 animate-slide-up">
+      <header className="rounded-2xl border border-white/[0.08] bg-slate-900/75 px-6 py-6 shadow-[0_18px_60px_rgba(0,0,0,0.22)]">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+          <div className="max-w-3xl">
+            <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-300/80">
+              <Smartphone className="h-4 w-4" />
+              Guest experience sandbox
+            </div>
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-50 sm:text-3xl">
+              Mobile guest journey
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+              Preview self-service check-in, a simulated mobile key, and rule-based concierge messaging from the guest and front-desk perspectives.
+            </p>
           </div>
-          <p className="text-xs text-gray-400 mt-1">
-            Explore a local, rule-based mockup of self check-in, mobile key, and concierge messaging. No lock, identity, WhatsApp, or model provider is connected.
-          </p>
+
+          <div className="flex items-center gap-3 rounded-xl border border-cyan-300/15 bg-cyan-300/[0.06] px-4 py-3">
+            <ShieldCheck className="h-5 w-5 text-cyan-300" />
+            <div>
+              <div className="text-xs font-semibold text-slate-200">Local simulation</div>
+              <div className="mt-0.5 text-[11px] text-slate-500">No identity, lock, messaging, or AI provider connected</div>
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* Main Container: Mobile Frame Simulator + Live Operations Monitor */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Interactive Mobile Phone UI */}
-        <div className="lg:col-span-5 flex justify-center">
-          <div className="w-[340px] h-[680px] bg-slate-950 rounded-[45px] p-4 border-[6px] border-slate-800 shadow-2xl relative flex flex-col justify-between overflow-hidden">
-            
-            {/* Phone Speaker & Camera Notch */}
-            <div className="w-32 h-4 bg-slate-900 rounded-full mx-auto mb-3 flex items-center justify-center">
-              <div className="w-3 h-3 rounded-full bg-slate-800" />
-            </div>
-
-            {/* Mobile Header */}
-            <div className="bg-slate-900/90 rounded-2xl p-3 border border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-md bg-amber-400 flex items-center justify-center text-slate-950 font-black text-xs">
-                  A
-                </div>
-                <span className="text-xs font-bold text-gray-100">Aura Guest App</span>
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Guest journey summary">
+        {[
+          { label: 'Journey status', value: 'Pre-arrival', detail: 'Room 101 assigned', icon: UserCheck, tone: 'text-emerald-300' },
+          { label: 'Identity state', value: 'Sample approved', detail: 'Local preview only', icon: ShieldCheck, tone: 'text-emerald-300' },
+          { label: 'Mobile key', value: digitalKeyGenerated ? 'Preview active' : 'Not activated', detail: 'No device command sent', icon: KeyRound, tone: digitalKeyGenerated ? 'text-emerald-300' : 'text-amber-300' },
+          { label: 'Conversation', value: `${messages.length} messages`, detail: 'Rule-based responses', icon: MessageCircle, tone: 'text-cyan-300' }
+        ].map(({ label, value, detail, icon: Icon, tone }) => (
+          <div key={label} className="rounded-2xl border border-white/[0.07] bg-slate-900/60 p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-medium text-slate-500">{label}</p>
+                <p className={`mt-2 text-sm font-semibold sm:text-base ${tone}`}>{value}</p>
+                <p className="mt-1 text-[11px] text-slate-600">{detail}</p>
               </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                Room #101
-              </span>
+              <div className="rounded-xl border border-white/[0.07] bg-slate-950/70 p-2.5 text-slate-400">
+                <Icon className="h-4 w-4" />
+              </div>
             </div>
+          </div>
+        ))}
+      </section>
 
-            {/* Mobile Navigation Tabs */}
-            <div className="flex justify-around py-2 border-b border-white/10 text-[10px] font-bold text-gray-400">
-              <button 
-                onClick={() => setActiveStep('key')} 
-                className={`pb-1 ${activeStep === 'key' ? 'text-amber-300 border-b-2 border-amber-400' : ''}`}
-              >
-                Mobile Key
-              </button>
-              <button 
-                onClick={() => setActiveStep('chat')} 
-                className={`pb-1 ${activeStep === 'chat' ? 'text-amber-300 border-b-2 border-amber-400' : ''}`}
-              >
-                AI Concierge
-              </button>
-              <button 
-                onClick={() => setActiveStep('verify')} 
-                className={`pb-1 ${activeStep === 'verify' ? 'text-amber-300 border-b-2 border-amber-400' : ''}`}
-              >
-                Check-in Status
-              </button>
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(360px,0.7fr)]">
+        <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/65">
+          <div className="flex flex-col gap-4 border-b border-white/[0.07] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-200 to-amber-500 font-bold text-slate-950">
+                A
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-100">Aura Guest App</h3>
+                <p className="mt-0.5 text-xs text-slate-500">Alexander Wright · Room 101</p>
+              </div>
             </div>
+            <div className="flex items-center gap-2 text-[11px] text-slate-500">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              Interactive preview
+            </div>
+          </div>
 
-            {/* Mobile Content Screen */}
-            <div className="flex-1 my-3 overflow-y-auto px-1 space-y-3">
-              {activeStep === 'key' && (
-                <div className="flex flex-col items-center justify-center h-full text-center space-y-4 p-4">
-                  <div className={`w-28 h-28 rounded-full flex items-center justify-center border-4 transition-all ${
-                    digitalKeyGenerated 
-                      ? 'bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-2xl shadow-emerald-500/30 animate-pulse' 
-                      : 'bg-amber-500/10 border-amber-400/40 text-amber-300'
+          <div className="border-b border-white/[0.07] bg-slate-950/25 px-4 py-3">
+            <div className="inline-flex w-full max-w-xl rounded-xl border border-white/[0.07] bg-slate-950/50 p-1">
+              {portalTabs.map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setActiveStep(id)}
+                  aria-pressed={activeStep === id}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-xs font-semibold transition-colors ${
+                    activeStep === id
+                      ? 'bg-slate-800 text-slate-100 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-300'
+                  }`}
+                >
+                  <Icon className={`h-3.5 w-3.5 ${activeStep === id ? 'text-amber-300' : ''}`} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="min-h-[510px] p-5 sm:p-6">
+            {activeStep === 'chat' && (
+              <div className="flex min-h-[462px] flex-col">
+                <div className="mb-5 flex items-center justify-between rounded-xl border border-white/[0.07] bg-slate-950/35 px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg bg-cyan-300/10 p-2 text-cyan-300">
+                      <Bot className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-100">Aura concierge</p>
+                      <p className="mt-0.5 text-[11px] text-slate-500">Local scripted assistant · usually replies instantly</p>
+                    </div>
+                  </div>
+                  <span className="hidden rounded-full border border-emerald-300/20 bg-emerald-300/[0.08] px-2.5 py-1 text-[10px] font-semibold text-emerald-200 sm:inline-flex">
+                    Available
+                  </span>
+                </div>
+
+                <div className="max-h-[330px] flex-1 space-y-4 overflow-y-auto px-1 pr-2">
+                  {messages.map((message, index) => (
+                    <div key={`${message.sender}-${index}`} className={`flex gap-2.5 ${message.sender === 'guest' ? 'justify-end' : 'justify-start'}`}>
+                      {message.sender === 'ai' && (
+                        <div className="mt-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-300/10 text-cyan-300">
+                          <Sparkles className="h-3.5 w-3.5" />
+                        </div>
+                      )}
+                      <div className={`max-w-[78%] rounded-2xl px-4 py-3 text-sm leading-6 ${
+                        message.sender === 'guest'
+                          ? 'rounded-br-md bg-amber-300 text-slate-950'
+                          : 'rounded-bl-md border border-white/[0.07] bg-slate-950/55 text-slate-300'
+                      }`}>
+                        {message.text}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-5 border-t border-white/[0.07] pt-4">
+                  <label className="flex items-center gap-2 rounded-xl border border-white/[0.09] bg-slate-950/55 p-1.5 focus-within:border-amber-300/35">
+                    <span className="sr-only">Message the concierge</span>
+                    <input
+                      type="text"
+                      placeholder="Ask about breakfast, the spa, or check-out…"
+                      value={inputMessage}
+                      onChange={(event) => setInputMessage(event.target.value)}
+                      onKeyDown={(event) => event.key === 'Enter' && handleSendMessage()}
+                      className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSendMessage}
+                      disabled={!inputMessage.trim()}
+                      aria-label="Send message"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-300 text-slate-950 transition-colors hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Send className="h-4 w-4" />
+                    </button>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {activeStep === 'key' && (
+              <div className="grid min-h-[462px] place-items-center">
+                <div className="w-full max-w-xl text-center">
+                  <div className={`mx-auto flex h-24 w-24 items-center justify-center rounded-3xl border ${
+                    digitalKeyGenerated
+                      ? 'border-emerald-300/25 bg-emerald-300/10 text-emerald-300 shadow-[0_18px_60px_rgba(52,211,153,0.12)]'
+                      : 'border-amber-300/20 bg-amber-300/[0.07] text-amber-300'
                   }`}>
-                    <Key className="w-12 h-12" />
+                    {digitalKeyGenerated ? <LockKeyhole className="h-10 w-10" /> : <KeyRound className="h-10 w-10" />}
                   </div>
-
-                  <div>
-                    <h4 className="font-extrabold text-sm text-gray-100">
-                      {digitalKeyGenerated ? 'Key Preview Active' : 'Preview Mobile Key'}
-                    </h4>
-                    <p className="text-[11px] text-gray-400 mt-1">
-                      {digitalKeyGenerated 
-                        ? 'The prototype now shows the success state; no door command was sent.'
-                        : 'Tap below to preview the successful key-activation state.'}
-                    </p>
-                  </div>
+                  <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Room 101 · Main building</p>
+                  <h4 className="mt-2 text-xl font-semibold text-slate-50">
+                    {digitalKeyGenerated ? 'Key preview is active' : 'Preview the mobile key state'}
+                  </h4>
+                  <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-400">
+                    {digitalKeyGenerated
+                      ? 'The interface is showing a successful activation state. No credential or door command was created.'
+                      : 'Activate the preview to see the guest-facing success state without contacting a lock provider or device.'}
+                  </p>
 
                   {!digitalKeyGenerated ? (
-                    <button 
+                    <button
+                      type="button"
                       onClick={() => setDigitalKeyGenerated(true)}
-                      className="btn-primary text-xs w-full py-2.5 flex items-center justify-center gap-2"
+                      className="btn-primary mx-auto mt-7 px-5 py-3 text-sm"
                     >
-                      <Zap className="w-4 h-4" /> Preview Key Activation
+                      <Zap className="h-4 w-4" />
+                      Activate preview
                     </button>
                   ) : (
-                    <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4" /> Simulated Success State
+                    <div className="mx-auto mt-7 inline-flex items-center gap-2 rounded-xl border border-emerald-300/20 bg-emerald-300/[0.08] px-4 py-3 text-xs font-semibold text-emerald-200">
+                      <CheckCircle2 className="h-4 w-4" />
+                      Simulated activation successful
                     </div>
                   )}
                 </div>
-              )}
+              </div>
+            )}
 
-              {activeStep === 'chat' && (
-                <div className="flex flex-col h-full justify-between">
-                  <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
-                    {messages.map((m, idx) => (
-                      <div 
-                        key={idx}
-                        className={`flex ${m.sender === 'guest' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div className={`max-w-[82%] p-2.5 rounded-2xl text-[11px] leading-snug ${
-                          m.sender === 'guest'
-                            ? 'bg-amber-500 text-slate-950 font-semibold rounded-br-none'
-                            : 'bg-slate-900 text-gray-200 border border-white/10 rounded-bl-none'
-                        }`}>
-                          {m.text}
-                        </div>
+            {activeStep === 'verify' && (
+              <div className="min-h-[462px]">
+                <div className="rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.045] p-5">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-xl bg-emerald-300/10 p-2.5 text-emerald-300">
+                        <ShieldCheck className="h-5 w-5" />
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Chat input inside phone */}
-                  <div className="pt-2 flex items-center gap-1.5 border-t border-white/10">
-                    <input
-                      type="text"
-                      placeholder="Ask AI Concierge..."
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                      className="flex-1 bg-slate-900 border border-white/10 rounded-full px-3 py-1.5 text-[11px] text-gray-200 focus:outline-none focus:border-amber-400/50"
-                    />
-                    <button 
-                      onClick={handleSendMessage}
-                      className="w-7 h-7 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center flex-shrink-0 font-bold"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                    </button>
+                      <div>
+                        <h4 className="text-sm font-semibold text-slate-100">Sample identity state approved</h4>
+                        <p className="mt-1 text-xs text-slate-500">Illustrative passport or driver licence review</p>
+                      </div>
+                    </div>
+                    <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-300/20 bg-emerald-300/[0.08] px-3 py-1.5 text-[11px] font-semibold text-emerald-200">
+                      <Check className="h-3.5 w-3.5" /> Approved
+                    </span>
                   </div>
                 </div>
-              )}
 
-              {activeStep === 'verify' && (
-                <div className="space-y-3 text-left">
-                  <div className="p-3 rounded-xl bg-slate-900 border border-emerald-500/30">
-                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
-                      <CheckCircle2 className="w-4 h-4" /> Sample Identity State
-                    </div>
-                    <p className="text-[11px] text-gray-400 mt-1">Passport / Driver License uploaded & pre-approved.</p>
+                <div className="mt-5 grid gap-4 md:grid-cols-2">
+                  <div className="rounded-xl border border-white/[0.07] bg-slate-950/35 p-5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Arrival details</p>
+                    <dl className="mt-4 space-y-4 text-sm">
+                      <div className="flex items-center justify-between gap-4">
+                        <dt className="text-slate-500">Guest</dt>
+                        <dd className="font-medium text-slate-200">Alexander Wright</dd>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <dt className="text-slate-500">Assigned room</dt>
+                        <dd className="font-medium text-slate-200">101</dd>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <dt className="text-slate-500">Standard check-in</dt>
+                        <dd className="font-medium text-slate-200">3:00 PM</dd>
+                      </div>
+                    </dl>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-slate-900 border border-white/10 space-y-2">
-                    <div className="text-xs font-bold text-gray-200">Recommended Upsells</div>
-                    <div className="flex items-center justify-between text-[11px] text-gray-300">
-                      <span>Early Check-in (11:00 AM)</span>
-                      <span className="font-bold text-amber-300">+$45</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-gray-300">
-                      <span>Gourmet Champagne Breakfast</span>
-                      <span className="font-bold text-amber-300">+$35</span>
+                  <div className="rounded-xl border border-white/[0.07] bg-slate-950/35 p-5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Sample upsells</p>
+                    <div className="mt-4 space-y-3">
+                      <div className="flex items-center justify-between gap-4 rounded-lg border border-white/[0.06] px-3 py-3">
+                        <div>
+                          <p className="text-xs font-medium text-slate-200">Early check-in</p>
+                          <p className="mt-0.5 text-[11px] text-slate-600">From 11:00 AM</p>
+                        </div>
+                        <span className="text-xs font-semibold text-amber-200">+$45</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-4 rounded-lg border border-white/[0.06] px-3 py-3">
+                        <div>
+                          <p className="text-xs font-medium text-slate-200">Champagne breakfast</p>
+                          <p className="mt-0.5 text-[11px] text-slate-600">In-room service</p>
+                        </div>
+                        <span className="text-xs font-semibold text-amber-200">+$35</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Bottom Home Indicator */}
-            <div className="w-24 h-1 bg-slate-700 rounded-full mx-auto mt-1" />
+              </div>
+            )}
           </div>
-        </div>
+        </section>
 
-        {/* Right Column: Hotel Front Desk Operations Sync View */}
-        <div className="lg:col-span-7 space-y-4">
-          <div className="glass-panel p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-cyan-400" /> Sample Front-Desk Portal State
-              </h3>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                Local Preview
-              </span>
+        <aside className="space-y-5">
+          <section className="rounded-2xl border border-white/[0.08] bg-slate-900/65 p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Front-desk view</p>
+                <h3 className="mt-1.5 text-base font-semibold text-slate-100">Journey readiness</h3>
+              </div>
+              <span className="rounded-full border border-cyan-300/20 bg-cyan-300/[0.07] px-2.5 py-1 text-[10px] font-semibold text-cyan-200">Preview</span>
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-white/10 flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-gray-200">Alexander Wright (Room #101)</div>
-                  <div className="text-[11px] text-gray-400">Pre-arrival registration completed via Web Link.</div>
+            <div className="mt-6 space-y-1">
+              {[
+                { title: 'Pre-arrival registration', description: 'Sample web form completed', state: 'Complete', icon: UserCheck, done: true },
+                { title: 'Identity review', description: 'Sample approval state', state: 'Approved', icon: ShieldCheck, done: true },
+                { title: 'Digital key', description: 'No credential dispatched', state: digitalKeyGenerated ? 'Preview active' : 'Pending', icon: KeyRound, done: digitalKeyGenerated },
+                { title: 'Concierge conversation', description: `${messages.length} messages in this session`, state: 'Local rules', icon: MessageCircle, done: true }
+              ].map(({ title, description, state, icon: Icon, done }, index) => (
+                <div key={title} className="relative flex gap-3 pb-5 last:pb-0">
+                  {index < 3 && <div className="absolute left-[17px] top-9 h-[calc(100%-28px)] w-px bg-white/[0.07]" />}
+                  <div className={`z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${
+                    done
+                      ? 'border-emerald-300/20 bg-emerald-300/[0.08] text-emerald-300'
+                      : 'border-amber-300/20 bg-amber-300/[0.07] text-amber-300'
+                  }`}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1 pt-0.5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold text-slate-200">{title}</p>
+                        <p className="mt-1 text-[11px] text-slate-500">{description}</p>
+                      </div>
+                      <span className={`shrink-0 text-[10px] font-semibold ${done ? 'text-emerald-300' : 'text-amber-300'}`}>{state}</span>
+                    </div>
+                  </div>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  Sample Approved
-                </span>
-              </div>
+              ))}
+            </div>
+          </section>
 
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-white/10 flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-gray-200">Digital Key Encryption Key</div>
-                  <div className="text-[11px] text-gray-400">Illustrative token state; no key was dispatched to a device.</div>
-                </div>
-                <span className="text-[10px] font-mono font-bold text-amber-300">
-                  {digitalKeyGenerated ? 'TOKEN_ACTIVE' : 'TOKEN_PENDING'}
-                </span>
+          <section className="rounded-2xl border border-white/[0.08] bg-slate-900/65 p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-slate-950/60 p-2.5 text-slate-400">
+                <Wifi className="h-4 w-4" />
               </div>
-
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-white/10 flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-gray-200">AI Concierge Assistant Log</div>
-                  <div className="text-[11px] text-gray-400">{messages.length} messages exchanged. Zero staff intervention needed.</div>
-                </div>
-                <span className="text-[10px] font-bold text-cyan-400">
-                  100% Automated
-                </span>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-100">Provider connections</h3>
+                <p className="mt-0.5 text-xs text-slate-500">Current sandbox boundaries</p>
               </div>
             </div>
-          </div>
-        </div>
+            <div className="mt-5 grid grid-cols-2 gap-2 text-[11px]">
+              {['Identity verification', 'Smart lock', 'Guest messaging', 'AI model'].map((provider) => (
+                <div key={provider} className="rounded-lg border border-white/[0.06] bg-slate-950/35 px-3 py-3">
+                  <p className="font-medium text-slate-300">{provider}</p>
+                  <p className="mt-1 flex items-center gap-1.5 text-slate-600"><Clock3 className="h-3 w-3" /> Not connected</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </aside>
       </div>
     </div>
   );

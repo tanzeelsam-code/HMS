@@ -63,8 +63,21 @@ const DeveloperPortal = lazy(() => import('./components/DeveloperPortal').then((
 })));
 
 const ModuleLoading = () => (
-  <div className="glass-panel min-h-48 flex items-center justify-center text-sm font-semibold text-gray-400" role="status">
-    Loading workspace…
+  <div className="surface-panel min-h-64 flex flex-col items-center justify-center gap-4 text-sm font-semibold text-gray-400" role="status">
+    <div className="h-8 w-8 rounded-full border-2 border-white/10 border-t-amber-300 animate-spin" />
+    Preparing workspace…
+  </div>
+);
+
+const FullScreenLoading: React.FC<{ label: string }> = ({ label }) => (
+  <div className="min-h-screen flex flex-col items-center justify-center bg-[#070b12] text-gray-100 gap-5">
+    <div className="w-14 h-14 rounded-2xl bg-[#d6aa50] flex items-center justify-center text-[#090d14] font-black text-xl tracking-tighter shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+      N
+    </div>
+    <div className="flex items-center gap-3 text-sm text-gray-400 font-medium" role="status">
+      <span className="h-2 w-2 rounded-full bg-amber-300 animate-pulse" />
+      {label}
+    </div>
   </div>
 );
 
@@ -420,7 +433,7 @@ export const App: React.FC = () => {
 
   if (publicBooking) {
     return (
-      <div className="min-h-screen bg-slate-950 p-2 sm:p-4">
+      <div className="min-h-screen bg-[#070b12] p-3 sm:p-6 lg:p-8">
         <Suspense fallback={<ModuleLoading />}>
           <BookingEngine
             propertyName="Nexus Luxury Resort & Spa"
@@ -436,14 +449,7 @@ export const App: React.FC = () => {
   }
 
   if (!authReady) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-gray-100 gap-4">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-200 flex items-center justify-center shadow-lg shadow-amber-500/20 text-slate-950 font-black text-xl tracking-tighter animate-pulse-glow">
-          N
-        </div>
-        <p className="text-sm text-gray-400 font-medium" role="status">Restoring your secure session…</p>
-      </div>
-    );
+    return <FullScreenLoading label="Restoring your secure session" />;
   }
 
   if (!currentUser) {
@@ -470,23 +476,19 @@ export const App: React.FC = () => {
   }
 
   if (loading && !metrics) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-gray-100 gap-4">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-200 flex items-center justify-center shadow-lg shadow-amber-500/20 text-slate-950 font-black text-xl tracking-tighter animate-pulse-glow">
-          N
-        </div>
-        <p className="text-sm text-gray-400 font-medium" role="status">Loading live property data…</p>
-      </div>
-    );
+    return <FullScreenLoading label="Loading live property data" />;
   }
 
   if (loadError && !metrics) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-gray-100 gap-4 p-4">
-        <p className="text-sm text-rose-300 font-semibold" role="alert">{loadError}</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#070b12] text-gray-100 gap-5 p-6">
+        <div className="surface-panel max-w-lg p-8 text-center">
+          <p className="text-lg font-semibold text-gray-100">We could not load the property workspace</p>
+          <p className="mt-2 text-sm text-rose-300" role="alert">{loadError}</p>
+        </div>
         <div className="flex gap-3">
-          <button onClick={() => void loadAll()} className="btn-primary text-xs px-4 py-2">Retry</button>
-          <button onClick={() => void handleLogout()} className="btn-secondary text-xs px-4 py-2">Sign Out</button>
+          <button onClick={() => void loadAll()} className="btn-primary">Retry</button>
+          <button onClick={() => void handleLogout()} className="btn-secondary">Sign out</button>
         </div>
       </div>
     );
@@ -497,7 +499,7 @@ export const App: React.FC = () => {
   const canManageReservations = ['General Manager', 'Front Desk'].includes(currentUser.role);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-gray-100">
+    <div className="app-shell min-h-screen flex flex-col text-gray-100">
       {metrics && (
         <Navbar
           metrics={metrics}
@@ -521,7 +523,7 @@ export const App: React.FC = () => {
       {notice && (
         <div
           role={notice.tone === 'error' ? 'alert' : 'status'}
-          className={`fixed right-4 top-20 z-50 max-w-md rounded-xl border px-4 py-3 text-xs font-semibold shadow-2xl ${
+          className={`fixed right-5 top-24 z-50 max-w-md rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-2xl backdrop-blur-xl ${
             notice.tone === 'success'
               ? 'bg-emerald-950/95 border-emerald-500/40 text-emerald-200'
               : 'bg-rose-950/95 border-rose-500/40 text-rose-200'
@@ -531,7 +533,7 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      <div className="flex flex-1 flex-col md:flex-row">
+      <div className="workspace-frame flex flex-1 flex-col md:flex-row">
         <Sidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -540,7 +542,8 @@ export const App: React.FC = () => {
           userRole={currentUser.role}
         />
 
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto max-w-[1600px] mx-auto w-full">
+        <main className="workspace-main flex-1 w-full" data-workspace={activeTab}>
+          <div className="workspace-view">
           {activeTab === 'tape-chart' && (
             <TapeChart
               rooms={rooms}
@@ -681,6 +684,7 @@ export const App: React.FC = () => {
 
           {activeTab === 'procurement' && <ProcurementBoard />}
           {activeTab === 'hr' && <HrBoard />}
+          </div>
         </main>
       </div>
 

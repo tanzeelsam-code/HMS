@@ -1,12 +1,33 @@
 import React from 'react';
-import { 
-  CalendarDays, Users, Sparkles, Globe,
-  TrendingUp, Utensils, ClipboardCheck, PhoneCall,
-  Bot, Heart, Wrench, Building, MessageSquare, Leaf, Building2, Upload,
-  Calculator, Boxes, Briefcase, Workflow, ShieldCheck, UserCog, Code2
+import {
+  Bot,
+  Boxes,
+  Briefcase,
+  Building,
+  Building2,
+  Calculator,
+  CalendarDays,
+  CheckCircle2,
+  ChevronDown,
+  ClipboardCheck,
+  Code2,
+  Globe,
+  Heart,
+  Leaf,
+  MessageSquare,
+  PhoneCall,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  Upload,
+  UserCog,
+  Users,
+  Utensils,
+  Workflow,
+  Wrench,
 } from 'lucide-react';
 
-export type ActiveTab = 
+export type ActiveTab =
   | 'tape-chart'
   | 'reservations'
   | 'housekeeping'
@@ -46,255 +67,211 @@ export const Sidebar: React.FC<SidebarProps> = ({
   dirtyRoomsCount,
   userRole,
 }) => {
-  const navItems = [
+  const navGroups = [
     {
-      id: 'tape-chart' as ActiveTab,
-      label: 'Tape Chart Grid',
-      icon: CalendarDays,
-      badge: 'API',
-      badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+      label: 'Front office',
+      items: [
+        { id: 'tape-chart' as ActiveTab, label: 'Tape Chart', icon: CalendarDays },
+        {
+          id: 'reservations' as ActiveTab,
+          label: 'Reservations & Folios',
+          icon: Users,
+          count: pendingArrivalsCount > 0 ? pendingArrivalsCount : undefined,
+          countLabel: `${pendingArrivalsCount} arrivals pending`,
+          countTone: 'amber',
+        },
+        { id: 'guest-cdp' as ActiveTab, label: 'Guest Profiles', icon: Heart },
+        { id: 'groups' as ActiveTab, label: 'Groups & Events', icon: Building },
+      ],
     },
     {
-      id: 'staff-copilot' as ActiveTab,
-      label: 'Staff AI Copilot',
-      icon: Bot,
-      badge: 'Executable',
-      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+      label: 'Guest & commercial',
+      items: [
+        { id: 'guest-portal' as ActiveTab, label: 'Guest Experience', icon: PhoneCall },
+        { id: 'reputation' as ActiveTab, label: 'Reputation', icon: MessageSquare },
+        { id: 'ai-revenue' as ActiveTab, label: 'Revenue Management', icon: Sparkles },
+        { id: 'channel-manager' as ActiveTab, label: 'Channel Manager', icon: Globe },
+        { id: 'multi-property' as ActiveTab, label: 'Multi-Property', icon: Building2 },
+      ],
     },
     {
-      id: 'workflow-studio' as ActiveTab,
-      label: 'Workflow & Task Studio',
-      icon: Workflow,
-      badge: 'Live Engine',
-      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+      label: 'Operations',
+      items: [
+        {
+          id: 'housekeeping' as ActiveTab,
+          label: 'Housekeeping',
+          icon: ClipboardCheck,
+          count: dirtyRoomsCount > 0 ? dirtyRoomsCount : undefined,
+          countLabel: `${dirtyRoomsCount} rooms require attention`,
+          countTone: 'rose',
+        },
+        { id: 'maintenance' as ActiveTab, label: 'Engineering & Maintenance', icon: Wrench },
+        { id: 'pos-charges' as ActiveTab, label: 'POS Charge Posting', icon: Utensils },
+        { id: 'procurement' as ActiveTab, label: 'Procurement & Inventory', icon: Boxes },
+        { id: 'hr' as ActiveTab, label: 'Staff & Scheduling', icon: Briefcase },
+        { id: 'esg' as ActiveTab, label: 'Sustainability', icon: Leaf },
+      ],
     },
     {
-      id: 'platform-control' as ActiveTab,
-      label: 'Audit & Integration Hub',
-      icon: ShieldCheck,
-      badge: 'Signed Events',
-      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
+      label: 'Finance',
+      items: [
+        { id: 'analytics' as ActiveTab, label: 'Financial Analytics', icon: TrendingUp },
+        { id: 'accounting' as ActiveTab, label: 'General Ledger', icon: Calculator },
+      ],
     },
     {
-      id: 'access-admin' as ActiveTab,
-      label: 'Accounts & Property Access',
-      icon: UserCog,
-      badge: 'GM Control',
-      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+      label: 'Automation & administration',
+      items: [
+        { id: 'staff-copilot' as ActiveTab, label: 'AI Copilot', icon: Bot },
+        { id: 'workflow-studio' as ActiveTab, label: 'Workflow Studio', icon: Workflow },
+        { id: 'platform-control' as ActiveTab, label: 'Integration & Audit', icon: ShieldCheck },
+        { id: 'access-admin' as ActiveTab, label: 'Users & Property Access', icon: UserCog },
+        { id: 'developer-portal' as ActiveTab, label: 'Developer Portal', icon: Code2 },
+        { id: 'migration' as ActiveTab, label: 'Data Migration', icon: Upload },
+      ],
     },
-    {
-      id: 'developer-portal' as ActiveTab,
-      label: 'Developer & API Portal',
-      icon: Code2,
-      badge: 'OpenAPI 3.1',
-      badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
-    },
-    {
-      id: 'guest-cdp' as ActiveTab,
-      label: 'Unified Guest CDP',
-      icon: Heart,
-      badge: 'Mini-CDP',
-      badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-    },
-    {
-      id: 'groups' as ActiveTab,
-      label: 'Groups & Events',
-      icon: Building,
-      badge: 'Live API',
-      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-    },
-    {
-      id: 'reputation' as ActiveTab,
-      label: 'Reputation AI',
-      icon: MessageSquare,
-      badge: 'Persisted',
-      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
-    },
-    {
-      id: 'reservations' as ActiveTab,
-      label: 'Reservations & Folios',
-      icon: Users,
-      badge: pendingArrivalsCount > 0 ? `${pendingArrivalsCount} Arriving` : undefined,
-      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-    },
-    {
-      id: 'housekeeping' as ActiveTab,
-      label: 'Housekeeping Dispatch',
-      icon: ClipboardCheck,
-      badge: dirtyRoomsCount > 0 ? `${dirtyRoomsCount} Action` : undefined,
-      badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/30'
-    },
-    {
-      id: 'maintenance' as ActiveTab,
-      label: 'Engineering CMMS',
-      icon: Wrench,
-      badge: 'Work Orders',
-      badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-    },
-    {
-      id: 'esg' as ActiveTab,
-      label: 'ESG Energy',
-      icon: Leaf,
-      badge: 'Connector-ready',
-      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-    },
-    {
-      id: 'multi-property' as ActiveTab,
-      label: 'Multi-Property CRS',
-      icon: Building2,
-      badge: 'Portfolio API',
-      badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-    },
-    {
-      id: 'migration' as ActiveTab,
-      label: 'PMS CSV Migration',
-      icon: Upload,
-      badge: 'Prototype',
-      badgeColor: 'bg-gray-500/20 text-gray-300 border-gray-500/30'
-    },
-    {
-      id: 'guest-portal' as ActiveTab,
-      label: 'Guest Mobile & AI Concierge',
-      icon: PhoneCall,
-      badge: 'Prototype',
-      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
-    },
-    {
-      id: 'ai-revenue' as ActiveTab,
-      label: 'Revenue Rules & Forecast',
-      icon: Sparkles,
-      badge: 'Rules',
-      badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-    },
-    {
-      id: 'channel-manager' as ActiveTab,
-      label: 'OTA Channel Manager',
-      icon: Globe,
-      badge: 'Demo Sync',
-      badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-    },
-    {
-      id: 'pos-charges' as ActiveTab,
-      label: 'POS Charge Posting',
-      icon: Utensils,
-    },
-    {
-      id: 'analytics' as ActiveTab,
-      label: 'Financials & RevPAR',
-      icon: TrendingUp,
-    },
-    {
-      id: 'accounting' as ActiveTab,
-      label: 'Finance & General Ledger',
-      icon: Calculator,
-      badge: 'Live GL',
-      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-    },
-    {
-      id: 'procurement' as ActiveTab,
-      label: 'Procurement & Stock',
-      icon: Boxes,
-      badge: 'Par Levels',
-      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
-    },
-    {
-      id: 'hr' as ActiveTab,
-      label: 'Staff & Shifts',
-      icon: Briefcase,
-      badge: 'Roster',
-      badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-    }
   ];
 
   const tabsByRole: Record<string, ActiveTab[]> = {
     'Front Desk': [
-      'tape-chart', 'staff-copilot', 'workflow-studio', 'guest-cdp', 'groups', 'reputation',
-      'reservations', 'housekeeping', 'maintenance', 'guest-portal',
-      'channel-manager', 'pos-charges',
+      'tape-chart',
+      'staff-copilot',
+      'workflow-studio',
+      'guest-cdp',
+      'groups',
+      'reputation',
+      'reservations',
+      'housekeeping',
+      'maintenance',
+      'guest-portal',
+      'channel-manager',
+      'pos-charges',
     ],
     Housekeeping: ['tape-chart', 'staff-copilot', 'workflow-studio', 'housekeeping', 'maintenance'],
     Finance: [
-      'tape-chart', 'workflow-studio', 'platform-control', 'developer-portal', 'reservations', 'ai-revenue', 'analytics', 'accounting',
-      'procurement', 'multi-property',
+      'tape-chart',
+      'workflow-studio',
+      'platform-control',
+      'developer-portal',
+      'reservations',
+      'ai-revenue',
+      'analytics',
+      'accounting',
+      'procurement',
+      'multi-property',
     ],
   };
+
+  const allTabs = navGroups.flatMap((group) => group.items.map((item) => item.id));
   const permittedTabs = userRole === 'General Manager'
-    ? navItems.map((item) => item.id)
+    ? allTabs
     : (tabsByRole[userRole] || ['tape-chart']);
-  const visibleNavItems = navItems.filter((item) => permittedTabs.includes(item.id));
+  const visibleGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => permittedTabs.includes(item.id)),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <>
-      <div className="md:hidden px-4 pt-3 w-full">
-        <label htmlFor="mobile-navigation" className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
-          Current workspace
+      <div className="sticky top-[72px] z-30 w-full border-b border-white/[0.07] bg-[#0c1423]/95 px-4 py-3 backdrop-blur-xl md:hidden">
+        <label htmlFor="mobile-navigation" className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">
+          Workspace
         </label>
-        <select
-          id="mobile-navigation"
-          value={activeTab}
-          onChange={(event) => setActiveTab(event.target.value as ActiveTab)}
-          className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-xs font-semibold text-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-          aria-label="Choose hotel workspace"
-        >
-          {visibleNavItems.map((item) => (
-            <option key={item.id} value={item.id}>{item.label}</option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            id="mobile-navigation"
+            value={activeTab}
+            onChange={(event) => setActiveTab(event.target.value as ActiveTab)}
+            className="h-11 w-full appearance-none rounded-xl border border-white/[0.09] bg-[#111a2b] px-3.5 pr-10 text-sm font-semibold text-slate-100 shadow-sm focus:border-amber-300/45 focus:outline-none focus:ring-2 focus:ring-amber-300/10"
+            aria-label="Choose hotel workspace"
+          >
+            {visibleGroups.map((group) => (
+              <optgroup key={group.label} label={group.label}>
+                {group.items.map((item) => (
+                  <option key={item.id} value={item.id}>{item.label}</option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        </div>
       </div>
 
-      <aside className="w-64 glass-panel rounded-none border-t-0 border-l-0 min-h-[calc(100vh-65px)] p-4 flex-col justify-between hidden md:flex">
-      <div className="space-y-4">
-        <div className="px-3 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
-          Main Navigation
+      <aside className="sticky top-[72px] hidden h-[calc(100vh-72px)] w-[280px] shrink-0 flex-col border-r border-white/[0.07] bg-[#0c1423] md:flex">
+        <div className="border-b border-white/[0.06] px-5 py-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.17em] text-slate-500">Workspace</p>
+          <p className="mt-1 text-sm font-semibold text-slate-200">Property operations</p>
         </div>
 
-        <nav className="space-y-1 max-h-[75vh] overflow-y-auto pr-1">
-          {visibleNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
+        <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Hotel operations navigation">
+          <div className="space-y-6">
+            {visibleGroups.map((group) => (
+              <section key={group.label} aria-labelledby={`nav-${group.label.replace(/\s+/g, '-').toLowerCase()}`}>
+                <h2
+                  id={`nav-${group.label.replace(/\s+/g, '-').toLowerCase()}`}
+                  className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.17em] text-slate-600"
+                >
+                  {group.label}
+                </h2>
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
 
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all group ${
-                  isActive 
-                    ? 'bg-gradient-to-r from-amber-500/20 to-amber-500/5 text-amber-300 border border-amber-500/40 shadow-lg shadow-amber-500/10' 
-                    : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${isActive ? 'text-amber-400' : 'text-gray-400'}`} />
-                  <span className="truncate">{item.label}</span>
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setActiveTab(item.id)}
+                        aria-current={isActive ? 'page' : undefined}
+                        className={`group relative flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/50 ${
+                          isActive
+                            ? 'bg-white/[0.075] text-slate-50 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.055)]'
+                            : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                        }`}
+                      >
+                        {isActive && <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-amber-300" />}
+                        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                          isActive
+                            ? 'bg-amber-300/[0.1] text-amber-300'
+                            : 'bg-white/[0.025] text-slate-500 group-hover:text-slate-300'
+                        }`}>
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span className="min-w-0 flex-1 leading-4">{item.label}</span>
+                        {item.count !== undefined && (
+                          <span
+                            aria-label={item.countLabel}
+                            title={item.countLabel}
+                            className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                              item.countTone === 'rose'
+                                ? 'bg-rose-400/[0.12] text-rose-300'
+                                : 'bg-amber-300/[0.12] text-amber-200'
+                            }`}
+                          >
+                            {item.count}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-
-                {item.badge && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${item.badgeColor}`}>
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* System Status Footnote */}
-      <div className="pt-3 border-t border-white/10 space-y-2">
-        <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/5 text-xs space-y-1">
-          <div className="flex items-center justify-between text-[11px] text-gray-400">
-            <span>PMS Core Status:</span>
-            <span className="text-emerald-400 font-bold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Operational
-            </span>
+              </section>
+            ))}
           </div>
-          <div className="flex items-center justify-between text-[11px] text-gray-400">
-            <span>Data Source:</span>
-            <span className="text-amber-300 font-mono">SQLite API</span>
+        </nav>
+
+        <div className="border-t border-white/[0.07] p-4">
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+              Core services operational
+            </div>
+            <p className="mt-1.5 pl-6 text-[10px] leading-4 text-slate-500">Live property data is connected and current.</p>
           </div>
         </div>
-      </div>
       </aside>
     </>
   );

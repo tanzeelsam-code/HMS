@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { MaintenanceWorkOrder } from '../types';
-import { Wrench, Clock, AlertTriangle, CheckCircle2, Plus, ShieldAlert, User } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Plus,
+  ShieldAlert,
+  User,
+  Wrench,
+} from 'lucide-react';
 
 interface MaintenanceBoardProps {
   orders: MaintenanceWorkOrder[];
@@ -8,10 +16,22 @@ interface MaintenanceBoardProps {
   onResolveOrder: (orderId: string) => void;
 }
 
+const priorityStyles: Record<MaintenanceWorkOrder['priority'], string> = {
+  Urgent: 'border-rose-400/20 bg-rose-400/10 text-rose-300',
+  High: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
+  Normal: 'border-sky-400/20 bg-sky-400/10 text-sky-300',
+};
+
+const statusStyles: Record<MaintenanceWorkOrder['status'], string> = {
+  Open: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
+  'In-Progress': 'border-sky-400/20 bg-sky-400/10 text-sky-300',
+  Resolved: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+};
+
 export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
   orders,
   onAddOrder,
-  onResolveOrder
+  onResolveOrder,
 }) => {
   const [roomNumber, setRoomNumber] = useState('103');
   const [category, setCategory] = useState<MaintenanceWorkOrder['category']>('Plumbing');
@@ -27,8 +47,8 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
     setError('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (posting) return;
     if (!issueDescription.trim()) {
       setError('Describe the maintenance issue before dispatching it.');
@@ -68,51 +88,136 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
     }
   };
 
+  const openCount = orders.filter((order) => order.status === 'Open').length;
+  const progressCount = orders.filter((order) => order.status === 'In-Progress').length;
+  const urgentCount = orders.filter(
+    (order) => order.priority === 'Urgent' && order.status !== 'Resolved',
+  ).length;
+  const resolvedCount = orders.filter((order) => order.status === 'Resolved').length;
+  const summaryCards = [
+    { label: 'Open orders', value: openCount, icon: Wrench, tone: 'text-amber-300' },
+    { label: 'In progress', value: progressCount, icon: Clock, tone: 'text-sky-300' },
+    { label: 'Urgent attention', value: urgentCount, icon: AlertTriangle, tone: 'text-rose-300' },
+    { label: 'Resolved', value: resolvedCount, icon: CheckCircle2, tone: 'text-emerald-300' },
+  ];
+
   return (
-    <div className="space-y-6 animate-slide-up">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Engineering CMMS & Maintenance Hub</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/30">
-              Work Orders & Asset History
-            </span>
+    <div className="mx-auto w-full max-w-[1680px] space-y-6 pb-10 animate-slide-up">
+      <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/65 shadow-[0_18px_50px_rgba(0,0,0,0.22)]">
+        <div className="p-6">
+          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-300/80">
+            <Wrench className="h-4 w-4" /> Engineering operations
           </div>
-          <p className="text-xs text-gray-400 mt-1">
-            Preventive maintenance tracking, Housekeeping escalation loops, and SLA repair countdowns.
+          <h2 className="text-2xl font-semibold tracking-tight text-white">Maintenance</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+            Dispatch engineering work, monitor SLA exposure, and close completed repairs.
           </p>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Form */}
-        <div className="lg:col-span-5 glass-panel p-5 space-y-4">
-          <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <Wrench className="w-4 h-4 text-purple-400" /> Dispatch New Engineering Ticket
-          </h3>
+        <div className="grid border-t border-white/[0.07] sm:grid-cols-2 xl:grid-cols-4">
+          {summaryCards.map(({ label, value, icon: Icon, tone }, index) => (
+            <div
+              key={label}
+              className={`flex items-center gap-3 px-6 py-4 ${index > 0 ? 'border-t border-white/[0.07] sm:border-l sm:border-t-0' : ''} ${index === 2 ? 'sm:border-l-0 xl:border-l' : ''}`}
+            >
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04]">
+                <Icon className={`h-4 w-4 ${tone}`} />
+              </div>
+              <div>
+                <div className={`text-lg font-semibold leading-none ${tone}`}>{value}</div>
+                <div className="mt-1 text-xs text-slate-500">{label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
-          <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+      <div className="grid gap-6 xl:grid-cols-[minmax(360px,0.72fr)_minmax(0,1.28fr)]">
+        <section className="h-fit rounded-2xl border border-white/[0.08] bg-slate-900/55 shadow-[0_12px_35px_rgba(0,0,0,0.16)] xl:sticky xl:top-6">
+          <div className="border-b border-white/[0.07] px-5 py-5 xl:px-6">
+            <h3 className="flex items-center gap-2 font-semibold text-slate-100">
+              <Plus className="h-4 w-4 text-violet-300" /> New work order
+            </h3>
+            <p className="mt-1 text-xs text-slate-500">Create and route an engineering request</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5 p-5 text-sm xl:p-6">
             {error && (
-              <div role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-rose-200">
+              <div role="alert" className="rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-xs leading-5 text-rose-200">
                 {error}
               </div>
             )}
+
             <div>
-              <label className="block text-gray-400 font-semibold mb-1">Room #</label>
+              <label htmlFor="maintenance-room" className="mb-2 block text-xs font-medium text-slate-400">Room number</label>
               <input
+                id="maintenance-room"
                 type="text"
                 value={roomNumber}
-                onChange={(e) => {
-                  setRoomNumber(e.target.value);
+                onChange={(event) => {
+                  setRoomNumber(event.target.value);
                   resetPendingRequest();
                 }}
-                className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-amber-300 font-bold font-mono focus:outline-none focus:border-purple-400/50"
+                className="min-h-11 w-full rounded-xl border border-white/[0.09] bg-slate-950/50 px-3 font-mono font-semibold text-slate-100 outline-none transition-colors focus:border-violet-300/40"
                 required
               />
             </div>
 
-            <label className="flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/5 p-3 cursor-pointer">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="maintenance-category" className="mb-2 block text-xs font-medium text-slate-400">Category</label>
+                <select
+                  id="maintenance-category"
+                  value={category}
+                  onChange={(event) => {
+                    setCategory(event.target.value as MaintenanceWorkOrder['category']);
+                    resetPendingRequest();
+                  }}
+                  className="min-h-11 w-full rounded-xl border border-white/[0.09] bg-slate-950/50 px-3 text-slate-100 outline-none focus:border-violet-300/40"
+                >
+                  <option value="Plumbing">Plumbing</option>
+                  <option value="Electrical">Electrical</option>
+                  <option value="HVAC / AC">HVAC / AC</option>
+                  <option value="Door Lock">Door lock</option>
+                  <option value="Furniture">Furniture</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="maintenance-priority" className="mb-2 block text-xs font-medium text-slate-400">SLA priority</label>
+                <select
+                  id="maintenance-priority"
+                  value={priority}
+                  onChange={(event) => {
+                    setPriority(event.target.value as MaintenanceWorkOrder['priority']);
+                    resetPendingRequest();
+                  }}
+                  className="min-h-11 w-full rounded-xl border border-white/[0.09] bg-slate-950/50 px-3 text-slate-100 outline-none focus:border-violet-300/40"
+                >
+                  <option value="Urgent">Urgent · 30 min</option>
+                  <option value="High">High · 60 min</option>
+                  <option value="Normal">Normal · 2 hours</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="maintenance-description" className="mb-2 block text-xs font-medium text-slate-400">Issue description</label>
+              <textarea
+                id="maintenance-description"
+                rows={5}
+                placeholder="Describe the issue, location, and any immediate impact…"
+                value={issueDescription}
+                onChange={(event) => {
+                  setIssueDescription(event.target.value);
+                  resetPendingRequest();
+                }}
+                className="w-full resize-y rounded-xl border border-white/[0.09] bg-slate-950/50 p-3 text-slate-100 outline-none transition-colors placeholder:text-slate-600 focus:border-violet-300/40"
+                required
+              />
+            </div>
+
+            <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${safetyCritical ? 'border-rose-400/30 bg-rose-400/[0.08]' : 'border-white/[0.08] bg-slate-950/30 hover:bg-white/[0.03]'}`}>
               <input
                 type="checkbox"
                 checked={safetyCritical}
@@ -123,129 +228,87 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
                 className="mt-0.5 h-4 w-4 accent-rose-500"
               />
               <span>
-                <span className="block font-bold text-rose-200">Safety-critical escalation</span>
-                <span className="mt-0.5 block text-[11px] leading-4 text-gray-400">Creates a critical workflow that must be approved by a General Manager before its engineering task executes.</span>
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+                  <ShieldAlert className="h-3.5 w-3.5 text-rose-300" /> Safety-critical escalation
+                </span>
+                <span className="mt-1 block text-[11px] leading-5 text-slate-500">
+                  Requires General Manager approval before the engineering task executes.
+                </span>
               </span>
             </label>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-gray-400 font-semibold mb-1">Category</label>
-                <select
-                  value={category}
-                  onChange={(e) => {
-                    setCategory(e.target.value as MaintenanceWorkOrder['category']);
-                    resetPendingRequest();
-                  }}
-                  className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
-                >
-                  <option value="Plumbing">Plumbing</option>
-                  <option value="Electrical">Electrical</option>
-                  <option value="HVAC / AC">HVAC / AC</option>
-                  <option value="Door Lock">Door Lock</option>
-                  <option value="Furniture">Furniture</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-gray-400 font-semibold mb-1">SLA Priority</label>
-                <select
-                  value={priority}
-                  onChange={(e) => {
-                    setPriority(e.target.value as MaintenanceWorkOrder['priority']);
-                    resetPendingRequest();
-                  }}
-                  className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
-                >
-                  <option value="Urgent">Urgent (30m SLA)</option>
-                  <option value="High">High (60m SLA)</option>
-                  <option value="Normal">Normal (2h SLA)</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-gray-400 font-semibold mb-1">Issue Description</label>
-              <textarea
-                rows={3}
-                placeholder="Describe problem (e.g. Water leak under sink, AC thermostat offline...)"
-                value={issueDescription}
-                onChange={(e) => {
-                  setIssueDescription(e.target.value);
-                  resetPendingRequest();
-                }}
-                className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-purple-400/50"
-                required
-              />
-            </div>
-
-            <button type="submit" disabled={posting} className="btn-primary text-xs w-full py-2.5 justify-center disabled:opacity-50">
-              <Plus className="w-4 h-4" /> {posting ? 'Dispatching…' : 'Dispatch Work Order'}
+            <button type="submit" disabled={posting} className="btn-primary min-h-11 w-full justify-center text-sm disabled:cursor-not-allowed disabled:opacity-50">
+              <Plus className="h-4 w-4" /> {posting ? 'Dispatching…' : 'Dispatch work order'}
             </button>
           </form>
-        </div>
+        </section>
 
-        {/* Active Work Orders List */}
-        <div className="lg:col-span-7 glass-panel p-5 space-y-4">
-          <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-purple-400" /> Active Work Orders & SLA Tracker
-          </h3>
+        <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/55 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
+          <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-5 xl:px-6">
+            <div>
+              <h3 className="flex items-center gap-2 font-semibold text-slate-100">
+                <Clock className="h-4 w-4 text-violet-300" /> Work order queue
+              </h3>
+              <p className="mt-1 text-xs text-slate-500">Engineering ownership and SLA status</p>
+            </div>
+            <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs text-slate-400">
+              {orders.length} total
+            </span>
+          </div>
 
-          <div className="space-y-3">
-            {orders.map((o) => (
-              <div 
-                key={o.id}
-                className="p-4 rounded-xl bg-slate-900/80 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-purple-400/40 transition-all text-xs"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center font-mono font-bold text-purple-300 flex-shrink-0">
-                    #{o.roomNumber}
-                  </div>
+          {orders.length > 0 ? (
+            <div className="divide-y divide-white/[0.06]">
+              {orders.map((order) => (
+                <article key={order.id} className="p-5 transition-colors hover:bg-white/[0.02] xl:p-6">
+                  <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex min-w-0 items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-violet-400/15 bg-violet-400/[0.06]">
+                        <span className="text-[9px] uppercase tracking-wider text-slate-500">Room</span>
+                        <span className="font-mono text-sm font-semibold text-violet-200">{order.roomNumber}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h4 className="font-semibold text-white">{order.category}</h4>
+                          <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${priorityStyles[order.priority]}`}>{order.priority}</span>
+                          <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${statusStyles[order.status]}`}>{order.status}</span>
+                          {order.safetyCritical && (
+                            <span className="flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-400/10 px-2 py-1 text-[10px] font-semibold text-rose-300">
+                              <ShieldAlert className="h-3 w-3" /> Safety critical
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">{order.issueDescription}</p>
+                        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500">
+                          <span className="flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> {order.assignedEngineer}</span>
+                          <span>Reported by {order.reportedBy}</span>
+                          <span>{order.reportedTime}</span>
+                        </div>
+                      </div>
+                    </div>
 
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-gray-100">{o.category}</span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                        o.priority === 'Urgent' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse' : 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
-                      }`}>
-                        {o.priority}
-                      </span>
-                      {o.safetyCritical && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase bg-rose-500/20 text-rose-200 border border-rose-500/40">
-                          Safety
-                        </span>
+                    <div className="flex shrink-0 items-center justify-between gap-4 border-t border-white/[0.06] pt-4 sm:flex-col sm:items-end sm:border-0 sm:pt-0">
+                      <div className="text-left sm:text-right">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Target SLA</div>
+                        <div className="mt-1 text-sm font-semibold text-slate-200">{order.slaMinutes} minutes</div>
+                      </div>
+                      {order.status !== 'Resolved' && (
+                        <button onClick={() => onResolveOrder(order.id)} className="btn-secondary min-h-9 border-emerald-400/20 px-3 text-xs text-emerald-200 hover:bg-emerald-400/10">
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Mark resolved
+                        </button>
                       )}
                     </div>
-
-                    <p className="text-gray-300 text-xs mt-1">{o.issueDescription}</p>
-
-                    <div className="flex items-center gap-3 text-[11px] text-gray-400 mt-2">
-                      <span>Assigned: {o.assignedEngineer}</span>
-                      <span>• Reported: {o.reportedTime}</span>
-                    </div>
                   </div>
-                </div>
-
-                <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/10">
-                  <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] border ${
-                    o.status === 'Resolved' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                  }`}>
-                    {o.status}
-                  </span>
-
-                  {o.status !== 'Resolved' && (
-                    <button 
-                      onClick={() => onResolveOrder(o.id)}
-                      className="btn-secondary text-[11px] px-2.5 py-1 text-emerald-300 hover:bg-emerald-500/10 border-emerald-500/30"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Mark Fixed
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="flex min-h-80 flex-col items-center justify-center px-6 text-center">
+              <CheckCircle2 className="h-9 w-9 text-emerald-400/60" />
+              <h4 className="mt-4 font-semibold text-slate-200">No engineering work orders</h4>
+              <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">New requests will appear here with ownership and SLA details.</p>
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

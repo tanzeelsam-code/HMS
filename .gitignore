@@ -30,3 +30,7 @@ shots/
 backups/
 server/hms.db
 server/hms.db-*
+
+# Local browser validation artifacts
+.playwright-cli/
+output/
