@@ -34,9 +34,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [showNotifications, setShowNotifications] = useState(false);
 
   const properties = [
-    'Aura Luxury Resort & Spa (Main Property)',
-    'Aura Boutique Suites & Villas',
-    'Aura Grand Executive Hotel'
+    'Nexus Luxury Resort & Spa (Main Property)',
+    'Nexus Boutique Suites & Villas',
+    'Nexus Grand Executive Hotel'
   ];
 
   return (
@@ -45,18 +45,18 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-200 flex items-center justify-center shadow-lg shadow-amber-500/20 text-slate-950 font-black text-xl tracking-tighter">
-            A
+            N
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-lg tracking-tight text-gold-gradient">
-                AuraHMS
+                NexusHOS
               </span>
               <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/20">
-                Enterprise AI
+                Hotel Operating System
               </span>
             </div>
-            <p className="text-[11px] text-gray-400 font-medium">Property Management Suite</p>
+            <p className="text-[11px] text-gray-400 font-medium">Enterprise AI Core</p>
           </div>
         </div>
 
