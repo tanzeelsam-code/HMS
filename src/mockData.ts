@@ -1,4 +1,4 @@
-import { Room, Reservation, HousekeepingTask, DynamicPricingRule, ChannelStatus, PosCharge, HotelMetrics, GuestProfile, MaintenanceWorkOrder, AnomalyItem } from './types';
+import { Room, Reservation, HousekeepingTask, DynamicPricingRule, ChannelStatus, PosCharge, HotelMetrics, GuestProfile, MaintenanceWorkOrder, AnomalyItem, GroupBooking, ReviewItem, EsgMetric, PropertyComparison } from './types';
 
 export const INITIAL_ROOMS: Room[] = [
   // Floor 1 - Standard & Deluxe
@@ -185,8 +185,6 @@ export const INITIAL_METRICS: HotelMetrics = {
   dirtyRooms: 2
 };
 
-// --- NEW V2 SEED DATA ---
-
 export const INITIAL_GUEST_PROFILES: GuestProfile[] = [
   {
     id: 'cdp-1',
@@ -278,4 +276,79 @@ export const INITIAL_ANOMALIES: AnomalyItem[] = [
     amount: 140,
     actionRequired: 'Review Audit Override Log'
   }
+];
+
+// --- NEW V3 SEED DATA ---
+
+export const INITIAL_GROUP_BOOKINGS: GroupBooking[] = [
+  {
+    id: 'grp-1',
+    groupName: 'Global AI Summit 2026',
+    companyName: 'Apex Innovations Corp',
+    contactPerson: 'David Vance',
+    contactEmail: 'd.vance@apexinnovations.io',
+    roomsAllocated: 12,
+    roomsPickedUp: 10,
+    startDate: '2026-08-10',
+    endDate: '2026-08-15',
+    status: 'Definite Block',
+    groupRate: 290,
+    banquetCateringTotal: 14500,
+    totalValue: 31900
+  },
+  {
+    id: 'grp-2',
+    groupName: 'International Cardiology Symposium',
+    companyName: 'MedTech Global Forum',
+    contactPerson: 'Dr. Sarah Jenkins',
+    contactEmail: 's.jenkins@medtechforum.org',
+    roomsAllocated: 8,
+    roomsPickedUp: 5,
+    startDate: '2026-09-01',
+    endDate: '2026-09-05',
+    status: 'Tentative Hold',
+    groupRate: 310,
+    banquetCateringTotal: 9800,
+    totalValue: 22200
+  }
+];
+
+export const INITIAL_REVIEWS: ReviewItem[] = [
+  {
+    id: 'rev-1',
+    source: 'Google Reviews',
+    guestName: 'Marcus Brody',
+    rating: 5,
+    date: 'Yesterday',
+    reviewText: 'Exceptional stay! The contactless digital key unlocked Room 303 in seconds. Savor Fine Dining Wagyu steak was 10/10.',
+    sentiment: 'Positive',
+    aiDraftedResponse: 'Dear Marcus, Thank you for your glowing 5-star review! We are delighted that you enjoyed your stay in Suite 303, the effortless NFC digital key, and the Wagyu at Savor Fine Dining. We look forward to welcoming you back to NexusHOS properties soon!',
+    responded: false
+  },
+  {
+    id: 'rev-2',
+    source: 'Booking.com',
+    guestName: 'Claire Bennet',
+    rating: 4,
+    date: '3 days ago',
+    reviewText: 'Beautiful ocean view and spotless suite. Wi-Fi was fast. Minor wait during afternoon check-in queue.',
+    sentiment: 'Neutral',
+    aiDraftedResponse: 'Dear Claire, Thank you for sharing your experience. We are thrilled you loved the ocean balcony views and fiber Wi-Fi! We appreciate your feedback regarding check-in timing and are implementing mobile self check-in options to ensure instant arrivals.',
+    responded: false
+  }
+];
+
+export const INITIAL_ESG_METRICS: EsgMetric = {
+  date: '2026-07-21',
+  carbonPerOccupiedRoomKg: 11.4,
+  energyKwhSaved: 480,
+  hvacAutoSetbacksTriggered: 14,
+  waterConsumptionLiters: 1420,
+  renewableEnergyPercentage: 68
+};
+
+export const INITIAL_PORTFOLIO_COMPARISON: PropertyComparison[] = [
+  { propertyName: 'Nexus Luxury Resort & Spa (Main Property)', totalRooms: 14, occupancyRate: 85.7, adr: 384.50, revPar: 329.50, totalRevenue: 14850, goppar: 215.40 },
+  { propertyName: 'Nexus Boutique Suites & Villas', totalRooms: 20, occupancyRate: 92.0, adr: 450.00, revPar: 414.00, totalRevenue: 24840, goppar: 288.10 },
+  { propertyName: 'Nexus Grand Executive Hotel', totalRooms: 45, occupancyRate: 78.4, adr: 260.00, revPar: 203.80, totalRevenue: 27513, goppar: 142.30 }
 ];

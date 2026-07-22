@@ -36,8 +36,8 @@ export interface Reservation {
   vipTier: 'Member' | 'Silver' | 'Gold' | 'Platinum';
   roomNumber: string;
   roomType: RoomType;
-  checkIn: string; // YYYY-MM-DD
-  checkOut: string; // YYYY-MM-DD
+  checkIn: string;
+  checkOut: string;
   nights: number;
   guestsCount: number;
   status: BookingStatus;
@@ -106,8 +106,6 @@ export interface HotelMetrics {
   dirtyRooms: number;
 }
 
-// --- NEW V2 CDP & CMMS & ANOMALY MODELS ---
-
 export interface GuestProfile {
   id: string;
   name: string;
@@ -146,17 +144,64 @@ export interface AnomalyItem {
   actionRequired: string;
 }
 
-// --- ERP (GL / Inventory / Procurement / HR) & AI MODELS ---
+export interface GroupBooking {
+  id: string;
+  groupName: string;
+  companyName: string;
+  contactPerson: string;
+  contactEmail: string;
+  roomsAllocated: number;
+  roomsPickedUp: number;
+  startDate: string;
+  endDate: string;
+  status: 'Definite Block' | 'Tentative Hold' | 'Released';
+  groupRate: number;
+  banquetCateringTotal: number;
+  totalValue: number;
+}
 
+export interface ReviewItem {
+  id: string;
+  source: 'Google Reviews' | 'Booking.com' | 'TripAdvisor' | 'Expedia';
+  guestName: string;
+  rating: number;
+  date: string;
+  reviewText: string;
+  sentiment: 'Positive' | 'Neutral' | 'Negative';
+  aiDraftedResponse?: string;
+  responded: boolean;
+}
+
+export interface EsgMetric {
+  date: string;
+  carbonPerOccupiedRoomKg: number;
+  energyKwhSaved: number;
+  hvacAutoSetbacksTriggered: number;
+  waterConsumptionLiters: number;
+  renewableEnergyPercentage: number;
+}
+
+export interface PropertyComparison {
+  propertyName: string;
+  totalRooms: number;
+  occupancyRate: number;
+  adr: number;
+  revPar: number;
+  totalRevenue: number;
+  goppar: number;
+}
+
+// ERP & AI Types
 export interface GLAccount {
   id: string;
   code: string;
   name: string;
   type: 'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Expense';
+  balance: number;
 }
 
 export interface JournalLine {
-  id: string;
+  id?: string;
   accountId: string;
   accountCode: string;
   accountName: string;
@@ -166,46 +211,53 @@ export interface JournalLine {
 
 export interface JournalEntry {
   id: string;
-  date: string; // YYYY-MM-DD
+  date: string;
+  accountCode: string;
+  accountName: string;
+  debit: number;
+  credit: number;
   description: string;
   source: string;
   lines: JournalLine[];
 }
 
+export interface AnomalyAlert {
+  id: string;
+  severity: 'High' | 'Medium' | 'Low' | 'high' | 'medium' | 'low';
+  title: string;
+  detail: string;
+  message?: string;
+}
+
 export interface NightAuditSummary {
-  foliosPosted: number;
+  date: string;
   totalRoomRevenue: number;
-  journalEntryId: string | null;
+  totalTax: number;
+  totalPosRevenue: number;
+  auditedBy: string;
+  foliosPosted: number;
+  journalEntryId: string;
   ranAt: string;
 }
 
-export interface InventoryItem {
-  id: string;
-  name: string;
-  category: string;
-  unit: string;
-  onHand: number;
-  parLevel: number;
-  costPerUnit: number;
+export interface PricingForecast {
+  roomType: string;
+  date: string;
+  predictedDemand: number;
+  recommendedPrice: number;
+  recommendedRate: number;
+  baseRate: number;
+  demandMultiplier: number;
+  occupancyForecast: number;
+  reasoning: string[];
 }
 
-export interface Vendor {
-  id: string;
-  name: string;
-  contact: string;
-  category: string;
-}
-
-export interface PurchaseOrder {
-  id: string;
-  vendorId: string;
-  itemId: string;
-  qty: number;
-  unitCost: number;
-  status: 'Open' | 'Received';
-  orderDate: string;
-  vendorName?: string;
-  itemName?: string;
+export interface DemandForecastDay {
+  date: string;
+  occupancyPct: number;
+  demandIndex: number;
+  expectedOccupancy: number;
+  arrivals: number;
 }
 
 export interface Employee {
@@ -213,41 +265,63 @@ export interface Employee {
   name: string;
   role: string;
   department: string;
+  email: string;
+  phone: string;
+  status: 'Active' | 'On Leave' | 'Terminated';
   shift: string;
   hourlyRate: number;
-  status: 'Active' | 'On Leave' | 'Terminated';
 }
 
 export interface Shift {
   id: string;
-  employeeId: string;
-  date: string; // YYYY-MM-DD
-  start: string; // HH:MM
-  end: string; // HH:MM
-  employeeName?: string;
+  employeeName: string;
+  role: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  department: string;
+  start: string;
+  end: string;
 }
 
-export interface AnomalyAlert {
-  severity: 'High' | 'Medium' | 'Low';
-  message: string;
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: string;
+  stockQty: number;
+  onHand: number;
+  unit: string;
+  minReorderLevel: number;
+  parLevel: number;
+  unitPrice: number;
+  costPerUnit: number;
 }
 
-export interface PricingForecast {
-  roomType: RoomType;
-  baseRate: number;
-  recommendedRate: number;
-  demandMultiplier: number;
-  occupancyForecast: number; // % over next 14 days
-  reasoning: string[];
+export interface Vendor {
+  id: string;
+  name: string;
+  category: string;
+  contactEmail: string;
+  phone: string;
+  contact: string;
+  rating: number;
 }
 
-export interface DemandForecastDay {
-  date: string; // YYYY-MM-DD
-  expectedOccupancy: number; // %
-  arrivals: number;
+export interface PurchaseOrder {
+  id: string;
+  poNumber: string;
+  vendorName: string;
+  date: string;
+  orderDate: string;
+  itemName: string;
+  qty: number;
+  unitCost: number;
+  totalAmount: number;
+  status: 'Pending' | 'Approved' | 'Delivered' | 'Received' | 'Open';
 }
 
 export interface CopilotResponse {
-  reply: string;
-  actions: string[];
+  answer?: string;
+  reply?: string;
+  actions?: Array<{ label: string; action: string }>;
 }

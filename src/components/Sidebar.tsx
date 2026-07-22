@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   CalendarDays, Users, Sparkles, Globe, CreditCard, 
   TrendingUp, Settings, HelpCircle, Utensils, ClipboardCheck, PhoneCall,
-  Bot, Heart, Wrench, Calculator, Boxes, Briefcase
+  Bot, Heart, Wrench, Building, MessageSquare, Leaf, Building2, Upload
 } from 'lucide-react';
 
 export type ActiveTab = 
@@ -14,12 +14,14 @@ export type ActiveTab =
   | 'channel-manager'
   | 'pos-charges'
   | 'analytics'
-  | 'accounting'
-  | 'procurement'
-  | 'hr'
   | 'staff-copilot'
   | 'guest-cdp'
-  | 'maintenance';
+  | 'maintenance'
+  | 'groups'
+  | 'reputation'
+  | 'esg'
+  | 'multi-property'
+  | 'migration';
 
 interface SidebarProps {
   activeTab: ActiveTab;
@@ -57,6 +59,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30'
     },
     {
+      id: 'groups' as ActiveTab,
+      label: 'Groups & Events',
+      icon: Building,
+      badge: 'MICE',
+      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+    },
+    {
+      id: 'reputation' as ActiveTab,
+      label: 'Reputation AI',
+      icon: MessageSquare,
+      badge: 'Reviews',
+      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
+    },
+    {
       id: 'reservations' as ActiveTab,
       label: 'Reservations & Folios',
       icon: Users,
@@ -76,6 +92,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Wrench,
       badge: 'Work Orders',
       badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+    },
+    {
+      id: 'esg' as ActiveTab,
+      label: 'ESG Energy',
+      icon: Leaf,
+      badge: 'Green',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+    },
+    {
+      id: 'multi-property' as ActiveTab,
+      label: 'Multi-Property CRS',
+      icon: Building2,
+      badge: 'Portfolio',
+      badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+    },
+    {
+      id: 'migration' as ActiveTab,
+      label: 'PMS CSV Migration',
+      icon: Upload,
+      badge: 'Importer',
+      badgeColor: 'bg-gray-500/20 text-gray-300 border-gray-500/30'
     },
     {
       id: 'guest-portal' as ActiveTab,
@@ -107,27 +144,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'analytics' as ActiveTab,
       label: 'Financials & RevPAR',
       icon: TrendingUp,
-    },
-    {
-      id: 'accounting' as ActiveTab,
-      label: 'Finance & GL',
-      icon: Calculator,
-      badge: 'Live GL',
-      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-    },
-    {
-      id: 'procurement' as ActiveTab,
-      label: 'Procurement & Stock',
-      icon: Boxes,
-      badge: 'Par Levels',
-      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
-    },
-    {
-      id: 'hr' as ActiveTab,
-      label: 'Staff & Shifts',
-      icon: Briefcase,
-      badge: 'Roster',
-      badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
     }
   ];
 
@@ -138,7 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           Main Navigation
         </div>
 
-        <nav className="space-y-1">
+        <nav className="space-y-1 max-h-[75vh] overflow-y-auto pr-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -147,7 +163,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all group ${
                   isActive 
                     ? 'bg-gradient-to-r from-amber-500/20 to-amber-500/5 text-amber-300 border border-amber-500/40 shadow-lg shadow-amber-500/10' 
                     : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
@@ -155,7 +171,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 <div className="flex items-center gap-2.5">
                   <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${isActive ? 'text-amber-400' : 'text-gray-400'}`} />
-                  <span>{item.label}</span>
+                  <span className="truncate">{item.label}</span>
                 </div>
 
                 {item.badge && (
