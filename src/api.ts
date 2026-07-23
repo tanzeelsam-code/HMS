@@ -27,10 +27,14 @@ export const getStoredUser = (): AuthUser | null => {
   }
 };
 
-export const logout = () => {
-  void supabase.auth.signOut();
+const clearStoredUser = () => {
   localStorage.removeItem('aura_token');
   localStorage.removeItem(USER_KEY);
+};
+
+export const logout = () => {
+  clearStoredUser();
+  void supabase.auth.signOut();
 };
 
 export const login = async (email: string, password: string): Promise<AuthUser> => {
@@ -46,7 +50,7 @@ export const login = async (email: string, password: string): Promise<AuthUser> 
 export const restoreSession = async (): Promise<AuthUser | null> => {
   const { data: sessionData } = await supabase.auth.getSession();
   if (!sessionData.session) {
-    logout();
+    clearStoredUser();
     return null;
   }
   try {
