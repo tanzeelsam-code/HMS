@@ -4,7 +4,7 @@ NexusHOS is a full-stack hotel operating-system prototype. It combines a public 
 
 ## Quick start
 
-Requirements: **Node.js 22.5 or newer** (the API uses Node's built-in `node:sqlite`).
+Requirements: **Node.js 22.5 or newer** and a PostgreSQL connection. The production target is the same Supabase PostgreSQL project used by NexusERP.
 
 ```bash
 npm install
@@ -38,12 +38,13 @@ React 18 + TypeScript + Tailwind CSS
  public IBE    hotel/ERP   workflow     platform API
   + quotes      + GL      durable events  audit/webhooks
        \          |          |            /
-                 Node node:sqlite
+       NexusERP Supabase PostgreSQL
+          (`nexushos` schema)
 ```
 
 - `src/` contains the Vite client, API wrapper, screens, and shared types.
 - `server/index.js` wires secure sessions, throttling, authentication evidence, fail-closed production configuration, durable delivery workers, and the modular hotel, ERP, AI, booking, portfolio, workflow, administration, developer, and platform route groups.
-- `server/db.js` initializes the SQLite schema and seed data. The default development database is `server/hms.db`; `HMS_DB_PATH` selects another database for isolated runs.
+- `server/db.js` initializes versioned hotel tables in an isolated PostgreSQL schema. Set `NEXUSHOS_DATABASE_URL` to the Supabase Session-pooler URI and keep `NEXUSHOS_DB_SCHEMA=nexushos` so ERP tables with similar names cannot collide.
 - `server/security.js`, `server/audit.js`, and `server/webhooks.js` provide request IDs, response hardening, persistent rate-limit buckets, an HMAC-chained append-only audit log, encrypted webhook secrets, signed delivery, expiring worker leases, retries, and SSRF controls.
 - `server/inventory.js` accounts for reservations and active group holds by room type and stay date, so public quotes, final booking, and group contracting share one transactional availability model.
 - `server/routes/booking.js` owns public availability, server-authoritative 15-minute quotes, transactional booking, and idempotent confirmation.
@@ -51,9 +52,9 @@ React 18 + TypeScript + Tailwind CSS
 - `server/routes/admin.js` provides General-Manager-only user lifecycle, property memberships, session revocation, and forced temporary-password rotation. `server/routes/developer.js` publishes the OpenAPI 3.1 contract and live integration readiness.
 - The property business date uses `Europe/Copenhagen` by default; set `HMS_TIME_ZONE` to another IANA time-zone name when running a property elsewhere.
 - Copy `.env.example` into the runtime secret/configuration system when preparing a deployment. Production rejects absent, weak, placeholder, or reused audit, webhook-encryption, and rate-limit secrets; it also requires exact HTTPS CORS origins.
-- `test/` starts real isolated APIs and migration-era databases. Its 25 integration tests cover browser and bearer sessions, authentication evidence, throttling, production bootstrap safety, administrator controls, OpenAPI discovery, public booking and replay safety, group inventory, event/outbox crash recovery, webhook leases, portfolio workflows, approval gates, audit-chain verification, role redaction, reservations, settlement, accounting, procurement, and Night Audit idempotency.
+- `test/` starts isolated PostgreSQL-compatible PGlite databases. Its integration suite covers browser and bearer sessions, authentication evidence, throttling, production bootstrap safety, administrator controls, OpenAPI discovery, public booking and replay safety, group inventory, event/outbox crash recovery, webhook leases, portfolio workflows, approval gates, audit-chain verification, role redaction, reservations, settlement, accounting, procurement, and Night Audit idempotency.
 
-The “AI” features are transparent deterministic rules calculated from current database data; this project does not call an external model or require an AI API key.
+The AI Operations workspace always provides a transparent rules-based briefing from aggregate live property data. When the optional server-side `OPENAI_API_KEY` is configured, it also uses the OpenAI Responses API for structured briefings and broader natural-language analysis. Model context is role-scoped, excludes guest personal data, and never directly performs a database write; operational commands require an explicit review-and-approve step. Revenue calculations and action execution remain deterministic and auditable.
 
 ## Demo operating policies
 
@@ -90,8 +91,9 @@ The command creates one organization, one property shell, and one active General
 | `npm test` | Run isolated API integration tests with Node's built-in test runner. |
 | `npm run build` | Type-check the client and create a production bundle in `dist/`. |
 | `npm run preview` | Serve the built client locally. |
-| `npm run backup` | Create an online SQLite snapshot with an immediate integrity check. |
-| `npm run backup:verify -- /path/to/backup.sqlite` | Re-open a backup read-only, run SQLite integrity checks, and report critical record counts. |
+| `npm run backup` | Create a PostgreSQL custom-format archive of the NexusHOS schema with `pg_dump`. |
+| `npm run backup:verify -- /path/to/backup.dump` | Validate a PostgreSQL archive and its checksum manifest with `pg_restore`. |
+| `npm run migrate:sqlite -- --source=/path/to/hms.db` | Copy a legacy SQLite database into an empty NexusHOS PostgreSQL schema. |
 | `NODE_ENV=production npm run bootstrap:admin` | One-time creation of the first production property and General Manager from secret-managed inputs. |
 
 GitHub Actions runs the production build and isolated API suite on every pull request and push to `main`.
@@ -99,7 +101,7 @@ GitHub Actions runs the production build and isolated API suite on every pull re
 ## Current limitations
 
 - The organization, property, membership, and portfolio records are persisted, but operational hotel tables are still scoped to the main property. This is not yet tenant-isolated multi-property production architecture.
-- The synchronous `node:sqlite` API remains experimental and single-process oriented. A production release still needs PostgreSQL, formal versioned migrations, tested backups/restore, queues, high availability, observability, and deployment runbooks.
+- PostgreSQL persistence and a baseline migration ledger are implemented. The current compatibility adapter preserves the original synchronous route contracts through a worker-owned database connection; a later scalability pass should convert route handlers to native asynchronous queries and add a distributed worker tier, high availability, observability, and restore drills.
 - Passwords, secure cookie sessions, throttling, account administration, forced password rotation, session revocation, fixed roles, audit evidence, and integration scopes are implemented. Invitation/recovery delivery, MFA/passkeys, SSO/SAML/OIDC, SCIM, configurable permissions, retention controls, and compliance evidence automation remain.
 - Direct booking is a real pay-at-property reservation flow, not a card-payment flow. Tokenization, 3DS/SCA, authorization/capture/refunds, terminals, virtual cards, payouts, disputes, and PCI-isolated provider integration require a payment provider and merchant credentials.
 - Signed webhooks, crash-recoverable delivery, and an OpenAPI/event portal exist, but OTA/channel, SiteMinder, review publication, messaging, digital key, BMS/IoT, accounting, tax/fiscal, and email providers are not connected. Channel sync and guest portal screens remain clearly labeled demonstrations.

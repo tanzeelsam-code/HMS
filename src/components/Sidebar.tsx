@@ -13,6 +13,7 @@ import {
   Code2,
   Globe,
   Heart,
+  Home,
   Leaf,
   MessageSquare,
   PhoneCall,
@@ -28,6 +29,7 @@ import {
 } from 'lucide-react';
 
 export type ActiveTab =
+  | 'overview'
   | 'tape-chart'
   | 'reservations'
   | 'housekeeping'
@@ -71,6 +73,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       label: 'Front office',
       items: [
+        { id: 'overview' as ActiveTab, label: 'Today', icon: Home },
+        { id: 'staff-copilot' as ActiveTab, label: 'AI Operations', icon: Bot },
         { id: 'tape-chart' as ActiveTab, label: 'Tape Chart', icon: CalendarDays },
         {
           id: 'reservations' as ActiveTab,
@@ -122,7 +126,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       label: 'Automation & administration',
       items: [
-        { id: 'staff-copilot' as ActiveTab, label: 'AI Copilot', icon: Bot },
         { id: 'workflow-studio' as ActiveTab, label: 'Workflow Studio', icon: Workflow },
         { id: 'platform-control' as ActiveTab, label: 'Integration & Audit', icon: ShieldCheck },
         { id: 'access-admin' as ActiveTab, label: 'Users & Property Access', icon: UserCog },
@@ -134,6 +137,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const tabsByRole: Record<string, ActiveTab[]> = {
     'Front Desk': [
+      'overview',
       'tape-chart',
       'staff-copilot',
       'workflow-studio',
@@ -147,8 +151,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       'channel-manager',
       'pos-charges',
     ],
-    Housekeeping: ['tape-chart', 'staff-copilot', 'workflow-studio', 'housekeeping', 'maintenance'],
+    Housekeeping: ['overview', 'tape-chart', 'staff-copilot', 'workflow-studio', 'housekeeping', 'maintenance'],
     Finance: [
+      'overview',
       'tape-chart',
       'workflow-studio',
       'platform-control',
@@ -165,7 +170,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const allTabs = navGroups.flatMap((group) => group.items.map((item) => item.id));
   const permittedTabs = userRole === 'General Manager'
     ? allTabs
-    : (tabsByRole[userRole] || ['tape-chart']);
+    : (tabsByRole[userRole] || ['overview', 'tape-chart']);
   const visibleGroups = navGroups
     .map((group) => ({
       ...group,

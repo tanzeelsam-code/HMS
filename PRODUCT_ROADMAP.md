@@ -16,7 +16,7 @@ This roadmap turns the competitor benchmark into an execution sequence. “Imple
 
 ## Release 2 — production foundation (next)
 
-- Migrate operational data to PostgreSQL with organization/brand/property keys on every row and enforced tenant isolation.
+- PostgreSQL/Supabase persistence now runs in a private `nexushos` schema alongside NexusERP. Next, add organization/brand/property keys to every operational row and enforce tenant isolation throughout the domain model.
 - Add formal forward-only migrations, point-in-time recovery, restore drills, a distributed queue/worker tier, caching, structured logs, traces, metrics, alerts, and SLOs.
 - Add invitations and recovery delivery, MFA/passkeys, OIDC/SAML SSO, SCIM, session/device controls, custom roles/scopes, approval separation, and privacy retention/export/deletion.
 - Add OAuth applications, sandbox properties, operator webhook replay, SDK generation, URI versioning, API lifecycle policy, and integration certification tests.

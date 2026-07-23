@@ -24,6 +24,7 @@ import { BookingModal } from './components/BookingModal';
 import { FolioModal } from './components/FolioModal';
 import { LoginScreen } from './components/LoginScreen';
 import { ChangePasswordScreen } from './components/ChangePasswordScreen';
+import { OperationsOverview } from './components/OperationsOverview';
 
 import { api, getStoredUser, logout, restoreSession, ApiError, AuthUser, AUTH_EXPIRED_EVENT } from './api';
 import {
@@ -90,7 +91,7 @@ export const App: React.FC = () => {
   const [notice, setNotice] = useState<Notice | null>(null);
   const [reservationSearch, setReservationSearch] = useState('');
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>('tape-chart');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
   const selectedProperty = 'Nexus Luxury Resort & Spa (Main Property)';
 
   // Live API-backed property state.
@@ -459,7 +460,7 @@ export const App: React.FC = () => {
         setPublicBooking(true);
       }}
       onLogin={(user) => {
-        setActiveTab('tape-chart');
+        setActiveTab('overview');
         setCurrentUser(user);
       }}
     />;
@@ -544,6 +545,28 @@ export const App: React.FC = () => {
 
         <main className="workspace-main flex-1 w-full" data-workspace={activeTab}>
           <div className="workspace-view">
+          {activeTab === 'overview' && metrics && (
+            <OperationsOverview
+              userName={currentUser.name}
+              userRole={currentUser.role}
+              metrics={metrics}
+              rooms={rooms}
+              reservations={reservations}
+              housekeepingTasks={housekeepingTasks}
+              maintenanceOrders={maintenanceOrders}
+              onNavigate={setActiveTab}
+              onOpenNewBooking={() => {
+                setBookingRoomNumber(undefined);
+                setBookingStartDate(undefined);
+                setIsBookingModalOpen(true);
+              }}
+              onSearchReservations={() => {
+                setReservationSearch('');
+                setActiveTab('reservations');
+              }}
+            />
+          )}
+
           {activeTab === 'tape-chart' && (
             <TapeChart
               rooms={rooms}
@@ -560,7 +583,12 @@ export const App: React.FC = () => {
           )}
 
           {activeTab === 'staff-copilot' && (
-            <StaffCopilot onDataChanged={refreshOperationalData} />
+            <StaffCopilot
+              onDataChanged={refreshOperationalData}
+              onNavigate={setActiveTab}
+              userName={currentUser.name}
+              userRole={currentUser.role}
+            />
           )}
 
           {activeTab === 'workflow-studio' && (

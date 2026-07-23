@@ -1,5 +1,5 @@
 // Encrypted webhook subscriptions and HMAC-signed outbound delivery attempts.
-// Uses only Node.js standard-library modules and node:sqlite.
+// Delivery state is persisted in the NexusHOS PostgreSQL schema.
 import crypto from 'node:crypto';
 import dns from 'node:dns/promises';
 import http from 'node:http';
@@ -7,6 +7,7 @@ import https from 'node:https';
 import net from 'node:net';
 import { db as defaultDb } from './db.js';
 import { stableJson } from './audit.js';
+import { WEBHOOK_CONSTRAINTS_SQL } from './postgres-constraints.js';
 
 export const WEBHOOK_SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS webhook_subscriptions (
@@ -77,6 +78,7 @@ const MAX_PAYLOAD_BYTES = 256 * 1024;
 const MAX_RESPONSE_BYTES = 4 * 1024;
 const EVENT_SEGMENT = /^[a-z][a-z0-9_-]{0,62}$/;
 const ATTEMPT_STATUSES = new Set(['Pending', 'Delivering', 'Succeeded', 'Failed']);
+const initializedWebhookDatabases = new WeakSet();
 
 const uid = (prefix) => `${prefix}-${crypto.randomUUID()}`;
 
@@ -326,7 +328,9 @@ const publicAttempt = (row) => row && ({
 });
 
 export function initializeWebhookSchema(database = defaultDb) {
+  if (initializedWebhookDatabases.has(database)) return;
   database.exec(WEBHOOK_SCHEMA_SQL);
+  database.exec(WEBHOOK_CONSTRAINTS_SQL);
   // Additive migration for databases created before delivery leases existed.
   // The column check keeps initialization idempotent because every public
   // webhook operation calls this function before touching the tables.
@@ -354,6 +358,7 @@ export function initializeWebhookSchema(database = defaultDb) {
     CREATE INDEX IF NOT EXISTS idx_webhook_attempts_lease
       ON webhook_delivery_attempts (status, lease_expires_at, scheduled_at);
   `);
+  initializedWebhookDatabases.add(database);
 }
 
 export async function createWebhookSubscription({
@@ -457,7 +462,7 @@ export function disableWebhookSubscription(id, { database = defaultDb } = {}) {
 
 /**
  * Persist one immutable event and its initial delivery attempts. Call outside
- * an already-open SQLite transaction, or pass `manageTransaction: false` to
+ * an already-open PostgreSQL transaction, or pass `manageTransaction: false` to
  * include the outbox write atomically in a transaction the caller already owns.
  */
 export function enqueueWebhookEvent(eventType, payload, {
@@ -587,7 +592,7 @@ export async function deliverDueWebhooks({
   for (let claimNumber = 0; claimNumber < limit; claimNumber++) {
     const startedAt = new Date().toISOString();
     const leaseExpiresAt = new Date(Date.now() + effectiveLeaseMs).toISOString();
-    // Selection and claim happen in one SQLite statement. Competing workers
+    // Selection and claim happen in one PostgreSQL statement. Competing workers
     // cannot both obtain the same row, and an abandoned Delivering row becomes
     // eligible again only after its lease expires (or immediately when it came
     // from a pre-lease version and therefore has no expiry).

@@ -315,7 +315,7 @@ r.post('/hr/employees', requireGeneralManager, (req, res) => {
 r.get('/hr/shifts', requireGeneralManager, (req, res) => {
   res.json(db.prepare(`
     SELECT s.*, e.name AS employeeName FROM shifts s
-    JOIN employees e ON e.id = s.employeeId ORDER BY s.date, s.start`).all());
+    JOIN employees e ON e.id = s.employeeId ORDER BY s.date, s.start_time`).all());
 });
 
 r.post('/hr/shifts', requireGeneralManager, (req, res) => {
@@ -331,7 +331,7 @@ r.post('/hr/shifts', requireGeneralManager, (req, res) => {
     return res.status(400).json({ error: 'start and end must use 24-hour HH:MM format' });
   }
   const id = uid('sh');
-  db.prepare('INSERT INTO shifts (id, employeeId, date, start, end) VALUES (?, ?, ?, ?, ?)')
+  db.prepare('INSERT INTO shifts (id, employeeId, date, start_time, end_time) VALUES (?, ?, ?, ?, ?)')
     .run(id, b.employeeId, b.date, b.start, b.end);
   res.status(201).json(db.prepare('SELECT * FROM shifts WHERE id = ?').get(id));
 });

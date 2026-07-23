@@ -4,9 +4,18 @@ import { Router } from 'express';
 import { db, tx, uid, today } from '../db.js';
 import { requireRoles } from '../auth.js';
 import { assertReservationCanCheckIn } from './core.js';
+import { createStructuredAiResponse, getAiProviderStatus } from '../ai-provider.js';
+import { createPostgresRateLimiter } from '../security.js';
 
 const r = Router();
 const requireFinanceRole = requireRoles('General Manager', 'Finance');
+const aiRequestRateLimit = createPostgresRateLimiter({
+  database: db,
+  scope: 'api.ai.actor',
+  limit: 30,
+  windowMs: 60_000,
+  keyGenerator: (req) => req.user?.id || req.ip,
+});
 const DAY_MS = 86400000;
 const addDays = (dateStr, n) => new Date(new Date(dateStr).getTime() + n * DAY_MS).toISOString().slice(0, 10);
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -26,6 +35,199 @@ const occupancyStats = () => {
     : 0;
   return { totalRooms: availableRooms, occupiedRooms: occupied.length, occupancyRate, adr, revPar: +((adr * occupancyRate) / 100).toFixed(2) };
 };
+
+const operationalSnapshot = (user) => {
+  const businessDate = today();
+  const stats = occupancyStats();
+  const canSeeFinancials = ['General Manager', 'Finance'].includes(user?.role);
+  const count = (sql, ...params) => Number(db.prepare(sql).get(...params)?.n || 0);
+  return {
+    businessDate,
+    userRole: user?.role || 'Staff',
+    rooms: {
+      totalOperational: stats.totalRooms,
+      occupied: stats.occupiedRooms,
+      occupancyRate: stats.occupancyRate,
+      ready: count("SELECT COUNT(*) AS n FROM rooms WHERE status = 'Vacant Clean'"),
+      dirty: count("SELECT COUNT(*) AS n FROM rooms WHERE status = 'Vacant Dirty'"),
+      outOfService: count("SELECT COUNT(*) AS n FROM rooms WHERE status = 'Out of Service'"),
+    },
+    guestFlow: {
+      arrivalsToday: count(
+        "SELECT COUNT(*) AS n FROM reservations WHERE checkIn = ? AND status = 'Confirmed'",
+        businessDate,
+      ),
+      departuresToday: count(
+        "SELECT COUNT(*) AS n FROM reservations WHERE checkOut = ? AND status = 'Checked-In'",
+        businessDate,
+      ),
+      vipArrivals: count(
+        "SELECT COUNT(*) AS n FROM reservations WHERE checkIn = ? AND status = 'Confirmed' AND vipTier IN ('Gold','Platinum')",
+        businessDate,
+      ),
+    },
+    operations: {
+      activeHousekeeping: count(
+        "SELECT COUNT(*) AS n FROM housekeeping_tasks WHERE status IN ('Pending','In-Progress')",
+      ),
+      urgentHousekeeping: count(
+        "SELECT COUNT(*) AS n FROM housekeeping_tasks WHERE status IN ('Pending','In-Progress') AND priority = 'Urgent'",
+      ),
+      openMaintenance: count(
+        "SELECT COUNT(*) AS n FROM maintenance_orders WHERE status IN ('Open','In-Progress')",
+      ),
+      urgentMaintenance: count(
+        "SELECT COUNT(*) AS n FROM maintenance_orders WHERE status IN ('Open','In-Progress') AND priority IN ('Urgent','High')",
+      ),
+      lowStockItems: count('SELECT COUNT(*) AS n FROM inventory_items WHERE onHand <= parLevel'),
+    },
+    ...(canSeeFinancials ? {
+      financials: {
+        adr: stats.adr,
+        revPar: stats.revPar,
+      },
+    } : {}),
+  };
+};
+
+const briefingSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    summary: { type: 'string' },
+    priorities: {
+      type: 'array',
+      maxItems: 4,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          urgency: { type: 'string', enum: ['critical', 'high', 'normal'] },
+          title: { type: 'string' },
+          reason: { type: 'string' },
+          nextStep: { type: 'string' },
+          route: {
+            type: 'string',
+            enum: ['reservations', 'housekeeping', 'maintenance', 'procurement', 'ai-revenue', 'tape-chart'],
+          },
+          evidence: { type: 'array', items: { type: 'string' }, maxItems: 3 },
+        },
+        required: ['urgency', 'title', 'reason', 'nextStep', 'route', 'evidence'],
+      },
+    },
+    opportunities: {
+      type: 'array',
+      maxItems: 3,
+      items: { type: 'string' },
+    },
+  },
+  required: ['summary', 'priorities', 'opportunities'],
+};
+
+const fallbackBriefing = (snapshot) => {
+  const priorities = [];
+  if (snapshot.guestFlow.arrivalsToday > 0) {
+    priorities.push({
+      urgency: snapshot.guestFlow.vipArrivals > 0 ? 'high' : 'normal',
+      title: 'Prepare today’s arrivals',
+      reason: `${snapshot.guestFlow.arrivalsToday} guest arrival(s) are still confirmed, including ${snapshot.guestFlow.vipArrivals} VIP arrival(s).`,
+      nextStep: 'Review assignments, requests, and room readiness before check-in.',
+      route: 'reservations',
+      evidence: [
+        `${snapshot.guestFlow.arrivalsToday} confirmed arrivals`,
+        `${snapshot.rooms.ready} vacant clean rooms`,
+      ],
+    });
+  }
+  if (snapshot.operations.activeHousekeeping > 0 || snapshot.rooms.dirty > 0) {
+    priorities.push({
+      urgency: snapshot.operations.urgentHousekeeping > 0 ? 'high' : 'normal',
+      title: 'Complete the room-readiness queue',
+      reason: `${snapshot.operations.activeHousekeeping} housekeeping task(s) are active and ${snapshot.rooms.dirty} room(s) still need service.`,
+      nextStep: 'Assign urgent rooms first and inspect completed work.',
+      route: 'housekeeping',
+      evidence: [
+        `${snapshot.operations.urgentHousekeeping} urgent housekeeping tasks`,
+        `${snapshot.rooms.dirty} dirty rooms`,
+      ],
+    });
+  }
+  if (snapshot.operations.openMaintenance > 0) {
+    priorities.push({
+      urgency: snapshot.operations.urgentMaintenance > 0 ? 'high' : 'normal',
+      title: 'Protect saleable inventory',
+      reason: `${snapshot.operations.openMaintenance} engineering work order(s) remain open.`,
+      nextStep: 'Resolve safety and guest-impacting issues before lower-priority work.',
+      route: 'maintenance',
+      evidence: [
+        `${snapshot.operations.urgentMaintenance} high-priority work orders`,
+        `${snapshot.rooms.outOfService} rooms out of service`,
+      ],
+    });
+  }
+  if (snapshot.operations.lowStockItems > 0) {
+    priorities.push({
+      urgency: 'normal',
+      title: 'Replenish low-stock items',
+      reason: `${snapshot.operations.lowStockItems} inventory item(s) are at or below par.`,
+      nextStep: 'Review reorder quantities and pending purchase orders.',
+      route: 'procurement',
+      evidence: [`${snapshot.operations.lowStockItems} items at or below par`],
+    });
+  }
+
+  return {
+    summary: priorities.length
+      ? `${priorities.length} operating area(s) need attention on ${snapshot.businessDate}. Occupancy is ${snapshot.rooms.occupancyRate}%.`
+      : `No urgent operating exceptions are visible on ${snapshot.businessDate}. Occupancy is ${snapshot.rooms.occupancyRate}%.`,
+    priorities: priorities.slice(0, 4),
+    opportunities: [
+      snapshot.rooms.ready > 0 ? `${snapshot.rooms.ready} ready room(s) remain available for direct or walk-in demand.` : null,
+      snapshot.guestFlow.vipArrivals > 0 ? `Personalize arrival preparation for ${snapshot.guestFlow.vipArrivals} VIP guest(s).` : null,
+      snapshot.financials ? `Review pricing against ADR $${snapshot.financials.adr} and RevPAR $${snapshot.financials.revPar}.` : null,
+    ].filter(Boolean),
+  };
+};
+
+r.get('/ai/status', (req, res) => {
+  res.json(getAiProviderStatus());
+});
+
+r.get('/ai/briefing', aiRequestRateLimit, async (req, res, next) => {
+  const snapshot = operationalSnapshot(req.user);
+  const status = getAiProviderStatus();
+  try {
+    const generated = await createStructuredAiResponse({
+      schemaName: 'hotel_operations_briefing',
+      schema: briefingSchema,
+      instructions: [
+        'Role: You are an evidence-grounded hotel operations analyst.',
+        'Goal: Turn the supplied aggregate property snapshot into a concise shift briefing.',
+        'Constraints: Use only supplied facts. Do not invent guests, causes, money, dates, or actions already completed.',
+        'Respect the user role and omit financial claims when financials are absent.',
+        'Rank guest safety, arrivals, room readiness, and service recovery before optimization.',
+        'Output: One short summary, up to four priorities with evidence and a valid app route, and up to three opportunities.',
+      ].join('\n'),
+      input: JSON.stringify(snapshot),
+    });
+    res.json({
+      ...(generated || fallbackBriefing(snapshot)),
+      generatedBy: generated ? 'openai' : 'rules',
+      model: generated ? status.model : null,
+      generatedAt: new Date().toISOString(),
+      businessDate: snapshot.businessDate,
+    });
+  } catch {
+    return res.json({
+      ...fallbackBriefing(snapshot),
+      generatedBy: 'rules',
+      model: null,
+      generatedAt: new Date().toISOString(),
+      businessDate: snapshot.businessDate,
+      providerNotice: 'The enhanced briefing was unavailable, so the verified rules briefing is shown.',
+    });
+  }
+});
 
 // -------------------------------------------------------- pricing forecast ----
 r.get('/ai/pricing-forecast', requireFinanceRole, (req, res) => {
@@ -126,6 +328,8 @@ const copilotIntents = [
   },
   {
     test: (m) => /(clean|start housekeeping)\s+floor\s+\d+/.test(m),
+    mutating: true,
+    proposal: 'Create or re-activate housekeeping tasks for every dirty room on the requested floor.',
     run: (m, user) => {
       if (!['General Manager', 'Front Desk', 'Housekeeping'].includes(user?.role)) {
         return { reply: 'Starting housekeeping requires a General Manager, Front Desk, or Housekeeping role.', actions: [] };
@@ -156,6 +360,8 @@ const copilotIntents = [
   },
   {
     test: (m) => /vip/.test(m) && /(arrival|assign|high floor)/.test(m),
+    mutating: true,
+    proposal: 'Reassign eligible VIP arrivals to available higher-floor rooms of the same room type.',
     run: (m, user) => {
       if (!['General Manager', 'Front Desk'].includes(user?.role)) {
         return { reply: 'Reassigning VIP arrivals requires a General Manager or Front Desk role.', actions: [] };
@@ -204,6 +410,8 @@ const copilotIntents = [
   },
   {
     test: (m) => /apply\s+(the\s+)?recommended\s+rates/.test(m),
+    mutating: true,
+    proposal: 'Apply enabled configured rate recommendations to non-occupied inventory.',
     run: (m, user) => {
       if (!['General Manager', 'Finance'].includes(user?.role)) {
         return { reply: 'Applying recommended rates requires a General Manager or Finance role.', actions: [] };
@@ -220,6 +428,8 @@ const copilotIntents = [
   },
   {
     test: (m) => /check[- ]?in\s+[a-z]/i.test(m),
+    mutating: true,
+    proposal: 'Check in the matching confirmed reservation and mark its assigned room occupied.',
     run: (m, user) => {
       if (!['General Manager', 'Front Desk'].includes(user?.role)) {
         return { reply: 'Guest check-in requires a General Manager or Front Desk role.', actions: [] };
@@ -273,26 +483,82 @@ const CAPABILITIES = [
   '"check in <guest name>"',
 ];
 
-r.post('/ai/copilot', (req, res) => {
+r.post('/ai/copilot', aiRequestRateLimit, async (req, res, next) => {
   const message = String((req.body || {}).message || '').trim();
   if (!message) return res.status(400).json({ error: 'message is required' });
   const lower = message.toLowerCase();
+  const previewActions = req.body?.confirmActions === false;
   const replies = [];
   const actions = [];
+  const proposedActions = [];
   for (const intent of copilotIntents) {
     if (intent.test(lower)) {
+      if (intent.mutating && previewActions) {
+        proposedActions.push(intent.proposal);
+        continue;
+      }
       const result = intent.run(lower, req.user);
       replies.push(result.reply);
       actions.push(...result.actions);
     }
   }
-  if (replies.length === 0) {
+  if (proposedActions.length > 0) {
     return res.json({
-      reply: `I didn't understand that. I can help with: ${CAPABILITIES.join('; ')}.`,
+      reply: 'I prepared this change but have not applied it. Review the proposed action before running it.',
       actions: [],
+      proposedActions,
+      requiresConfirmation: true,
+      confirmationMessage: message,
+      generatedBy: 'rules',
     });
   }
-  res.json({ reply: replies.join(' '), actions });
+  if (replies.length === 0) {
+    const status = getAiProviderStatus();
+    if (status.configured) {
+      try {
+        const answer = await createStructuredAiResponse({
+          schemaName: 'hotel_copilot_answer',
+          schema: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              reply: { type: 'string' },
+              suggestedFollowUps: {
+                type: 'array',
+                maxItems: 3,
+                items: { type: 'string' },
+              },
+            },
+            required: ['reply', 'suggestedFollowUps'],
+          },
+          instructions: [
+            'Role: You are a hotel operations copilot answering from an aggregate live property snapshot.',
+            'Goal: Answer the staff question directly and recommend a useful next step.',
+            'Constraints: Use only supplied evidence. Never claim that an action was executed.',
+            'Do not expose or infer guest personal information. State when the snapshot lacks the answer.',
+            'Keep the reply under 120 words.',
+          ].join('\n'),
+          input: JSON.stringify({ question: message, snapshot: operationalSnapshot(req.user) }),
+          maxOutputTokens: 500,
+        });
+        return res.json({
+          ...answer,
+          actions: [],
+          generatedBy: 'openai',
+          model: status.model,
+        });
+      } catch {
+        // Keep the deterministic capability path available if the provider is
+        // unavailable, rate-limited, or refuses the request.
+      }
+    }
+    return res.json({
+      reply: `I need an enhanced AI connection to answer that safely. The verified commands available now are: ${CAPABILITIES.join('; ')}.`,
+      actions: [],
+      generatedBy: 'rules',
+    });
+  }
+  res.json({ reply: replies.join(' '), actions, generatedBy: 'rules' });
 });
 
 // ---------------------------------------------------------------- anomalies ----
@@ -301,16 +567,17 @@ r.get('/ai/anomalies', requireFinanceRole, (req, res) => {
 
   for (const row of db.prepare(`
     SELECT res.id, res.guestName, res.roomNumber,
-      ROUND(
-        COALESCE(SUM(f.amount), 0)
-        + MAX(0, res.totalAmount - COALESCE(SUM(
-          CASE WHEN f.category = 'Room Charge' THEN f.amount ELSE 0 END
-        ), 0)),
-        2
-      ) AS balance
+      COALESCE(SUM(f.amount), 0)
+      + GREATEST(0, res.totalAmount - COALESCE(SUM(
+        CASE WHEN f.category = 'Room Charge' THEN f.amount ELSE 0 END
+      ), 0)) AS balance
     FROM reservations res LEFT JOIN folio_items f ON res.id = f.reservation_id
     WHERE res.status = 'Checked-In'
-    GROUP BY res.id HAVING balance < -0.005`).all()) {
+    GROUP BY res.id
+    HAVING COALESCE(SUM(f.amount), 0)
+      + GREATEST(0, res.totalAmount - COALESCE(SUM(
+        CASE WHEN f.category = 'Room Charge' THEN f.amount ELSE 0 END
+      ), 0)) < -0.005`).all()) {
     anomalies.push({
       severity: 'High',
       message: `Reservation ${row.id} (${row.guestName}, room ${row.roomNumber}) has a projected checkout credit of $${Math.abs(row.balance).toFixed(2)} after contracted room charges.`,

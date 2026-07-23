@@ -21,13 +21,18 @@ import {
   createApiRateLimiter,
   createLoginRateLimiters,
   createSecurityMiddleware,
-  createSqliteRateLimiter,
+  createPostgresRateLimiter,
 } from './security.js';
 import { createMutationAuditMiddleware, recordAuditFromRequest } from './audit.js';
 import { createPlatformRouter } from './routes/platform.js';
 import { db, DB_PATH } from './db.js';
 import { backfillOperationalFolioJournals } from './accounting.js';
 import { deliverDueWebhooks } from './webhooks.js';
+
+// Router imports above install their additive tables. Re-assert private-schema
+// grants after every table and trigger exists so Supabase Data API roles cannot
+// reach internal hotel records directly.
+db.secureSchema();
 
 const isProduction = process.env.NODE_ENV === 'production';
 const productionSecret = (name) => {
@@ -173,7 +178,7 @@ app.get('/api/health', (req, res) => {
     res.status(503).json({ status: 'error', database: 'unavailable' });
   }
 });
-app.use('/api/booking', createSqliteRateLimiter({
+app.use('/api/booking', createPostgresRateLimiter({
   database: db,
   scope: 'api.booking.ip',
   limit: 120,

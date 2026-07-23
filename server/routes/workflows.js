@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { Router } from 'express';
 import { db, tx, uid } from '../db.js';
 import { requireRoles } from '../auth.js';
+import { WORKFLOW_CONSTRAINTS_SQL } from '../postgres-constraints.js';
 
 const r = Router();
 const operationalRoles = requireRoles('General Manager', 'Front Desk', 'Housekeeping', 'Finance');
@@ -141,6 +142,7 @@ BEGIN
   SELECT RAISE(ABORT, 'workflow run request evidence is immutable');
 END;
 `);
+db.exec(WORKFLOW_CONSTRAINTS_SQL);
 
 const nowIso = () => new Date().toISOString();
 const actorFor = (req) => req.user?.email || req.user?.name || 'Unknown user';
@@ -669,7 +671,7 @@ export function enqueueWorkflowEvent(eventType, aggregateId, context = {}, {
 
 /**
  * Drain a bounded number of durable workflow events. Claiming is a single
- * SQLite statement with a lease, so another process can safely reclaim a row
+ * PostgreSQL statement with a lease, so another process can safely reclaim a row
  * after a worker crash. Workflow-run idempotency protects the commit/ack gap:
  * if a worker dies after creating runs but before completing the outbox row,
  * replay observes those runs instead of duplicating them.
@@ -828,6 +830,7 @@ const insertStarter = db.prepare(`
     (id, name, description, trigger_type, trigger_config, actions, risk_level,
      approval_mode, status, version, created_by, created_at, updated_by, updated_at)
   VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Active', 1, 'System', ?, 'System', ?)`);
+if (process.env.NEXUSHOS_SKIP_SEED !== 'true') {
 insertStarter.run(
   'wf-vip-arrival-readiness',
   'VIP arrival readiness',
@@ -901,6 +904,7 @@ insertStarter.run(
   seededAt,
   seededAt,
 );
+}
 
 // --------------------------------------------------------------- templates ----
 r.get('/workflows/templates', operationalRoles, (req, res) => {

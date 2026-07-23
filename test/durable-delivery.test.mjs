@@ -4,10 +4,9 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { after, test } from 'node:test';
-import { DatabaseSync } from 'node:sqlite';
 
 const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'nexushos-delivery-'));
-process.env.HMS_DB_PATH = path.join(tempDirectory, 'workflow-test.db');
+process.env.NEXUSHOS_DATABASE_URL = `pglite://${path.join(tempDirectory, 'delivery-pg')}`;
 
 const {
   createWebhookSubscription,
@@ -27,31 +26,7 @@ after(() => {
 });
 
 test('webhook leases migrate legacy rows, reclaim crashes, and prevent double delivery', async () => {
-  const database = new DatabaseSync(':memory:');
-  database.exec('PRAGMA foreign_keys = ON');
-  database.exec(`
-    CREATE TABLE webhook_subscriptions (
-      id TEXT PRIMARY KEY, url TEXT NOT NULL, description TEXT,
-      event_types_json TEXT NOT NULL, secret_encrypted TEXT NOT NULL,
-      active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1)),
-      created_by TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
-    ) STRICT;
-    CREATE TABLE webhook_events (
-      id TEXT PRIMARY KEY, event_type TEXT NOT NULL, occurred_at TEXT NOT NULL,
-      request_id TEXT, payload_json TEXT NOT NULL, created_at TEXT NOT NULL
-    ) STRICT;
-    CREATE TABLE webhook_delivery_attempts (
-      id TEXT PRIMARY KEY,
-      event_id TEXT NOT NULL REFERENCES webhook_events(id),
-      subscription_id TEXT NOT NULL REFERENCES webhook_subscriptions(id),
-      attempt_number INTEGER NOT NULL CHECK (attempt_number >= 1),
-      status TEXT NOT NULL CHECK (status IN ('Pending', 'Delivering', 'Succeeded', 'Failed')),
-      scheduled_at TEXT NOT NULL, started_at TEXT, completed_at TEXT,
-      response_status INTEGER, response_body TEXT, error_message TEXT,
-      signature_version TEXT, created_at TEXT NOT NULL,
-      UNIQUE (event_id, subscription_id, attempt_number)
-    ) STRICT;
-  `);
+  const database = db;
   initializeWebhookSchema(database);
   const columns = database.prepare('PRAGMA table_info(webhook_delivery_attempts)')
     .all().map((column) => column.name);
@@ -145,7 +120,6 @@ test('webhook leases migrate legacy rows, reclaim crashes, and prevent double de
     );
   } finally {
     await new Promise((resolve) => receiver.close(resolve));
-    database.close();
   }
 });
 

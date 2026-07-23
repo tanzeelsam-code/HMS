@@ -1,6 +1,6 @@
 // Production-oriented HTTP security primitives for the NexusHOS API.
 //
-// These helpers deliberately use SQLite instead of process-local Maps so rate
+// These helpers deliberately use PostgreSQL instead of process-local Maps so rate
 // limits remain consistent when more than one API process shares the database.
 // For a geographically distributed deployment, use the same middleware shape
 // with a centralized/edge rate-limit store.
@@ -11,9 +11,9 @@ export const SECURITY_SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS api_rate_limit_buckets (
   scope TEXT NOT NULL,
   bucket_key TEXT NOT NULL,
-  window_start_ms INTEGER NOT NULL,
+  window_start_ms BIGINT NOT NULL,
   request_count INTEGER NOT NULL CHECK (request_count >= 0),
-  expires_at_ms INTEGER NOT NULL,
+  expires_at_ms BIGINT NOT NULL,
   PRIMARY KEY (scope, bucket_key)
 ) STRICT;
 
@@ -95,10 +95,10 @@ export function createSecurityMiddleware({
 }
 
 /**
- * Fixed-window SQLite rate limiter. Rejected requests continue incrementing the
+ * Fixed-window PostgreSQL rate limiter. Rejected requests continue incrementing the
  * current bucket, while the expiry remains fixed from its first request.
  */
-export function createSqliteRateLimiter({
+export function createPostgresRateLimiter({
   database = defaultDb,
   scope,
   limit,
@@ -188,7 +188,7 @@ export function createLoginRateLimiters({
   keyPepper = process.env.NEXUSHOS_RATE_LIMIT_PEPPER,
 } = {}) {
   return [
-    createSqliteRateLimiter({
+    createPostgresRateLimiter({
       database,
       scope: 'auth.login.ip',
       limit: perAddressLimit,
@@ -196,7 +196,7 @@ export function createLoginRateLimiters({
       keyPepper,
       keyGenerator: clientAddress,
     }),
-    createSqliteRateLimiter({
+    createPostgresRateLimiter({
       database,
       scope: 'auth.login.ip_account',
       limit: perAccountAndAddressLimit,
@@ -213,7 +213,7 @@ export function createApiRateLimiter({
   perActorLimit = 600,
   keyPepper = process.env.NEXUSHOS_RATE_LIMIT_PEPPER,
 } = {}) {
-  return createSqliteRateLimiter({
+  return createPostgresRateLimiter({
     database,
     scope: 'api.authenticated.actor',
     limit: perActorLimit,

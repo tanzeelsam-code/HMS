@@ -1,26 +1,31 @@
-// db.js — schema + seed for the NexusHOS local backend.
-// NOTE: better-sqlite3 could not be installed on this machine (no Visual Studio
-// build tools, and upstream ships no prebuilt binaries). We use Node's built-in
-// node:sqlite (DatabaseSync), which exposes the same synchronous API style.
-import { DatabaseSync } from 'node:sqlite';
+// db.js — PostgreSQL schema + seed for NexusHOS.
+// Hotel tables live in the dedicated `nexushos` schema of the NexusERP
+// PostgreSQL database so similarly named ERP tables remain independent.
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
 import { hashPassword, isPasswordHash } from './passwords.js';
+import { PostgresSyncDatabase } from './postgres-sync.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const configuredDbPath = process.env.HMS_DB_PATH?.trim();
-export const DB_PATH = configuredDbPath === ':memory:'
-  ? configuredDbPath
-  : path.resolve(configuredDbPath || path.join(__dirname, 'hms.db'));
-export const db = new DatabaseSync(DB_PATH);
+export const LEGACY_DB_PATH = path.resolve(
+  process.env.HMS_DB_PATH?.trim() || path.join(__dirname, 'hms.db'),
+);
+export const DB_SCHEMA = process.env.NEXUSHOS_DB_SCHEMA?.trim() || 'nexushos';
+export const DB_PATH = `PostgreSQL schema ${DB_SCHEMA}`;
+export const db = new PostgresSyncDatabase();
 
-db.exec('PRAGMA journal_mode = WAL');
-db.exec('PRAGMA foreign_keys = ON');
+db.exec(`
+  CREATE TABLE IF NOT EXISTS schema_migrations (
+    version INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    applied_at TEXT NOT NULL
+  )
+`);
 
 export const uid = (prefix) => `${prefix}-${crypto.randomUUID()}`;
 
-// Run fn inside a transaction (node:sqlite has no .transaction() helper).
+// Run fn inside the worker-owned PostgreSQL connection transaction.
 export function tx(fn) {
   db.exec('BEGIN');
   try {
@@ -133,7 +138,7 @@ CREATE TABLE IF NOT EXISTS employees (
   hourlyRate REAL, status TEXT
 );
 CREATE TABLE IF NOT EXISTS shifts (
-  id TEXT PRIMARY KEY, employeeId TEXT, date TEXT, start TEXT, end TEXT
+  id TEXT PRIMARY KEY, employeeId TEXT, date TEXT, start_time TEXT, end_time TEXT
 );
 CREATE TABLE IF NOT EXISTS night_audit_postings (
   business_date TEXT NOT NULL,
@@ -245,20 +250,15 @@ db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_normalized_email ON users(l
 
 // Older databases did not enforce reservation-code uniqueness. Repair any
 // pre-existing duplicates before adding the index used by search and Copilot.
-const duplicateReservationIds = db.prepare(`
-  SELECT id FROM reservations
-  WHERE rowid NOT IN (SELECT MIN(rowid) FROM reservations GROUP BY code)
-`).all();
-const reservationCodeExists = db.prepare('SELECT 1 FROM reservations WHERE code = ?');
-const updateReservationCode = db.prepare('UPDATE reservations SET code = ? WHERE id = ?');
-for (const reservation of duplicateReservationIds) {
-  let replacement;
-  do {
-    replacement = `GH-${crypto.randomInt(100000, 1000000)}`;
-  } while (reservationCodeExists.get(replacement));
-  updateReservationCode.run(replacement, reservation.id);
-}
+// The PostgreSQL schema is created with the unique reservation-code index from
+// its first migration. Legacy SQLite duplicates are repaired by the import
+// utility before data is copied.
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_reservations_code_unique ON reservations(code)');
+db.prepare(`
+  INSERT INTO schema_migrations (version, name, applied_at)
+  VALUES (1, 'nexushos_postgresql_baseline', ?)
+  ON CONFLICT (version) DO NOTHING
+`).run(new Date().toISOString());
 
 // Core accounts are schema-level dependencies used by operational postings.
 // INSERT OR IGNORE also upgrades databases created by older project versions.
@@ -281,7 +281,9 @@ for (const account of [
 // ------------------------------------------------------------------ seed ----
 const count = (t) => db.prepare(`SELECT COUNT(*) AS n FROM ${t}`).get().n;
 
-if (count('users') === 0 && process.env.NODE_ENV !== 'production') {
+if (count('users') === 0
+  && process.env.NODE_ENV !== 'production'
+  && process.env.NEXUSHOS_SKIP_SEED !== 'true') {
   tx(() => {
     const ins = (t, cols, rows) => {
       const stmt = db.prepare(
@@ -408,7 +410,7 @@ if (count('users') === 0 && process.env.NODE_ENV !== 'production') {
       ['emp-6', 'Priya Nair', 'Sous Chef', 'F&B', 'Evening', 27, 'Active'],
     ]);
 
-    ins('shifts', ['id', 'employeeId', 'date', 'start', 'end'], [
+    ins('shifts', ['id', 'employeeId', 'date', 'start_time', 'end_time'], [
       ['sh-1', 'emp-1', '2026-07-21', '07:00', '15:00'],
       ['sh-2', 'emp-2', '2026-07-21', '07:00', '15:00'],
       ['sh-3', 'emp-3', '2026-07-21', '09:00', '17:00'],
@@ -417,13 +419,13 @@ if (count('users') === 0 && process.env.NODE_ENV !== 'production') {
       ['sh-6', 'emp-6', '2026-07-21', '14:00', '22:00'],
     ]);
   });
-  console.log('[db] seeded hms.db');
+  console.log(`[db] seeded PostgreSQL schema ${DB_SCHEMA}`);
 }
 
 // Development portfolio records are seeded independently so older local
 // databases gain the organization model. Production never invents customer,
 // property, review, ESG, or group data.
-if (process.env.NODE_ENV !== 'production') tx(() => {
+if (process.env.NODE_ENV !== 'production' && process.env.NEXUSHOS_SKIP_SEED !== 'true') tx(() => {
   const createdAt = new Date().toISOString();
   db.prepare(`INSERT OR IGNORE INTO organizations (id, name, slug, created_at)
     VALUES (?, ?, ?, ?)`).run('org-nexus', 'Nexus Hospitality Group', 'nexus-hospitality', createdAt);

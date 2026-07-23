@@ -1243,7 +1243,8 @@ const documentedOperationCount = () => Object.values(OPENAPI_DOCUMENT.paths)
     .filter((key) => ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'].includes(key)).length, 0);
 
 const tableExists = (name) => !!db.prepare(
-  "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?"
+  `SELECT 1 FROM information_schema.tables
+   WHERE table_schema = current_schema() AND table_name = ?`
 ).get(name);
 
 const secretStatus = (name) => {
@@ -1288,8 +1289,8 @@ r.get('/developer/status', requireAuth, developerRateLimit, requirePasswordChang
     },
     database: {
       ready: databaseReady,
-      driver: 'node:sqlite DatabaseSync',
-      schemaMigrationsVersioned: false,
+      driver: 'PostgreSQL (NexusERP/Supabase)',
+      schemaMigrationsVersioned: true,
     },
     openApi: {
       ready: true,

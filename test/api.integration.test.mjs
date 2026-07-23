@@ -8,7 +8,6 @@ import os from 'node:os';
 import path from 'node:path';
 import { after, before, describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { DatabaseSync } from 'node:sqlite';
 import { contractedNightlyRate } from '../server/stay-pricing.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -28,6 +27,35 @@ async function unusedPort() {
   const { port } = server.address();
   await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
   return port;
+}
+
+async function queryIsolatedDatabase(databaseUrl, sql) {
+  const child = spawn(process.execPath, ['-e', `
+    import('./server/db.js').then(({ db }) => {
+      const row = db.prepare(process.env.TEST_QUERY).get();
+      console.log('TEST_QUERY_RESULT=' + JSON.stringify(row));
+      db.close();
+    }).catch((error) => { console.error(error); process.exitCode = 1; });
+  `], {
+    cwd: root,
+    env: {
+      ...process.env,
+      NODE_ENV: 'production',
+      NEXUSHOS_SKIP_SEED: 'true',
+      NEXUSHOS_DATABASE_URL: databaseUrl,
+      TEST_QUERY: sql,
+      NODE_NO_WARNINGS: '1',
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let output = '';
+  child.stdout.on('data', (chunk) => { output += chunk; });
+  child.stderr.on('data', (chunk) => { output += chunk; });
+  const [exitCode] = await once(child, 'exit');
+  assert.equal(exitCode, 0, output);
+  const encoded = output.split('\n').find((line) => line.startsWith('TEST_QUERY_RESULT='));
+  assert.ok(encoded, output);
+  return JSON.parse(encoded.slice('TEST_QUERY_RESULT='.length));
 }
 
 async function request(route, {
@@ -93,35 +121,17 @@ describe('NexusHOS API integration', { concurrency: false }, () => {
   before(async () => {
     // Refuse to run against the developer database if isolation support is removed.
     const databaseSource = await readFile(path.join(root, 'server/db.js'), 'utf8');
-    assert.match(databaseSource, /HMS_DB_PATH/, 'server/db.js must honor HMS_DB_PATH before integration tests can run safely');
+    assert.match(databaseSource, /NEXUSHOS_DB_SCHEMA/, 'server/db.js must isolate the NexusHOS PostgreSQL schema');
 
     tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'nexushos-api-'));
-    const databasePath = path.join(tempDirectory, 'hms-test.db');
-    // Start with the original reservation schema so every run exercises the
-    // idempotent actualCheckOut migration, not only fresh CREATE TABLE setup.
-    const legacyDb = new DatabaseSync(databasePath);
-    legacyDb.exec(`
-      CREATE TABLE reservations (
-        id TEXT PRIMARY KEY, code TEXT, guestName TEXT, guestEmail TEXT, guestPhone TEXT,
-        vipTier TEXT, roomNumber TEXT, roomType TEXT, checkIn TEXT, checkOut TEXT,
-        nights INTEGER, guestsCount INTEGER, status TEXT, channel TEXT,
-        totalAmount REAL, paidAmount REAL, specialRequests TEXT,
-        contactlessCheckInCompleted INTEGER DEFAULT 0
-      );
-      INSERT INTO reservations
-        (id, code, guestName, roomNumber, checkIn, checkOut, nights, guestsCount, status, totalAmount, paidAmount)
-      VALUES
-        ('legacy-duplicate-1', 'GH-100000', 'Legacy Duplicate One', 'X1', '2020-01-01', '2020-01-02', 1, 1, 'Cancelled', 0, 0),
-        ('legacy-duplicate-2', 'GH-100000', 'Legacy Duplicate Two', 'X2', '2020-01-01', '2020-01-02', 1, 1, 'Cancelled', 0, 0)
-    `);
-    legacyDb.close();
+    const databasePath = path.join(tempDirectory, 'hms-test-pg');
     const port = await unusedPort();
     apiBase = `http://127.0.0.1:${port}`;
     apiProcess = spawn(process.execPath, ['server/index.js'], {
       cwd: root,
       env: {
         ...process.env,
-        HMS_DB_PATH: databasePath,
+        NEXUSHOS_DATABASE_URL: `pglite://${databasePath}`,
         HMS_TRUST_PROXY: '',
         PORT: String(port),
         NODE_NO_WARNINGS: '1',
@@ -310,13 +320,14 @@ describe('NexusHOS API integration', { concurrency: false }, () => {
   });
 
   test('an empty production database never receives published demo credentials', async () => {
-    const productionDatabase = path.join(tempDirectory, 'empty-production.db');
+    const productionDatabase = path.join(tempDirectory, 'empty-production-pg');
+    const productionDatabaseUrl = `pglite://${productionDatabase}`;
     const child = spawn(process.execPath, ['-e', "import('./server/db.js')"], {
       cwd: root,
       env: {
         ...process.env,
         NODE_ENV: 'production',
-        HMS_DB_PATH: productionDatabase,
+        NEXUSHOS_DATABASE_URL: productionDatabaseUrl,
         NODE_NO_WARNINGS: '1',
       },
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -326,16 +337,17 @@ describe('NexusHOS API integration', { concurrency: false }, () => {
     child.stderr.on('data', (chunk) => { output += chunk; });
     const [exitCode] = await once(child, 'exit');
     assert.equal(exitCode, 0, output);
-    let productionDb = new DatabaseSync(productionDatabase, { readOnly: true });
-    assert.equal(productionDb.prepare('SELECT COUNT(*) AS count FROM users').get().count, 0);
-    productionDb.close();
+    assert.equal(
+      (await queryIsolatedDatabase(productionDatabaseUrl, 'SELECT COUNT(*) AS count FROM users')).count,
+      0,
+    );
 
     const server = spawn(process.execPath, ['server/index.js'], {
       cwd: root,
       env: {
         ...process.env,
         NODE_ENV: 'production',
-        HMS_DB_PATH: productionDatabase,
+        NEXUSHOS_DATABASE_URL: productionDatabaseUrl,
         HMS_ALLOWED_ORIGINS: 'https://hotel.example.com',
         NEXUSHOS_AUDIT_HMAC_SECRET: 'Aud1t-Zx9!Qp4#Lm7$Vr2%Cw8&Ks5*Ht3',
         NEXUSHOS_WEBHOOK_ENCRYPTION_KEY: 'Webh00k-Yt8@Mn3!Pc7#Rf2$Vx6%Bq9&Jd4',
@@ -356,7 +368,7 @@ describe('NexusHOS API integration', { concurrency: false }, () => {
       env: {
         ...process.env,
         NODE_ENV: 'production',
-        HMS_DB_PATH: productionDatabase,
+        NEXUSHOS_DATABASE_URL: productionDatabaseUrl,
         NEXUSHOS_BOOTSTRAP_ADMIN_EMAIL: 'initial.owner@example.com',
         NEXUSHOS_BOOTSTRAP_ADMIN_NAME: 'Bootstrap Owner',
         NEXUSHOS_BOOTSTRAP_ADMIN_PASSWORD: 'V8!Cobalt-River-Temporary',
@@ -374,10 +386,10 @@ describe('NexusHOS API integration', { concurrency: false }, () => {
     bootstrap.stderr.on('data', (chunk) => { bootstrapOutput += chunk; });
     const [bootstrapExitCode] = await once(bootstrap, 'exit');
     assert.equal(bootstrapExitCode, 0, bootstrapOutput);
-    productionDb = new DatabaseSync(productionDatabase, { readOnly: true });
-    const bootstrapped = productionDb.prepare(`
-      SELECT email, role, active, must_change_password FROM users
-    `).get();
+    const bootstrapped = await queryIsolatedDatabase(
+      productionDatabaseUrl,
+      'SELECT email, role, active, must_change_password FROM users',
+    );
     assert.deepEqual({
       email: bootstrapped.email,
       role: bootstrapped.role,
@@ -390,10 +402,12 @@ describe('NexusHOS API integration', { concurrency: false }, () => {
       mustChange: 1,
     });
     assert.equal(
-      productionDb.prepare('SELECT property_id FROM user_property_memberships').get().property_id,
+      (await queryIsolatedDatabase(
+        productionDatabaseUrl,
+        'SELECT property_id FROM user_property_memberships',
+      )).property_id,
       'prop-main',
     );
-    productionDb.close();
   });
 
   test('public direct booking holds a server quote, confirms once, and triggers frontline work', async () => {
@@ -1088,6 +1102,31 @@ describe('NexusHOS API integration', { concurrency: false }, () => {
     assert.equal(ambiguous.response.status, 200);
     assert.match(ambiguous.data.reply, /multiple|exact reservation code/i);
     assert.deepEqual(ambiguous.data.actions, []);
+
+    const preview = await request('/api/ai/copilot', {
+      method: 'POST',
+      authenticated: true,
+      body: { message: 'clean floor 1', confirmActions: false },
+    });
+    assert.equal(preview.response.status, 200);
+    assert.equal(preview.data.requiresConfirmation, true);
+    assert.ok(Array.isArray(preview.data.proposedActions));
+    assert.ok(preview.data.proposedActions.length > 0);
+    assert.deepEqual(preview.data.actions, []);
+  });
+
+  test('AI briefing is role-safe and available without an external model', async () => {
+    const briefing = await request('/api/ai/briefing', { authenticated: true });
+    assert.equal(briefing.response.status, 200, JSON.stringify(briefing.data));
+    assert.equal(typeof briefing.data.summary, 'string');
+    assert.ok(Array.isArray(briefing.data.priorities));
+    assert.ok(Array.isArray(briefing.data.opportunities));
+    assert.match(briefing.data.generatedBy, /^(openai|rules)$/);
+
+    const housekeepingToken = await loginAs('house@aura.com', 'house123');
+    const housekeepingBriefing = await request('/api/ai/briefing', { bearerToken: housekeepingToken });
+    assert.equal(housekeepingBriefing.response.status, 200, JSON.stringify(housekeepingBriefing.data));
+    assert.doesNotMatch(JSON.stringify(housekeepingBriefing.data), /\bADR\b|\bRevPAR\b/i);
   });
 
   test('night audit is idempotent for the same business date', async () => {

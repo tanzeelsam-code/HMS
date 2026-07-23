@@ -155,7 +155,7 @@ function backfillGroupRoomTypeAllocations() {
     LEFT JOIN group_room_blocks block ON block.group_booking_id = group_record.id
     WHERE group_record.status IN (?, ?)
     GROUP BY group_record.id
-    HAVING allocated_by_type != group_record.rooms_allocated
+    HAVING COALESCE(SUM(block.rooms_allocated), 0) != group_record.rooms_allocated
     ORDER BY group_record.created_at, group_record.id
   `).all(...ACTIVE_GROUP_STATUSES);
   if (groups.length === 0) return;

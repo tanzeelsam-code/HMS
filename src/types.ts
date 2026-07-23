@@ -343,4 +343,30 @@ export interface CopilotResponse {
   answer?: string;
   reply?: string;
   actions?: string[];
+  proposedActions?: string[];
+  requiresConfirmation?: boolean;
+  confirmationMessage?: string;
+  suggestedFollowUps?: string[];
+  generatedBy?: 'openai' | 'rules';
+  model?: string | null;
+}
+
+export interface AiBriefingPriority {
+  urgency: 'critical' | 'high' | 'normal';
+  title: string;
+  reason: string;
+  nextStep: string;
+  route: string;
+  evidence: string[];
+}
+
+export interface AiOperationsBriefing {
+  summary: string;
+  priorities: AiBriefingPriority[];
+  opportunities: string[];
+  generatedBy: 'openai' | 'rules';
+  model: string | null;
+  generatedAt: string;
+  businessDate: string;
+  providerNotice?: string;
 }

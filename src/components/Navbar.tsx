@@ -10,6 +10,7 @@ import {
   Search,
 } from 'lucide-react';
 import { HotelMetrics } from '../types';
+import { BrandMark } from './BrandMark';
 
 interface NavbarProps {
   metrics: HotelMetrics;
@@ -45,9 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="sticky top-0 z-40 flex h-[72px] w-full items-center gap-3 border-b border-white/[0.07] bg-[#0a1120]/95 px-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)] backdrop-blur-xl sm:px-5 lg:gap-5 lg:px-6">
       <div className="flex shrink-0 items-center gap-3" aria-label="NexusHOS hotel operating system">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-300/30 bg-amber-400 text-lg font-black tracking-[-0.08em] text-[#101722] shadow-[0_8px_24px_rgba(226,177,83,0.16)]">
-          N
-        </div>
+        <BrandMark className="h-10 w-10 drop-shadow-[0_8px_24px_rgba(226,177,83,0.16)]" />
         <div className="hidden sm:block">
           <div className="text-[17px] font-bold tracking-[-0.025em] text-slate-50">
             Nexus<span className="text-amber-300">HOS</span>

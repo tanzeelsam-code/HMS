@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   AlertTriangle,
   ArrowRight,
-  Building2,
   CalendarCheck2,
   CalendarDays,
   CheckCircle2,
@@ -12,6 +11,7 @@ import {
   Workflow,
 } from 'lucide-react';
 import { login, AuthUser } from '../api';
+import { BrandMark } from './BrandMark';
 
 interface LoginScreenProps {
   onLogin: (user: AuthUser) => void;
@@ -68,9 +68,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
     <main className="min-h-screen bg-[#070b12] text-gray-100 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(520px,0.95fr)]">
       <section className="relative hidden min-h-screen overflow-hidden border-r border-white/[0.07] lg:flex lg:flex-col lg:justify-between lg:p-14 xl:p-20">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(214,170,80,0.14),transparent_28rem),radial-gradient(circle_at_75%_80%,rgba(74,104,163,0.12),transparent_30rem)]" />
-        <div className="relative">
+          <div className="relative">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#d6aa50] text-lg font-black text-[#090d14] shadow-[0_12px_30px_rgba(0,0,0,0.25)]">N</div>
+            <BrandMark className="h-11 w-11 drop-shadow-[0_12px_30px_rgba(0,0,0,0.25)]" />
             <div>
               <div className="text-base font-bold tracking-[-0.025em] text-white">NexusHOS</div>
               <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">Hotel operating system</div>
@@ -111,7 +111,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
       <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-[480px]">
           <div className="mb-9 flex items-center gap-3 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d6aa50] font-black text-[#090d14]">N</div>
+            <BrandMark className="h-10 w-10" />
             <div>
               <div className="font-bold text-white">NexusHOS</div>
               <div className="text-[10px] uppercase tracking-[0.16em] text-gray-500">Hotel operating system</div>
@@ -119,9 +119,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
           </div>
 
           <div className="mb-8">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-[#111927] text-amber-300">
-              <Building2 className="h-5 w-5" />
-            </div>
+            <BrandMark className="mb-4 h-11 w-11" />
             <h2 className="text-3xl font-semibold tracking-[-0.04em] text-white">Welcome back</h2>
             <p className="mt-2 text-sm leading-6 text-gray-400">Sign in to continue to your property workspace.</p>
           </div>

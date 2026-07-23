@@ -1,11 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="NexusHOS">
-  <defs>
-    <linearGradient id="g" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#14b8a6"/>
-      <stop offset="1" stop-color="#2563eb"/>
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="16" fill="#0f172a"/>
-  <path d="M17 47V17h8l14 19V17h8v30h-8L25 28v19z" fill="url(#g)"/>
-  <path d="M14 51h36" stroke="#e2e8f0" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="NexusHOS logo" fill="none">
+  <rect x="3" y="3" width="58" height="58" rx="18" fill="#080D16"/>
+  <path d="M15 50V24c0-5.523 4.477-10 10-10h24v26c0 5.523-4.477 10-10 10H15Z" fill="#101A2B"/>
+  <path d="M16 49V24.8c0-5.412 4.388-9.8 9.8-9.8H48v24.2c0 5.412-4.388 9.8-9.8 9.8H16Z" stroke="#F7C96B" stroke-opacity=".45" stroke-width="2"/>
+  <path d="M21 40V23M31 40V23M21 31.5h10" stroke="#F7C96B" stroke-width="4.2" stroke-linecap="round"/>
+  <circle cx="39.5" cy="31.5" r="8.25" stroke="#65E0C7" stroke-width="4.2"/>
+  <circle cx="39.5" cy="31.5" r="2.2" fill="#65E0C7"/>
+  <path d="M50 24.2C47.9 21.5 44.7 20 40.6 20c-5 0-8.1 2.3-8.1 5.9 0 3.5 2.7 5.2 7 5.7 5.1.6 8.3 2.2 8.3 5.9 0 3.6-3.3 6.1-8.6 6.1-4.3 0-7.6-1.6-9.5-4.4" stroke="#F8FAFC" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M19 47h26" stroke="#65E0C7" stroke-width="2.6" stroke-linecap="round" stroke-opacity=".8"/>
 </svg>

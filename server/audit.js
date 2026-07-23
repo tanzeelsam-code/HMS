@@ -1,11 +1,12 @@
 // Append-only, HMAC-chained security audit events.
 //
-// The SQLite triggers prevent application-level UPDATE/DELETE operations. The
+// PostgreSQL triggers prevent application-level UPDATE/DELETE operations. The
 // HMAC chain additionally makes out-of-band alteration or removal detectable
 // when the signing key is held outside the database. Periodically export the
 // latest sequence/hash to independent storage for a durable external seal.
 import crypto from 'node:crypto';
 import { db as defaultDb } from './db.js';
+import { APPEND_ONLY_CONSTRAINTS_SQL } from './postgres-constraints.js';
 
 export const AUDIT_SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS audit_events (
@@ -52,6 +53,7 @@ const OUTCOMES = new Set(['success', 'failure', 'denied']);
 const SAFE_ACTION = /^[A-Za-z0-9._:-]{1,160}$/;
 const SAFE_TYPE = /^[A-Za-z0-9._:-]{1,100}$/;
 const MAX_METADATA_BYTES = 64 * 1024;
+const initializedAuditDatabases = new WeakSet();
 
 const requiredText = (value, name, pattern = null) => {
   if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${name} is required`);
@@ -166,7 +168,10 @@ const rowToSignedShape = (row) => ({
 });
 
 export function initializeAuditSchema(database = defaultDb) {
+  if (initializedAuditDatabases.has(database)) return;
   database.exec(AUDIT_SCHEMA_SQL);
+  database.exec(APPEND_ONLY_CONSTRAINTS_SQL);
+  initializedAuditDatabases.add(database);
 }
 
 /**
@@ -222,6 +227,7 @@ export function recordAuditEvent(event, {
         resource_type, resource_id, outcome, source, network_hash,
         metadata_json, previous_hash, event_hash
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      RETURNING sequence
     `).run(
       normalized.id,
       normalized.occurredAt,

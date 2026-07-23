@@ -15,15 +15,18 @@
     "test": "node --test --test-concurrency=1",
     "backup": "node scripts/backup.mjs",
     "backup:verify": "node scripts/verify-backup.mjs",
+    "migrate:sqlite": "node scripts/migrate-sqlite-to-postgres.mjs",
     "bootstrap:admin": "node scripts/bootstrap-admin.mjs"
   },
   "dependencies": {
     "express": "^5.2.1",
     "lucide-react": "^0.469.0",
+    "pg": "8.18.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.4",
     "@tailwindcss/vite": "^4.0.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",

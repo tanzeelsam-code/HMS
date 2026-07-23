@@ -555,7 +555,7 @@ r.post('/reservations/:id/folio-items', requireFolioRole, (req, res) => {
     db.prepare('INSERT INTO folio_items (id, reservation_id, date, description, category, amount, postedBy) VALUES (?, ?, ?, ?, ?, ?, ?)')
       .run(folioItemId, rez.id, today(), normalizedDescription, normalizedCategory, normalizedAmount, req.user.name);
     if (normalizedCategory === 'Payment') {
-      db.prepare('UPDATE reservations SET paidAmount = MAX(0, paidAmount - ?) WHERE id = ?')
+      db.prepare('UPDATE reservations SET paidAmount = GREATEST(0, paidAmount - ?) WHERE id = ?')
         .run(normalizedAmount, rez.id);
     }
     postFolioJournal({
