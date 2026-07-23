@@ -83,6 +83,21 @@ const asNumber = (value: unknown) => Number(value || 0);
 const requireNoError = (error: unknown) => {
   if (error) throw error;
 };
+// Runs best-effort compensating deletes after a failed multi-step write. Each
+// step is isolated so one failed cleanup call can't abort the rest and hide
+// the original error; failures are logged, not thrown.
+async function compensate(label: string, steps: Array<() => PromiseLike<{ error?: unknown } | void>>) {
+  for (const step of steps) {
+    try {
+      const result = await step();
+      if (result && (result as { error?: unknown }).error) {
+        console.error("compensation step failed", label, (result as { error?: unknown }).error);
+      }
+    } catch (cleanupError) {
+      console.error("compensation step failed", label, cleanupError);
+    }
+  }
+}
 const throwDatabaseError = (error: unknown) => {
   if ((error as { code?: string } | null)?.code === "23P01") {
     throw fail("Room is already reserved for the requested dates", 409);
@@ -121,8 +136,11 @@ const jwtIssuedAt = (token: string) => {
     return 0;
   }
 };
+// Falls back to a random value generated once per isolate (not derived from
+// the service-role key) if the operator has not configured a stable pepper.
+const fallbackRateLimitPepper = crypto.randomUUID();
 async function enforceRateLimit(req: Request, scope: string, limit: number, windowMs: number) {
-  const pepper = Deno.env.get("NEXUSHOS_RATE_LIMIT_PEPPER") || serviceKey.slice(-32);
+  const pepper = Deno.env.get("NEXUSHOS_RATE_LIMIT_PEPPER") || fallbackRateLimitPepper;
   const bucketKey = await sha256(`${pepper}:${clientAddress(req)}`);
   const { data, error } = await db.rpc("consume_rate_limit", {
     p_scope: scope,
@@ -377,30 +395,22 @@ async function listReservations(propertyId: string) {
   ));
 }
 
-async function metrics(propertyId: string, timezone: string) {
-  const [rooms, reservations, folios] = await Promise.all([
-    rows("rooms", propertyId), rows("reservations", propertyId), rows("folio_items", propertyId),
-  ]);
-  const businessDate = today(timezone);
-  const sellable = rooms.filter((r) => r.status !== "Out of Service").length;
-  const occupied = rooms.filter((r) => r.status === "Occupied").length;
-  const active = reservations.filter((r) => ["Confirmed", "Checked-In"].includes(String(r.status)));
-  const roomRevenue = folios.filter((f) => f.category === "Room Charge")
-    .reduce((sum, item) => sum + asNumber(item.amount), 0);
-  const occupiedNights = Math.max(1, active.reduce((sum, item) => sum + asNumber(item.nights), 0));
-  const occupancyRate = sellable ? Number(((occupied / sellable) * 100).toFixed(1)) : 0;
-  const adr = Number((roomRevenue / occupiedNights).toFixed(2));
+async function metrics(propertyId: string) {
+  if (!propertyId) throw fail("Property context is required", 500);
+  const { data, error } = await db.rpc("property_metrics", { p_property_id: propertyId }).single();
+  if (error) throw error;
+  const row = data as Record<string, unknown>;
   return {
-    businessDate,
-    occupancyRate,
+    businessDate: row.business_date,
+    occupancyRate: asNumber(row.occupancy_rate),
     financialMetricsAvailable: true,
-    adr,
-    revPar: Number((adr * occupancyRate / 100).toFixed(2)),
-    totalRevenue: Number(folios.reduce((sum, item) => sum + asNumber(item.amount), 0).toFixed(2)),
-    arrivalsToday: reservations.filter((r) => r.checkin === businessDate && !["Cancelled", "No-Show"].includes(String(r.status))).length,
-    departuresToday: reservations.filter((r) => r.checkout === businessDate && !["Cancelled", "No-Show"].includes(String(r.status))).length,
-    inHouseGuests: reservations.filter((r) => r.status === "Checked-In").reduce((sum, item) => sum + asNumber(item.guestscount), 0),
-    dirtyRooms: rooms.filter((r) => r.status === "Vacant Dirty").length,
+    adr: asNumber(row.adr),
+    revPar: asNumber(row.rev_par),
+    totalRevenue: asNumber(row.total_revenue),
+    arrivalsToday: asNumber(row.arrivals_today),
+    departuresToday: asNumber(row.departures_today),
+    inHouseGuests: asNumber(row.in_house_guests),
+    dirtyRooms: asNumber(row.dirty_rooms),
   };
 }
 
@@ -718,16 +728,18 @@ async function registerHotelTenant(req: Request, body: Record<string, unknown>) 
   } catch (error) {
     // Auth and Postgres cannot share one transaction. Compensate in reverse
     // order so a failed registration never leaves a usable partial tenant.
-    if (authUserId) {
-      await db.from("user_property_memberships").delete().eq("user_id", authUserId);
-      await db.from("users").delete().eq("id", authUserId);
-    }
-    await db.from("channels").delete().eq("property_id", propId);
-    await db.from("pricing_rules").delete().eq("property_id", propId);
-    await db.from("rooms").delete().eq("property_id", propId);
-    await db.from("properties").delete().eq("id", propId);
-    await db.from("organizations").delete().eq("id", orgId);
-    if (authUserId) await authClient.auth.admin.deleteUser(authUserId);
+    await compensate("register-hotel", [
+      ...(authUserId ? [
+        () => db.from("user_property_memberships").delete().eq("user_id", authUserId),
+        () => db.from("users").delete().eq("id", authUserId),
+      ] : []),
+      () => db.from("channels").delete().eq("property_id", propId),
+      () => db.from("pricing_rules").delete().eq("property_id", propId),
+      () => db.from("rooms").delete().eq("property_id", propId),
+      () => db.from("properties").delete().eq("id", propId),
+      () => db.from("organizations").delete().eq("id", orgId),
+      ...(authUserId ? [() => authClient.auth.admin.deleteUser(authUserId)] : []),
+    ]);
     throw error;
   }
 
@@ -837,9 +849,11 @@ async function handle(req: Request, path: string, url: URL, user: StaffUser | nu
       const { error: membershipError } = await db.from("user_property_memberships").insert(mems);
       if (membershipError) throw membershipError;
     } catch (error) {
-      await db.from("user_property_memberships").delete().eq("user_id", userId);
-      await db.from("users").delete().eq("id", userId);
-      await authClient.auth.admin.deleteUser(userId);
+      await compensate("create-staff-user", [
+        () => db.from("user_property_memberships").delete().eq("user_id", userId),
+        () => db.from("users").delete().eq("id", userId),
+        () => authClient.auth.admin.deleteUser(userId),
+      ]);
       throw error;
     }
 
@@ -915,11 +929,8 @@ async function handle(req: Request, path: string, url: URL, user: StaffUser | nu
     }
     const { error: authError } = await authClient.auth.admin.updateUserById(targetId, { password: newPassword });
     if (authError) throw authError;
-    await db.from("users").update({
-      must_change_password: 1,
-      auth_invalid_before: Math.floor(Date.now() / 1000),
-    }).eq("id", targetId);
     const { error } = await db.from("users").update({
+      must_change_password: 1,
       auth_invalid_before: Math.floor(Date.now() / 1000),
     }).eq("id", targetId);
     if (error) throw error;
@@ -975,7 +986,7 @@ async function handle(req: Request, path: string, url: URL, user: StaffUser | nu
       outlet: r.outlet, items: parseJson(r.items, []), total: asNumber(r.total), status: r.status,
     }));
   }
-  if (key === "GET /metrics") return metrics(user.propertyId, user.timezone);
+  if (key === "GET /metrics") return metrics(user.propertyId);
   if (key === "GET /guests") {
     requireRole(user, "folio");
     return (await rows("guest_profiles", user.propertyId, "name")).map((r) => ({

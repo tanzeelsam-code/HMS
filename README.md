@@ -42,26 +42,45 @@ React 18 + TypeScript + Tailwind CSS
           (`nexushos` schema)
 ```
 
+**Two backend implementations of the same API exist side by side.** `server/`
+(Express + PostgreSQL) is the **local development and test backend only** —
+it is what `npm run dev` and `npm test` exercise, and it is not deployed
+anywhere. `supabase/functions/nexushos-api/` (Deno) is the **only backend
+that serves production traffic** at `www.nexushos.com`; it is deployed
+independently through `deploy-supabase.yml` and is not started by `npm run
+dev`. The two reimplement overlapping business logic (rooms, reservations,
+admin user management, public booking) in different languages, so a rule
+change made in one is not automatically reflected in the other — when
+changing anything under "Demo operating policies" below, check whether the
+same change is needed in `supabase/functions/nexushos-api/index.ts` before
+assuming a passing `npm test` run covers production behavior.
+
 - `src/` contains the Vite client, API wrapper, screens, and shared types.
 - `supabase/functions/nexushos-api/` is the production API used by
   `www.nexushos.com`. It authenticates Supabase access tokens and scopes every
   hotel-owned query to the caller's property membership.
 - `supabase/migrations/` is the production database migration history. Tenant
   tables use mandatory `property_id` foreign keys and per-property uniqueness.
-- `server/index.js` wires secure sessions, throttling, authentication evidence, fail-closed production configuration, durable delivery workers, and the modular hotel, ERP, AI, booking, portfolio, workflow, administration, developer, and platform route groups.
-- `server/db.js` initializes versioned hotel tables in an isolated PostgreSQL schema. Set `NEXUSHOS_DATABASE_URL` to the Supabase Session-pooler URI and keep `NEXUSHOS_DB_SCHEMA=nexushos` so ERP tables with similar names cannot collide.
-- `server/security.js`, `server/audit.js`, and `server/webhooks.js` provide request IDs, response hardening, persistent rate-limit buckets, an HMAC-chained append-only audit log, encrypted webhook secrets, signed delivery, expiring worker leases, retries, and SSRF controls.
-- `server/inventory.js` accounts for reservations and active group holds by room type and stay date, so public quotes, final booking, and group contracting share one transactional availability model.
-- `server/routes/booking.js` owns public availability, server-authoritative 15-minute quotes, transactional booking, and idempotent confirmation.
-- `server/routes/workflows.js` owns versioned automations, risk-based approvals, immutable run evidence, task execution, and a leased transactional event outbox.
-- `server/routes/admin.js` provides General-Manager-only user lifecycle, property memberships, session revocation, and forced temporary-password rotation. `server/routes/developer.js` publishes the OpenAPI 3.1 contract and live integration readiness.
-- The property business date uses `Europe/Copenhagen` by default; set `HMS_TIME_ZONE` to another IANA time-zone name when running a property elsewhere.
+- `server/index.js` (local dev/test only) wires secure sessions, throttling, authentication evidence, fail-closed production configuration, durable delivery workers, and the modular hotel, ERP, AI, booking, portfolio, workflow, administration, developer, and platform route groups.
+- `server/db.js` (local dev/test only) initializes versioned hotel tables in an isolated PostgreSQL schema. Set `NEXUSHOS_DATABASE_URL` to the Supabase Session-pooler URI and keep `NEXUSHOS_DB_SCHEMA=nexushos` so ERP tables with similar names cannot collide.
+- `server/security.js`, `server/audit.js`, and `server/webhooks.js` (local dev/test only) provide request IDs, response hardening, persistent rate-limit buckets, an HMAC-chained append-only audit log, encrypted webhook secrets, signed delivery, expiring worker leases, retries, and SSRF controls.
+- `server/inventory.js` (local dev/test only) accounts for reservations and active group holds by room type and stay date, so public quotes, final booking, and group contracting share one transactional availability model.
+- `server/routes/booking.js` (local dev/test only) owns public availability, server-authoritative 15-minute quotes, transactional booking, and idempotent confirmation.
+- `server/routes/workflows.js` (local dev/test only) owns versioned automations, risk-based approvals, immutable run evidence, task execution, and a leased transactional event outbox.
+- `server/routes/admin.js` (local dev/test only) provides General-Manager-only user lifecycle, property memberships, session revocation, and forced temporary-password rotation. `server/routes/developer.js` publishes the OpenAPI 3.1 contract and live integration readiness.
+- The property business date uses `Europe/Copenhagen` by default in the local dev backend; set `HMS_TIME_ZONE` to another IANA time-zone name when running a property elsewhere. The production Edge Function instead derives the business date per-property from `properties.timezone`.
 - Copy `.env.example` into the runtime secret/configuration system when preparing a deployment. Production rejects absent, weak, placeholder, or reused audit, webhook-encryption, and rate-limit secrets; it also requires exact HTTPS CORS origins.
-- `test/` starts isolated PostgreSQL-compatible PGlite databases. Its integration suite covers browser and bearer sessions, authentication evidence, throttling, production bootstrap safety, administrator controls, OpenAPI discovery, public booking and replay safety, group inventory, event/outbox crash recovery, webhook leases, portfolio workflows, approval gates, audit-chain verification, role redaction, reservations, settlement, accounting, procurement, and Night Audit idempotency.
+- `test/` starts isolated PostgreSQL-compatible PGlite databases. Its integration suite covers browser and bearer sessions, authentication evidence, throttling, production bootstrap safety, administrator controls, OpenAPI discovery, public booking and replay safety, group inventory, event/outbox crash recovery, webhook leases, portfolio workflows, approval gates, audit-chain verification, role redaction, reservations, settlement, accounting, procurement, and Night Audit idempotency. A separate `test/supabase.migrations.test.mjs` applies the production migrations and exercises production-only SQL functions directly — this is the only automated coverage of the Supabase-specific code path, since the Deno Edge Function itself has no local integration test runner wired up.
 
 The AI Operations workspace always provides a transparent rules-based briefing from aggregate live property data. When the optional server-side `OPENAI_API_KEY` is configured, it also uses the OpenAI Responses API for structured briefings and broader natural-language analysis. Model context is role-scoped, excludes guest personal data, and never directly performs a database write; operational commands require an explicit review-and-approve step. Revenue calculations and action execution remain deterministic and auditable.
 
 ## Demo operating policies
+
+These policies describe the local development backend (`server/`) in full;
+the production Edge Function implements the same reservation, folio, and
+booking rules but currently authenticates with Supabase Auth bearer tokens
+rather than the `HttpOnly` session cookie described below, and does not yet
+implement the workflow/webhook/audit-chain items — see "Current limitations".
 
 - Cancellations are accepted before the arrival business date and fully reverse the local folio. From the arrival date onward, an unarrived confirmed booking uses **Mark No-Show**; the demo's no-penalty policy also reverses the folio and releases inventory.
 - Early departures retain the full contracted room and tax total. Checkout posts every unposted contract night, recognizes future-night contract charges on the current business date, and records `actualCheckOut` separately so operational departure counts do not recur on the former scheduled date.
