@@ -47,14 +47,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   const canSearch = ['General Manager', 'Front Desk', 'Finance'].includes(userRole);
 
   return (
-    <header className="sticky top-0 z-40 flex h-[72px] w-full items-center gap-3 border-b border-white/[0.07] bg-[#0a1120]/95 px-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)] backdrop-blur-xl sm:px-5 lg:gap-5 lg:px-6">
-      <div className="flex shrink-0 items-center gap-3" aria-label="Nexus HOS hotel operating system">
-        <BrandMark className="h-10 w-10 drop-shadow-[0_8px_24px_rgba(245,158,11,0.22)]" />
+    <header className="sticky top-0 z-40 flex h-[76px] w-full items-center gap-3 border-b border-white/[0.07] bg-[#0a1120]/95 px-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)] backdrop-blur-xl sm:px-5 lg:gap-5 lg:px-6">
+      <div className="flex shrink-0 items-center gap-3.5" aria-label="Nexus HOS hotel operating system">
+        <BrandMark className="h-[52px] w-[52px] drop-shadow-[0_10px_28px_rgba(245,158,11,0.28)]" />
         <div className="hidden sm:block">
-          <div className="text-[17px] font-bold tracking-[-0.025em] text-slate-50">
-            Nexus <span className="text-amber-400 font-extrabold">HOS</span>
+          <div className="text-[22px] font-black tracking-[-0.03em] text-slate-50 leading-none">
+            Nexus <span className="text-amber-400">HOS</span>
           </div>
-          <p className="mt-0.5 text-[9.5px] font-bold uppercase tracking-[0.2em] text-slate-400">
+          <p className="mt-1 text-[11.5px] font-bold uppercase tracking-[0.2em] text-slate-300 leading-none">
             Hotel operating system
           </p>
         </div>

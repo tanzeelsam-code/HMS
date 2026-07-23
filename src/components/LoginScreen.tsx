@@ -69,13 +69,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
       <section className="relative hidden min-h-screen overflow-hidden border-r border-white/[0.07] lg:flex lg:flex-col lg:justify-between lg:p-14 xl:p-20">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(214,170,80,0.14),transparent_28rem),radial-gradient(circle_at_75%_80%,rgba(74,104,163,0.12),transparent_30rem)]" />
           <div className="relative">
-          <div className="flex items-center gap-3">
-            <BrandMark className="h-11 w-11 drop-shadow-[0_12px_30px_rgba(0,0,0,0.25)]" />
+          <div className="flex items-center gap-4">
+            <BrandMark className="h-16 w-16 drop-shadow-[0_12px_30px_rgba(245,158,11,0.25)]" />
             <div>
-              <div className="text-base font-bold tracking-[-0.025em] text-white">
-                Nexus <span className="text-amber-400 font-extrabold">HOS</span>
+              <div className="text-2xl font-black tracking-[-0.03em] text-white leading-none">
+                Nexus <span className="text-amber-400">HOS</span>
               </div>
-              <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-gray-400">Hotel operating system</div>
+              <div className="mt-1.5 text-xs font-bold uppercase tracking-[0.2em] text-slate-300 leading-none">Hotel operating system</div>
             </div>
           </div>
 
@@ -112,18 +112,18 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
 
       <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-[480px]">
-          <div className="mb-9 flex items-center gap-3 lg:hidden">
-            <BrandMark className="h-10 w-10" />
+          <div className="mb-9 flex items-center gap-3.5 lg:hidden">
+            <BrandMark className="h-14 w-14" />
             <div>
-              <div className="font-bold text-white">
-                Nexus <span className="text-amber-400 font-extrabold">HOS</span>
+              <div className="text-xl font-black text-white leading-none">
+                Nexus <span className="text-amber-400">HOS</span>
               </div>
-              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-400">Hotel operating system</div>
+              <div className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-300 leading-none">Hotel operating system</div>
             </div>
           </div>
 
           <div className="mb-8">
-            <BrandMark className="mb-4 h-11 w-11" />
+            <BrandMark className="mb-5 h-16 w-16 drop-shadow-[0_12px_30px_rgba(245,158,11,0.25)]" />
             <h2 className="text-3xl font-semibold tracking-[-0.04em] text-white">Welcome back</h2>
             <p className="mt-2 text-sm leading-6 text-gray-400">Sign in to continue to your property workspace.</p>
           </div>
