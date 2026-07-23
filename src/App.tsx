@@ -24,6 +24,7 @@ import { BookingModal } from './components/BookingModal';
 import { FolioModal } from './components/FolioModal';
 import { LoginScreen } from './components/LoginScreen';
 import { ChangePasswordScreen } from './components/ChangePasswordScreen';
+import { ChangeOwnPasswordModal } from './components/ChangeOwnPasswordModal';
 import { OperationsOverview } from './components/OperationsOverview';
 
 import { api, getStoredUser, logout, restoreSession, ApiError, AuthUser, AUTH_EXPIRED_EVENT } from './api';
@@ -86,6 +87,7 @@ export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(getStoredUser());
   const [authReady, setAuthReady] = useState(false);
   const [publicBooking, setPublicBooking] = useState(isPublicBookingLocation());
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [notice, setNotice] = useState<Notice | null>(null);
@@ -514,6 +516,7 @@ export const App: React.FC = () => {
             setReservationSearch(query);
             setActiveTab('reservations');
           }}
+          onChangePassword={() => setChangePasswordOpen(true)}
           onLogout={handleLogout}
           selectedProperty={selectedProperty}
           userName={currentUser.name}
@@ -733,6 +736,17 @@ export const App: React.FC = () => {
           reservation={selectedReservationForFolio}
           onClose={() => setSelectedReservationForFolio(null)}
           onAddFolioItem={handleAddFolioItem}
+        />
+      )}
+
+      {changePasswordOpen && (
+        <ChangeOwnPasswordModal
+          user={currentUser}
+          onClose={() => setChangePasswordOpen(false)}
+          onChanged={(user) => {
+            setCurrentUser(user);
+            setNotice({ tone: 'success', message: 'Your password was changed successfully.' });
+          }}
         />
       )}
     </div>

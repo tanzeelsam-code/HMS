@@ -5,6 +5,7 @@ import {
   CalendarPlus,
   ChevronDown,
   Flame,
+  KeyRound,
   LogOut,
   Moon,
   Search,
@@ -19,6 +20,7 @@ interface NavbarProps {
   onSearch: (query: string) => void;
   selectedProperty: string;
   onLogout: () => void | Promise<void>;
+  onChangePassword: () => void;
   userName?: string;
   userRole?: string;
 }
@@ -30,6 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSearch,
   selectedProperty,
   onLogout,
+  onChangePassword,
   userName = 'General Manager',
   userRole = 'Front Desk Admin',
 }) => {
@@ -203,6 +206,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="whitespace-nowrap text-xs font-semibold text-slate-200">{userName}</div>
             <div className="mt-0.5 whitespace-nowrap text-[10px] text-slate-500">{userRole}</div>
           </div>
+          <button
+            type="button"
+            onClick={onChangePassword}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-amber-300/[0.08] hover:text-amber-200"
+            aria-label={`Change password for ${userName}`}
+            title="Change password"
+          >
+            <KeyRound className="h-4 w-4" />
+          </button>
           <button
             type="button"
             onClick={() => void onLogout()}
