@@ -8,6 +8,8 @@ export interface AuthUser {
   role: string;
   email: string;
   mustChangePassword?: boolean;
+  propertyId?: string;
+  allowedPropertyIds?: string[];
 }
 
 export class ApiError extends Error {
@@ -69,12 +71,14 @@ const request = async <T>(method: string, path: string, body?: unknown): Promise
   try {
     const { data: sessionData } = await supabase.auth.getSession();
     const accessToken = sessionData.session?.access_token;
+    const propertyId = getStoredUser()?.propertyId;
     const res = await fetch(`${supabaseFunctionUrl}${path}`, {
       method,
       headers: {
         'Content-Type': 'application/json',
         ...supabasePublicHeaders,
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        ...(propertyId ? { 'X-NexusHOS-Property-ID': propertyId } : {}),
       },
       signal: controller.signal,
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
@@ -125,6 +129,7 @@ export const changePassword = async (
   if (reauthenticated.error) throw new ApiError('Current password is incorrect', 401);
   const updated = await supabase.auth.updateUser({ password: newPassword });
   if (updated.error) throw new ApiError(updated.error.message, updated.error.status || 400);
+  await request<{ success: boolean }>('POST', '/auth/password-changed');
   const user = await restoreSession();
   if (!user) throw new ApiError('Unable to restore your session after changing password', 401);
   return user;

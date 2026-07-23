@@ -31,9 +31,9 @@ These credentials are seeded into a new local database and are for development o
 ```text
 React 18 + TypeScript + Tailwind CSS
                 |
-          Vite /api proxy
+     Cloudflare Worker static assets
                 |
-                 Express 5 REST API
+          Supabase Edge Function
        /          |          |            \
  public IBE    hotel/ERP   workflow     platform API
   + quotes      + GL      durable events  audit/webhooks
@@ -43,6 +43,11 @@ React 18 + TypeScript + Tailwind CSS
 ```
 
 - `src/` contains the Vite client, API wrapper, screens, and shared types.
+- `supabase/functions/nexushos-api/` is the production API used by
+  `www.nexushos.com`. It authenticates Supabase access tokens and scopes every
+  hotel-owned query to the caller's property membership.
+- `supabase/migrations/` is the production database migration history. Tenant
+  tables use mandatory `property_id` foreign keys and per-property uniqueness.
 - `server/index.js` wires secure sessions, throttling, authentication evidence, fail-closed production configuration, durable delivery workers, and the modular hotel, ERP, AI, booking, portfolio, workflow, administration, developer, and platform route groups.
 - `server/db.js` initializes versioned hotel tables in an isolated PostgreSQL schema. Set `NEXUSHOS_DATABASE_URL` to the Supabase Session-pooler URI and keep `NEXUSHOS_DB_SCHEMA=nexushos` so ERP tables with similar names cannot collide.
 - `server/security.js`, `server/audit.js`, and `server/webhooks.js` provide request IDs, response hardening, persistent rate-limit buckets, an HMAC-chained append-only audit log, encrypted webhook secrets, signed delivery, expiring worker leases, retries, and SSRF controls.
@@ -96,11 +101,35 @@ The command creates one organization, one property shell, and one active General
 | `npm run migrate:sqlite -- --source=/path/to/hms.db` | Copy a legacy SQLite database into an empty NexusHOS PostgreSQL schema. |
 | `NODE_ENV=production npm run bootstrap:admin` | One-time creation of the first production property and General Manager from secret-managed inputs. |
 
-GitHub Actions runs the production build and isolated API suite on every pull request and push to `main`.
+GitHub Actions runs the production build, isolated API suite, migration test,
+and Supabase Edge Function type-check on every pull request and push to `main`.
+
+## Production deployment
+
+The frontend and backend are separate deployment targets:
+
+- Cloudflare automatically builds and deploys the frontend after a successful
+  push to `main`, using `npm run build` and `npx wrangler deploy`.
+- The Supabase database migrations and `nexushos-api` Edge Function deploy
+  through `.github/workflows/deploy-supabase.yml`. Configure the GitHub
+  repository variable `SUPABASE_PROJECT_REF` and the production-environment
+  secrets `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD` once. Until those
+  values exist, the backend deployment job intentionally remains skipped.
+- Keep public buyer self-registration disabled until Turnstile and the buyer
+  lifecycle are operational. Enabling it requires Edge Function secrets
+  `NEXUSHOS_SELF_SERVICE_SIGNUP_ENABLED=true`, `TURNSTILE_SECRET_KEY`, and a
+  strong random `NEXUSHOS_RATE_LIMIT_PEPPER`.
+
+Before accepting a paying customer, also verify the hosted Supabase Auth
+settings: direct email signup disabled, 12-character strong passwords, secure
+password changes enabled, production SMTP configured, and the correct Site URL.
+The checked-in `supabase/config.toml` applies these defaults to local stacks but
+does not silently change every hosted Auth setting.
 
 ## Current limitations
 
-- The organization, property, membership, and portfolio records are persisted, but operational hotel tables are still scoped to the main property. This is not yet tenant-isolated multi-property production architecture.
+- Tenant isolation is implemented in the migration and Edge Function, but it is
+  effective in production only after both are deployed by the Supabase workflow.
 - PostgreSQL persistence and a baseline migration ledger are implemented. The current compatibility adapter preserves the original synchronous route contracts through a worker-owned database connection; a later scalability pass should convert route handlers to native asynchronous queries and add a distributed worker tier, high availability, observability, and restore drills.
 - Passwords, secure cookie sessions, throttling, account administration, forced password rotation, session revocation, fixed roles, audit evidence, and integration scopes are implemented. Invitation/recovery delivery, MFA/passkeys, SSO/SAML/OIDC, SCIM, configurable permissions, retention controls, and compliance evidence automation remain.
 - Direct booking is a real pay-at-property reservation flow, not a card-payment flow. Tokenization, 3DS/SCA, authorization/capture/refunds, terminals, virtual cards, payouts, disputes, and PCI-isolated provider integration require a payment provider and merchant credentials.
