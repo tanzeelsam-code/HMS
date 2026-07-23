@@ -1,10 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="NexusHOS logo" fill="none">
-  <rect x="3" y="3" width="58" height="58" rx="18" fill="#080D16"/>
-  <path d="M15 50V24c0-5.523 4.477-10 10-10h24v26c0 5.523-4.477 10-10 10H15Z" fill="#101A2B"/>
-  <path d="M16 49V24.8c0-5.412 4.388-9.8 9.8-9.8H48v24.2c0 5.412-4.388 9.8-9.8 9.8H16Z" stroke="#F7C96B" stroke-opacity=".45" stroke-width="2"/>
-  <path d="M21 40V23M31 40V23M21 31.5h10" stroke="#F7C96B" stroke-width="4.2" stroke-linecap="round"/>
-  <circle cx="39.5" cy="31.5" r="8.25" stroke="#65E0C7" stroke-width="4.2"/>
-  <circle cx="39.5" cy="31.5" r="2.2" fill="#65E0C7"/>
-  <path d="M50 24.2C47.9 21.5 44.7 20 40.6 20c-5 0-8.1 2.3-8.1 5.9 0 3.5 2.7 5.2 7 5.7 5.1.6 8.3 2.2 8.3 5.9 0 3.6-3.3 6.1-8.6 6.1-4.3 0-7.6-1.6-9.5-4.4" stroke="#F8FAFC" stroke-width="3.2" stroke-linecap="round"/>
-  <path d="M19 47h26" stroke="#65E0C7" stroke-width="2.6" stroke-linecap="round" stroke-opacity=".8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Nexus HOS logo" fill="none">
+  <defs>
+    <linearGradient id="nexusBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0D1527" />
+      <stop offset="50%" stop-color="#080D1A" />
+      <stop offset="100%" stop-color="#03060D" />
+    </linearGradient>
+    <linearGradient id="nexusGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="35%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+    <linearGradient id="nexusGoldLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFBEB" />
+      <stop offset="50%" stop-color="#FCD34D" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+    <linearGradient id="nexusCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#0D9488" />
+    </linearGradient>
+    <linearGradient id="nexusBorderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.6" />
+      <stop offset="50%" stop-color="#38BDF8" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#D97706" stop-opacity="0.5" />
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#nexusBgGrad)"/>
+  <rect x="2" y="2" width="60" height="60" rx="16" stroke="url(#nexusBorderGrad)" stroke-width="1.5"/>
+  <line x1="12" y1="47" x2="52" y2="47" stroke="#1E293B" stroke-width="1" stroke-dasharray="3 2"/>
+  <path d="M 17 44 V 22 C 17 18.7 19.7 16 23 16 C 25.2 16 27 17.8 27 20 V 44 H 22 C 19.2 44 17 41.8 17 39 Z" fill="url(#nexusGoldGrad)"/>
+  <path d="M 37 20 C 37 17.8 38.8 16 41 16 C 44.3 16 47 18.7 47 22 V 44 H 42 C 39.2 44 37 41.8 37 39 V 20 Z" fill="url(#nexusGoldGrad)"/>
+  <path d="M 21.5 19.5 L 42.5 40.5" stroke="url(#nexusGoldLight)" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 27 32 H 37" stroke="url(#nexusCyanGrad)" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="4" fill="#0A0F1D" stroke="url(#nexusCyanGrad)" stroke-width="2"/>
+  <circle cx="32" cy="32" r="1.5" fill="#38BDF8"/>
+  <path d="M 25 13.5 C 28.5 11.5 35.5 11.5 39 13.5" stroke="url(#nexusGoldLight)" stroke-width="1.75" stroke-linecap="round" fill="none"/>
 </svg>

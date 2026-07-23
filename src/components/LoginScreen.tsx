@@ -72,8 +72,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
           <div className="flex items-center gap-3">
             <BrandMark className="h-11 w-11 drop-shadow-[0_12px_30px_rgba(0,0,0,0.25)]" />
             <div>
-              <div className="text-base font-bold tracking-[-0.025em] text-white">NexusHOS</div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500">Hotel operating system</div>
+              <div className="text-base font-bold tracking-[-0.025em] text-white">
+                Nexus <span className="text-amber-400 font-extrabold">HOS</span>
+              </div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-gray-400">Hotel operating system</div>
             </div>
           </div>
 
@@ -113,8 +115,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
           <div className="mb-9 flex items-center gap-3 lg:hidden">
             <BrandMark className="h-10 w-10" />
             <div>
-              <div className="font-bold text-white">NexusHOS</div>
-              <div className="text-[10px] uppercase tracking-[0.16em] text-gray-500">Hotel operating system</div>
+              <div className="font-bold text-white">
+                Nexus <span className="text-amber-400 font-extrabold">HOS</span>
+              </div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-400">Hotel operating system</div>
             </div>
           </div>
 
