@@ -34,3 +34,8 @@ server/hms.db-*
 # Local browser validation artifacts
 .playwright-cli/
 output/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
