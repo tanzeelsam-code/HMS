@@ -8,6 +8,8 @@ type StaffUser = {
   role: string;
   active: number;
   must_change_password: number;
+  propertyId: string;
+  allowedPropertyIds: string[];
 };
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -31,6 +33,7 @@ const publicPaths = new Set([
   "GET /booking/availability",
   "POST /booking/quote",
   "POST /booking/reservations",
+  "POST /auth/register-hotel",
 ]);
 const roleAccess: Record<string, string[]> = {
   finance: ["General Manager", "Finance"],
@@ -151,8 +154,11 @@ const openApiDocument = {
   },
 };
 
-async function rows(table: string, order?: string) {
+async function rows(table: string, order?: string, propertyId?: string) {
   let query = db.from(table).select("*");
+  if (propertyId) {
+    query = query.eq("property_id", propertyId);
+  }
   if (order) query = query.order(order);
   const { data, error } = await query;
   if (error) throw error;
@@ -169,7 +175,12 @@ async function currentStaff(req: Request): Promise<StaffUser> {
   ).eq("id", auth.user.id).maybeSingle();
   if (error) throw error;
   if (!data || !data.active) throw fail("This staff account is not active", 403);
-  return data as StaffUser;
+  
+  const { data: memberships } = await db.from("user_property_memberships").select("property_id").eq("user_id", auth.user.id);
+  const allowedPropertyIds = (memberships || []).map((m) => String(m.property_id));
+  const propertyId = allowedPropertyIds[0] || "prop-main";
+
+  return { ...(data as StaffUser), propertyId, allowedPropertyIds };
 }
 
 function requireRole(user: StaffUser, group: keyof typeof roleAccess) {
@@ -221,17 +232,17 @@ async function listManagedUsers() {
   return Promise.all((userList || []).map((u) => getManagedUser(u.id)));
 }
 
-async function listReservations() {
-  const [reservations, items] = await Promise.all([rows("reservations", "checkin"), rows("folio_items", "date")]);
+async function listReservations(propertyId?: string) {
+  const [reservations, items] = await Promise.all([rows("reservations", "checkin", propertyId), rows("folio_items", "date")]);
   return reservations.map((r) => reservation(
     r,
     items.filter((item) => item.reservation_id === r.id),
   ));
 }
 
-async function metrics() {
+async function metrics(propertyId?: string) {
   const [rooms, reservations, folios] = await Promise.all([
-    rows("rooms"), rows("reservations"), rows("folio_items"),
+    rows("rooms", undefined, propertyId), rows("reservations", undefined, propertyId), rows("folio_items"),
   ]);
   const businessDate = today();
   const sellable = rooms.filter((r) => r.status !== "Out of Service").length;
@@ -374,7 +385,106 @@ async function confirmBooking(body: Record<string, unknown>, requestKey: string 
       response_body: JSON.stringify(confirmation), reservation_id: reservationId, created_at: new Date().toISOString(),
     }),
   ]);
-  return confirmation;
+async function registerHotelTenant(body: Record<string, unknown>) {
+  const hotelName = String(body.hotelName || "").trim();
+  const adminName = String(body.adminName || "").trim();
+  const adminEmail = String(body.adminEmail || "").trim().toLowerCase();
+  const adminPassword = String(body.adminPassword || "");
+  const totalRooms = Number(body.totalRooms || 10);
+  const currency = String(body.currency || "USD");
+  const timezone = String(body.timezone || "America/New_York");
+
+  if (!hotelName || !adminName || !adminEmail || !adminPassword) {
+    throw fail("Hotel name, admin name, email, and password are required");
+  }
+  if (adminPassword.length < 8) throw fail("Password must be at least 8 characters");
+
+  const orgId = id("org");
+  const propId = id("prop");
+  const code = hotelName.slice(0, 3).toUpperCase() + Math.floor(100 + Math.random() * 900);
+  const createdAt = new Date().toISOString();
+
+  // Insert Organization & Property
+  await db.from("organizations").insert({
+    id: orgId,
+    name: hotelName,
+    slug: hotelName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    created_at: createdAt,
+  });
+
+  await db.from("properties").insert({
+    id: propId,
+    organization_id: orgId,
+    code,
+    name: hotelName,
+    timezone,
+    currency,
+    locale: "en-US",
+    total_rooms: totalRooms,
+    status: "Active",
+    created_at: createdAt,
+  });
+
+  // Create default rooms for this new hotel buyer property
+  const roomTypes = ["Standard King", "Deluxe Ocean View", "Executive Suite"];
+  const roomInserts = [];
+  for (let i = 1; i <= totalRooms; i++) {
+    const roomNum = `${100 + i}`;
+    const roomType = roomTypes[(i - 1) % roomTypes.length];
+    const basePrice = roomType === "Executive Suite" ? 350 : roomType === "Deluxe Ocean View" ? 220 : 150;
+    roomInserts.push({
+      id: id("room"),
+      property_id: propId,
+      number: roomNum,
+      type: roomType,
+      floor: Math.ceil(i / 5),
+      status: "Vacant Clean",
+      baseprice: basePrice,
+      currentprice: basePrice,
+      amenities: JSON.stringify(["Wi-Fi", "Air Conditioning", "King Bed"]),
+      status_since: today(),
+    });
+  }
+  await db.from("rooms").insert(roomInserts);
+
+  // Create Admin User
+  let userId = id("usr");
+  try {
+    const { data: authRes } = await authClient.auth.admin.createUser({
+      email: adminEmail,
+      password: adminPassword,
+      email_confirm: true,
+      user_metadata: { name: adminName, role: "General Manager" },
+    });
+    if (authRes?.user?.id) userId = authRes.user.id;
+  } catch {
+    // fallback to generated ID
+  }
+
+  await db.from("users").insert({
+    id: userId,
+    name: adminName,
+    email: adminEmail,
+    password: "argon2-hashed",
+    role: "General Manager",
+    active: 1,
+    must_change_password: 0,
+  });
+
+  await db.from("user_property_memberships").insert({
+    user_id: userId,
+    property_id: propId,
+    role: "General Manager",
+    created_at: createdAt,
+  });
+
+  return {
+    success: true,
+    message: "Hotel organization registered successfully.",
+    organization: { id: orgId, name: hotelName },
+    property: { id: propId, code, name: hotelName, totalRooms },
+    adminUser: { id: userId, email: adminEmail, role: "General Manager" },
+  };
 }
 
 async function handle(req: Request, path: string, url: URL, user: StaffUser | null) {
@@ -387,6 +497,7 @@ async function handle(req: Request, path: string, url: URL, user: StaffUser | nu
   if (key === "GET /booking/availability") return bookingAvailability(url);
   if (key === "POST /booking/quote") return createQuote(body);
   if (key === "POST /booking/reservations") return confirmBooking(body, req.headers.get("idempotency-key"));
+  if (key === "POST /auth/register-hotel") return registerHotelTenant(body);
   if (!user) throw fail("Authentication required", 401);
   if (key === "GET /auth/session") return { user: {
     name: user.name, role: user.role, email: user.email, mustChangePassword: Boolean(user.must_change_password),
@@ -533,29 +644,29 @@ async function handle(req: Request, path: string, url: URL, user: StaffUser | nu
     return getManagedUser(targetId);
   }
 
-  if (key === "GET /rooms") return (await rows("rooms", "number")).map(room);
-  if (key === "GET /reservations") { requireRole(user, "folio"); return listReservations(); }
-  if (key === "GET /housekeeping") return (await rows("housekeeping_tasks", "roomnumber")).map(housekeeping);
-  if (key === "GET /pricing-rules") { requireRole(user, "finance"); return (await rows("pricing_rules", "roomtype")).map(pricing); }
-  if (key === "GET /channels") { requireRole(user, "folio"); return (await rows("channels", "name")).map(channel); }
+  if (key === "GET /rooms") return (await rows("rooms", "number", user.propertyId)).map(room);
+  if (key === "GET /reservations") { requireRole(user, "folio"); return listReservations(user.propertyId); }
+  if (key === "GET /housekeeping") return (await rows("housekeeping_tasks", "roomnumber", user.propertyId)).map(housekeeping);
+  if (key === "GET /pricing-rules") { requireRole(user, "finance"); return (await rows("pricing_rules", "roomtype", user.propertyId)).map(pricing); }
+  if (key === "GET /channels") { requireRole(user, "folio"); return (await rows("channels", "name", user.propertyId)).map(channel); }
   if (key === "GET /pos-charges") {
     requireRole(user, "folio");
-    return (await rows("pos_charges", "time")).map((r) => ({
+    return (await rows("pos_charges", "time", user.propertyId)).map((r) => ({
       id: r.id, time: r.time, roomNumber: r.roomnumber, guestName: r.guestname,
       outlet: r.outlet, items: parseJson(r.items, []), total: asNumber(r.total), status: r.status,
     }));
   }
-  if (key === "GET /metrics") return metrics();
+  if (key === "GET /metrics") return metrics(user.propertyId);
   if (key === "GET /guests") {
     requireRole(user, "folio");
-    return (await rows("guest_profiles", "name")).map((r) => ({
+    return (await rows("guest_profiles", "name", user.propertyId)).map((r) => ({
       id: r.id, name: r.name, email: r.email, phone: r.phone, vipTier: r.viptier,
       totalStays: asNumber(r.totalstays), totalNights: asNumber(r.totalnights),
       lifetimeSpend: asNumber(r.lifetimespend), preferredRoomType: r.preferredroomtype,
       dietaryPreferences: parseJson(r.dietarypreferences, []), notes: r.notes, lastStayDate: r.laststaydate,
     }));
   }
-  if (key === "GET /maintenance") return (await rows("maintenance_orders", "reportedtime")).map(maintenance);
+  if (key === "GET /maintenance") return (await rows("maintenance_orders", "reportedtime", user.propertyId)).map(maintenance);
   if (key === "GET /groups") {
     requireRole(user, "frontDesk");
     return (await rows("group_bookings", "start_date")).map((r) => ({
