@@ -1,3 +1,5 @@
+import { supabase, supabaseFunctionUrl, supabasePublicHeaders } from './supabase';
+
 const USER_KEY = 'aura_user';
 export const AUTH_EXPIRED_EVENT = 'nexushos:auth-expired';
 
@@ -26,59 +28,79 @@ export const getStoredUser = (): AuthUser | null => {
 };
 
 export const logout = () => {
-  // Remove legacy bearer tokens left by releases before HttpOnly sessions.
+  void supabase.auth.signOut();
   localStorage.removeItem('aura_token');
   localStorage.removeItem(USER_KEY);
 };
 
 export const login = async (email: string, password: string): Promise<AuthUser> => {
-  const res = await fetch('/api/auth/login', {
-    method: 'POST',
-    credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new ApiError(data.error || 'Login failed', res.status);
+  const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+  if (error) {
+    throw new ApiError(error.message || 'Login failed', error.status || 401);
   }
-  localStorage.setItem(USER_KEY, JSON.stringify(data.user));
-  return data.user as AuthUser;
+  const user = await restoreSession();
+  if (!user) throw new ApiError('This account is not authorized for NexusHOS.', 403);
+  return user;
 };
 
 export const restoreSession = async (): Promise<AuthUser | null> => {
-  const res = await fetch('/api/auth/session', { credentials: 'same-origin' });
-  if (!res.ok) {
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session) {
     logout();
     return null;
   }
-  const data = await res.json() as { user: AuthUser };
-  localStorage.setItem(USER_KEY, JSON.stringify(data.user));
-  return data.user;
+  try {
+    const data = await request<{ user: AuthUser }>('GET', '/auth/session');
+    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+    return data.user;
+  } catch {
+    logout();
+    return null;
+  }
 };
 
 const request = async <T>(method: string, path: string, body?: unknown): Promise<T> => {
-  const res = await fetch(`/api${path}`, {
-    method,
-    credentials: 'same-origin',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    const res = await fetch(`${supabaseFunctionUrl}${path}`, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...supabasePublicHeaders,
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+      signal: controller.signal,
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    });
 
-  if (res.status === 401) {
-    logout();
-    window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT));
-    throw new ApiError('Session expired. Please log in again.', 401);
-  }
+    if (res.status === 401) {
+      logout();
+      window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT));
+      throw new ApiError('Session expired. Please log in again.', 401);
+    }
 
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new ApiError((data as { error?: string }).error || `Request failed (${res.status})`, res.status);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new ApiError((data as { error?: string }).error || `Request failed (${res.status})`, res.status);
+    }
+    return data as T;
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ApiError('The Supabase request timed out. Please try again.', 504);
+    }
+    if (err instanceof TypeError && err.message.toLowerCase().includes('fetch')) {
+      throw new ApiError('Unable to connect to Supabase. Check your connection and try again.', 503);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return data as T;
 };
+
 
 export const api = {
   get: <T>(path: string) => request<T>('GET', path),
@@ -90,11 +112,16 @@ export const changePassword = async (
   currentPassword: string,
   newPassword: string,
 ): Promise<AuthUser> => {
-  const result = await request<{ user: AuthUser; otherSessionsRevoked: number }>(
-    'POST',
-    '/auth/change-password',
-    { currentPassword, newPassword },
-  );
-  localStorage.setItem(USER_KEY, JSON.stringify(result.user));
-  return result.user;
+  const { data: current } = await supabase.auth.getUser();
+  if (!current.user?.email) throw new ApiError('Authentication required', 401);
+  const reauthenticated = await supabase.auth.signInWithPassword({
+    email: current.user.email,
+    password: currentPassword,
+  });
+  if (reauthenticated.error) throw new ApiError('Current password is incorrect', 401);
+  const updated = await supabase.auth.updateUser({ password: newPassword });
+  if (updated.error) throw new ApiError(updated.error.message, updated.error.status || 400);
+  const user = await restoreSession();
+  if (!user) throw new ApiError('Unable to restore your session after changing password', 401);
+  return user;
 };

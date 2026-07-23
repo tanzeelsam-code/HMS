@@ -281,7 +281,7 @@ const CodeBlock: React.FC<{
 );
 
 export const DeveloperPortal: React.FC<DeveloperPortalProps> = ({
-  openApiUrl = '/api/openapi.json',
+  openApiUrl = '/openapi.json',
 }) => {
   const [activeTab, setActiveTab] = useState<PortalTab>('overview');
   const [status, setStatus] = useState<DeveloperStatus | null>(null);
@@ -297,10 +297,7 @@ export const DeveloperPortal: React.FC<DeveloperPortalProps> = ({
     setLoading(true);
     setError('');
     try {
-      const specRequest = fetch(openApiUrl, { credentials: 'same-origin' }).then(async (response) => {
-        if (!response.ok) throw new Error(`OpenAPI download failed (${response.status})`);
-        return response.json() as Promise<OpenApiDocument>;
-      });
+      const specRequest = api.get<OpenApiDocument>(openApiUrl);
       const [nextStatus, nextCatalog, nextOpenApi] = await Promise.all([
         api.get<DeveloperStatus>('/developer/status'),
         api.get<EventCatalog>('/developer/events/catalog'),

@@ -1,4 +1,5 @@
 import React, { FormEvent, useMemo, useRef, useState } from 'react';
+import { supabaseFunctionUrl, supabasePublicHeaders } from '../supabase';
 import {
   ArrowLeft,
   ArrowRight,
@@ -139,18 +140,38 @@ function createIdempotencyKey() {
 }
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
-  const data = await response.json().catch(() => ({})) as { error?: string };
-  if (!response.ok) {
-    throw new BookingApiError(data.error || `Request failed (${response.status})`, response.status);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(url, {
+      ...init,
+      headers: { ...supabasePublicHeaders, ...init?.headers },
+      signal: controller.signal,
+    });
+    const data = await response.json().catch(() => ({})) as { error?: string };
+    if (!response.ok) {
+      throw new BookingApiError(data.error || `Request failed (${response.status})`, response.status);
+    }
+    return data as T;
+  } catch (err: unknown) {
+    if (err instanceof BookingApiError) throw err;
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new BookingApiError('The booking service timed out. Please try again.', 504);
+    }
+    if (err instanceof TypeError && err.message.toLowerCase().includes('fetch')) {
+      throw new BookingApiError('Cannot connect to the booking service. Check your connection and try again.', 503);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return data as T;
 }
+
 
 export const BookingEngine: React.FC<BookingEngineProps> = ({
   propertyName = 'Aura Hotel',
   locationLabel = 'Copenhagen, Denmark',
-  apiBasePath = '/api/booking',
+  apiBasePath = `${supabaseFunctionUrl}/booking`,
   className = '',
   onExit,
   onConfirmed,
