@@ -21,6 +21,7 @@ const authClient = createClient(supabaseUrl, serviceKey, {
 
 const allowedOrigins = new Set([
   "https://www.nexushos.com",
+  "https://nexushos.com",
   "https://nexus-hos.tanzeelsam.workers.dev",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
@@ -39,7 +40,9 @@ const roleAccess: Record<string, string[]> = {
   manager: ["General Manager"],
 };
 
-const json = (body: unknown, status = 200, origin = "") => new Response(JSON.stringify(body), {
+const json = (body: unknown, status = 200, origin = "") => new Response(
+  status === 204 ? null : JSON.stringify(body),
+  {
   status,
   headers: {
     "content-type": "application/json; charset=utf-8",
