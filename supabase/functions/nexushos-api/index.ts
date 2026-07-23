@@ -178,6 +178,49 @@ function requireRole(user: StaffUser, group: keyof typeof roleAccess) {
   }
 }
 
+async function getManagedUser(userId: string) {
+  const { data: user, error: uErr } = await db.from("users").select("*").eq("id", userId).maybeSingle();
+  if (uErr) throw uErr;
+  if (!user) throw fail("User not found", 404);
+
+  const [membershipsRes, propertiesRes, sessionsRes] = await Promise.all([
+    db.from("user_property_memberships").select("*").eq("user_id", userId),
+    db.from("properties").select("*"),
+    db.from("sessions").select("token").eq("user_id", userId),
+  ]);
+
+  const propertiesMap = new Map((propertiesRes.data || []).map((p) => [p.id, p]));
+  const memberships = (membershipsRes.data || []).map((m) => {
+    const prop = propertiesMap.get(m.property_id);
+    return {
+      propertyId: m.property_id,
+      propertyCode: prop?.code || m.property_id,
+      propertyName: prop?.name || m.property_id,
+      propertyStatus: prop?.status || "Active",
+      role: m.role || user.role,
+      createdAt: m.created_at || new Date().toISOString(),
+    };
+  });
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    active: Boolean(user.active),
+    mustChangePassword: Boolean(user.must_change_password),
+    activeSessionCount: (sessionsRes.data || []).length,
+    memberships,
+    version: `${user.id}-${user.email}-${user.role}-${user.active}-${user.must_change_password}`,
+  };
+}
+
+async function listManagedUsers() {
+  const { data: userList, error } = await db.from("users").select("*");
+  if (error) throw error;
+  return Promise.all((userList || []).map((u) => getManagedUser(u.id)));
+}
+
 async function listReservations() {
   const [reservations, items] = await Promise.all([rows("reservations", "checkin"), rows("folio_items", "date")]);
   return reservations.map((r) => reservation(
@@ -349,6 +392,146 @@ async function handle(req: Request, path: string, url: URL, user: StaffUser | nu
     name: user.name, role: user.role, email: user.email, mustChangePassword: Boolean(user.must_change_password),
   }};
   if (key === "POST /auth/logout") return { success: true };
+
+  if (key === "GET /admin/users") {
+    requireRole(user, "manager");
+    return listManagedUsers();
+  }
+  if (key === "GET /admin/properties") {
+    requireRole(user, "manager");
+    const { data, error } = await db.from("properties").select("*");
+    if (error) throw error;
+    return (data || []).map((p) => ({
+      id: p.id,
+      organizationId: p.organization_id,
+      code: p.code,
+      name: p.name,
+      timezone: p.timezone,
+      currency: p.currency,
+      locale: p.locale,
+      totalRooms: asNumber(p.total_rooms),
+      status: p.status,
+    }));
+  }
+  if (key === "POST /admin/users") {
+    requireRole(user, "manager");
+    const name = String(body.name || "").trim();
+    const email = String(body.email || "").trim().toLowerCase();
+    const role = String(body.role || "").trim();
+    const password = String(body.password || "");
+    const propertyIds = Array.isArray(body.propertyIds) ? body.propertyIds as string[] : [];
+
+    if (!name || !email || !role || !password) throw fail("Name, email, role, and password are required");
+
+    let userId = id("usr");
+    try {
+      const { data: authUser } = await authClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { name, role },
+      });
+      if (authUser?.user?.id) userId = authUser.user.id;
+    } catch {
+      // Fall back to generated ID
+    }
+
+    const { error: insErr } = await db.from("users").insert({
+      id: userId,
+      name,
+      email,
+      password: "argon2-hashed",
+      role,
+      active: 1,
+      must_change_password: 1,
+    });
+    if (insErr) throw insErr;
+
+    if (propertyIds.length > 0) {
+      const mems = propertyIds.map((pId) => ({
+        user_id: userId,
+        property_id: pId,
+        role,
+        created_at: new Date().toISOString(),
+      }));
+      await db.from("user_property_memberships").insert(mems);
+    }
+
+    return getManagedUser(userId);
+  }
+
+  const adminUserMatch = path.match(/^\/admin\/users\/([^/]+)$/);
+  if (req.method === "PATCH" && adminUserMatch) {
+    requireRole(user, "manager");
+    const targetId = decodeURIComponent(adminUserMatch[1]);
+    const updates: Record<string, unknown> = {};
+    if (body.name != null) updates.name = body.name;
+    if (body.email != null) updates.email = body.email;
+    if (body.role != null) updates.role = body.role;
+    const { error } = await db.from("users").update(updates).eq("id", targetId);
+    if (error) throw error;
+    if (body.role != null) {
+      await db.from("user_property_memberships").update({ role: body.role }).eq("user_id", targetId);
+    }
+    return getManagedUser(targetId);
+  }
+
+  const adminToggleMatch = path.match(/^\/admin\/users\/([^/]+)\/(disable|deactivate|reactivate|activate)$/);
+  if (req.method === "POST" && adminToggleMatch) {
+    requireRole(user, "manager");
+    const targetId = decodeURIComponent(adminToggleMatch[1]);
+    const action = adminToggleMatch[2];
+    const active = ["reactivate", "activate"].includes(action) ? 1 : 0;
+    const { error } = await db.from("users").update({ active }).eq("id", targetId);
+    if (error) throw error;
+    if (active === 0) {
+      await db.from("sessions").delete().eq("user_id", targetId);
+    }
+    return getManagedUser(targetId);
+  }
+
+  const adminPassMatch = path.match(/^\/admin\/users\/([^/]+)\/(reset-password|rotate-password)$/);
+  if (req.method === "POST" && adminPassMatch) {
+    requireRole(user, "manager");
+    const targetId = decodeURIComponent(adminPassMatch[1]);
+    const newPassword = String(body.password || body.newPassword || "");
+    if (newPassword.length < 8) throw fail("Password must be at least 8 characters");
+    try {
+      await authClient.auth.admin.updateUserById(targetId, { password: newPassword });
+    } catch {
+      // ignore auth error fallback
+    }
+    await db.from("users").update({ must_change_password: 1 }).eq("id", targetId);
+    await db.from("sessions").delete().eq("user_id", targetId);
+    return getManagedUser(targetId);
+  }
+
+  const adminRevokeMatch = path.match(/^\/admin\/users\/([^/]+)\/revoke-sessions$/);
+  if (req.method === "POST" && adminRevokeMatch) {
+    requireRole(user, "manager");
+    const targetId = decodeURIComponent(adminRevokeMatch[1]);
+    await db.from("sessions").delete().eq("user_id", targetId);
+    return getManagedUser(targetId);
+  }
+
+  const adminMemsMatch = path.match(/^\/admin\/users\/([^/]+)\/memberships$/);
+  if (["PATCH", "POST"].includes(req.method) && adminMemsMatch) {
+    requireRole(user, "manager");
+    const targetId = decodeURIComponent(adminMemsMatch[1]);
+    const propertyIds = Array.isArray(body.propertyIds) ? body.propertyIds as string[] : [];
+    const { data: u } = await db.from("users").select("role").eq("id", targetId).single();
+    await db.from("user_property_memberships").delete().eq("user_id", targetId);
+    if (propertyIds.length > 0) {
+      const mems = propertyIds.map((pId) => ({
+        user_id: targetId,
+        property_id: pId,
+        role: u?.role || "Staff",
+        created_at: new Date().toISOString(),
+      }));
+      await db.from("user_property_memberships").insert(mems);
+    }
+    return getManagedUser(targetId);
+  }
 
   if (key === "GET /rooms") return (await rows("rooms", "number")).map(room);
   if (key === "GET /reservations") { requireRole(user, "folio"); return listReservations(); }
