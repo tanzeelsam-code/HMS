@@ -136,12 +136,17 @@ const jwtIssuedAt = (token: string) => {
     return 0;
   }
 };
-// Falls back to a random value generated once per isolate (not derived from
-// the service-role key) if the operator has not configured a stable pepper.
-const fallbackRateLimitPepper = crypto.randomUUID();
+const rateLimitPepper = Deno.env.get("NEXUSHOS_RATE_LIMIT_PEPPER")?.trim();
 async function enforceRateLimit(req: Request, scope: string, limit: number, windowMs: number) {
-  const pepper = Deno.env.get("NEXUSHOS_RATE_LIMIT_PEPPER") || fallbackRateLimitPepper;
-  const bucketKey = await sha256(`${pepper}:${clientAddress(req)}`);
+  // A process-local fallback would generate different bucket keys across Edge
+  // Function isolates and weaken the shared database limiter. Keep health
+  // checks available, but fail protected public routes closed until operators
+  // configure one stable secret for every isolate.
+  if (!rateLimitPepper) {
+    console.error("rate-limit pepper is not configured", scope);
+    throw fail("Request protection is temporarily unavailable", 503);
+  }
+  const bucketKey = await sha256(`${rateLimitPepper}:${clientAddress(req)}`);
   const { data, error } = await db.rpc("consume_rate_limit", {
     p_scope: scope,
     p_bucket_key: bucketKey,

@@ -134,10 +134,13 @@ The frontend and backend are separate deployment targets:
   repository variable `SUPABASE_PROJECT_REF` and the production-environment
   secrets `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD` once. Until those
   values exist, the backend deployment job intentionally remains skipped.
+- Configure a strong, stable `NEXUSHOS_RATE_LIMIT_PEPPER` as an Edge Function
+  secret before deployment. Public booking and buyer-registration routes fail
+  closed with `503` when it is missing so rate-limit buckets remain consistent
+  across all Edge Function isolates.
 - Keep public buyer self-registration disabled until Turnstile and the buyer
   lifecycle are operational. Enabling it requires Edge Function secrets
-  `NEXUSHOS_SELF_SERVICE_SIGNUP_ENABLED=true`, `TURNSTILE_SECRET_KEY`, and a
-  strong random `NEXUSHOS_RATE_LIMIT_PEPPER`.
+  `NEXUSHOS_SELF_SERVICE_SIGNUP_ENABLED=true` and `TURNSTILE_SECRET_KEY`.
 
 Before accepting a paying customer, also verify the hosted Supabase Auth
 settings: direct email signup disabled, 12-character strong passwords, secure
