@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Reservation, FolioItem } from '../types';
+import { api } from '../api';
+import { PaymentModal } from './PaymentModal';
 import { X, CreditCard, Printer, CheckCircle2, ShieldAlert, Download } from 'lucide-react';
 
 interface FolioModalProps {
@@ -9,10 +11,15 @@ interface FolioModalProps {
 }
 
 export const FolioModal: React.FC<FolioModalProps> = ({
-  reservation,
+  reservation: reservationProp,
   onClose,
   onAddFolioItem
 }) => {
+  // Live copy so a Stripe payment posted via PaymentModal refreshes the folio
+  // view without going through the manual add-item flow.
+  const [reservation, setReservation] = useState<Reservation>(reservationProp);
+  useEffect(() => setReservation(reservationProp), [reservationProp]);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState<FolioItem['category']>('Minibar');
@@ -162,6 +169,17 @@ export const FolioModal: React.FC<FolioModalProps> = ({
       setError(err instanceof Error ? err.message : 'Unable to record the refund.');
     } finally {
       setPosting(false);
+    }
+  };
+
+  const handlePaymentPosted = async () => {
+    setShowPaymentModal(false);
+    try {
+      const list = await api.get<Reservation[]>('/reservations');
+      const updated = list.find((item) => item.id === reservation.id);
+      if (updated) setReservation(updated);
+    } catch {
+      // Keep showing the pre-payment folio; the next parent refresh syncs it.
     }
   };
 
@@ -324,6 +342,17 @@ export const FolioModal: React.FC<FolioModalProps> = ({
             >
               <ShieldAlert className="w-3.5 h-3.5 text-rose-400" /> Chargeback Pack
             </button>
+
+            {folioOpen && balance > 0.005 && (
+              <button
+                type="button"
+                onClick={() => setShowPaymentModal(true)}
+                className="btn-secondary text-xs px-3 py-1.5 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10"
+                title="Charge a card through the payments provider"
+              >
+                <CreditCard className="w-3.5 h-3.5" /> Take Payment
+              </button>
+            )}
           </div>
 
           {folioOpen && projectedBalance > 0.005 ? (
@@ -350,6 +379,15 @@ export const FolioModal: React.FC<FolioModalProps> = ({
             <span className="text-xs font-semibold text-gray-500">Closed folio</span>
           )}
         </div>
+
+        {/* Stripe Payment Modal */}
+        {showPaymentModal && (
+          <PaymentModal
+            reservation={reservation}
+            onClose={() => setShowPaymentModal(false)}
+            onPosted={() => { void handlePaymentPosted(); }}
+          />
+        )}
 
         {/* Evidence Pack Modal */}
         {showEvidenceModal && (

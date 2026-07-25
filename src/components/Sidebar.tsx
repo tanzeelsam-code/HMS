@@ -180,7 +180,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      <div className="sticky top-[72px] z-30 w-full border-b border-white/[0.07] bg-[#0c1423]/95 px-4 py-3 backdrop-blur-xl md:hidden">
+      <div className="sticky top-[72px] z-30 w-full border-b border-[var(--border-color)] bg-[#1f2937]/95 px-4 py-3 backdrop-blur-xl md:hidden">
         <label htmlFor="mobile-navigation" className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">
           Workspace
         </label>
@@ -189,7 +189,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             id="mobile-navigation"
             value={activeTab}
             onChange={(event) => setActiveTab(event.target.value as ActiveTab)}
-            className="h-11 w-full appearance-none rounded-xl border border-white/[0.09] bg-[#111a2b] px-3.5 pr-10 text-sm font-semibold text-slate-100 shadow-sm focus:border-amber-300/45 focus:outline-none focus:ring-2 focus:ring-amber-300/10"
+            className="h-11 w-full appearance-none rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3.5 pr-10 text-sm font-semibold text-slate-100 shadow-sm focus:border-[var(--accent-gold)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--accent-gold)]/10"
             aria-label="Choose hotel workspace"
           >
             {visibleGroups.map((group) => (
@@ -204,8 +204,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <aside className="sticky top-[72px] hidden h-[calc(100vh-72px)] w-[280px] shrink-0 flex-col border-r border-white/[0.07] bg-[#0c1423] md:flex">
-        <div className="border-b border-white/[0.06] px-5 py-4">
+      <aside className="sticky top-[72px] hidden h-[calc(100vh-72px)] w-[280px] shrink-0 flex-col border-r border-[var(--border-color)] bg-[#1f2937] md:flex">
+        <div className="border-b border-[var(--border-color)] px-5 py-4">
           <p className="text-[10px] font-semibold uppercase tracking-[0.17em] text-slate-500">Workspace</p>
           <p className="mt-1 text-sm font-semibold text-slate-200">Property operations</p>
         </div>
@@ -216,7 +216,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <section key={group.label} aria-labelledby={`nav-${group.label.replace(/\s+/g, '-').toLowerCase()}`}>
                 <h2
                   id={`nav-${group.label.replace(/\s+/g, '-').toLowerCase()}`}
-                  className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.17em] text-slate-600"
+                  className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.17em] text-slate-500"
                 >
                   {group.label}
                 </h2>
@@ -233,15 +233,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         aria-current={isActive ? 'page' : undefined}
                         className={`group relative flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/50 ${
                           isActive
-                            ? 'bg-white/[0.075] text-slate-50 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.055)]'
-                            : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                            ? 'bg-[var(--bg-surface-elevated)] text-slate-50 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.055)]'
+                            : 'text-slate-400 hover:bg-[var(--bg-surface)] hover:text-slate-200'
                         }`}
                       >
                         {isActive && <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-amber-300" />}
                         <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${
                           isActive
-                            ? 'bg-amber-300/[0.1] text-amber-300'
-                            : 'bg-white/[0.025] text-slate-500 group-hover:text-slate-300'
+                            ? 'bg-[var(--accent-gold-soft)] text-amber-300'
+                            : 'bg-[var(--bg-card)] text-slate-500 group-hover:text-slate-300'
                         }`}>
                           <Icon className="h-4 w-4" />
                         </span>
@@ -268,8 +268,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </nav>
 
-        <div className="border-t border-white/[0.07] p-4">
-          <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-3">
+        <div className="border-t border-[var(--border-color)] p-4">
+          <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3">
             <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
               <CheckCircle2 className="h-4 w-4 text-emerald-400" />
               Core services operational

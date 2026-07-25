@@ -32,15 +32,15 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-[#070b12] text-gray-100 p-6">
-          <div className="surface-panel max-w-md p-8 text-center flex flex-col items-center rounded-3xl border border-white/10 bg-slate-950 shadow-2xl">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] text-slate-100 p-6">
+          <div className="surface-panel max-w-md p-8 text-center flex flex-col items-center rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl">
             <div className="h-12 w-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 mb-4">
               <AlertTriangle className="h-6 w-6" />
             </div>
-            <h2 className="text-xl font-bold text-white mb-2">
+            <h2 className="text-xl font-bold text-slate-50 mb-2">
               {this.props.fallbackLabel || 'Something went wrong'}
             </h2>
-            <p className="text-xs text-gray-400 mb-6 leading-relaxed">
+            <p className="text-xs text-slate-400 mb-6 leading-relaxed">
               {this.state.error?.message || 'An unexpected error occurred while loading this view.'}
             </p>
             <button

@@ -1,0 +1,17 @@
+-- NexusHOS PostgreSQL schema entry point.
+--
+-- The full initial schema lives in the forward-only migration:
+--   server/pg/migrations/001_initial.sql
+--
+-- Apply it (and any later migrations) with:
+--   HMS_DB_DRIVER=postgres DATABASE_URL=... node server/pg/migrate.js
+--
+-- 001_initial.sql is a faithful translation of every table, index, and
+-- trigger created by: server/db.js, server/audit.js, server/security.js,
+-- server/webhooks.js, server/routes/booking.js, server/routes/workflows.js.
+-- Its header documents the compatibility decisions (TEXT stays TEXT, JSON
+-- stays TEXT not JSONB, ISO timestamps stay TEXT, 0/1 booleans stay INTEGER,
+-- REAL becomes DOUBLE PRECISION) and the multi-tenancy staging columns
+-- (organization_id / property_id with 'org-default' / 'prop-default'
+-- defaults on every business table).
+\i migrations/001_initial.sql

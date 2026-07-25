@@ -72,7 +72,7 @@ const ModuleLoading = () => (
 );
 
 const FullScreenLoading: React.FC<{ label: string }> = ({ label }) => (
-  <div className="min-h-screen flex flex-col items-center justify-center bg-[#070b12] text-gray-100 gap-5">
+  <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] text-gray-100 gap-5">
     <div className="w-14 h-14 rounded-2xl bg-[#d6aa50] flex items-center justify-center text-[#090d14] font-black text-xl tracking-tighter shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
       N
     </div>
@@ -436,7 +436,7 @@ export const App: React.FC = () => {
 
   if (publicBooking) {
     return (
-      <div className="min-h-screen bg-[#070b12] p-3 sm:p-6 lg:p-8">
+      <div className="min-h-screen bg-[#0f172a] p-3 sm:p-6 lg:p-8">
         <Suspense fallback={<ModuleLoading />}>
           <BookingEngine
             propertyName="Nexus Luxury Resort & Spa"
@@ -484,7 +484,7 @@ export const App: React.FC = () => {
 
   if (loadError && !metrics) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#070b12] text-gray-100 gap-5 p-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] text-gray-100 gap-5 p-6">
         <div className="surface-panel max-w-lg p-8 text-center">
           <p className="text-lg font-semibold text-gray-100">We could not load the property workspace</p>
           <p className="mt-2 text-sm text-rose-300" role="alert">{loadError}</p>

@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const canSearch = ['General Manager', 'Front Desk', 'Finance'].includes(userRole);
 
   return (
-    <header className="sticky top-0 z-40 flex h-[76px] w-full items-center gap-3 border-b border-white/[0.07] bg-[#0a1120]/95 px-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)] backdrop-blur-xl sm:px-5 lg:gap-5 lg:px-6">
+    <header className="sticky top-0 z-40 flex h-[76px] w-full items-center gap-3 border-b border-[var(--border-color)] bg-[#111827]/95 px-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)] backdrop-blur-xl sm:px-5 lg:gap-5 lg:px-6">
       <div className="flex shrink-0 items-center gap-3.5" aria-label="Nexus HOS hotel operating system">
         <BrandMark className="h-[52px] w-[52px] drop-shadow-[0_10px_28px_rgba(245,158,11,0.28)]" />
         <div className="hidden sm:block">
@@ -60,11 +60,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      <div className="hidden h-8 w-px shrink-0 bg-white/[0.08] sm:block" />
+      <div className="hidden h-8 w-px shrink-0 bg-slate-500/30 sm:block" />
 
       <button
         type="button"
-        className="hidden shrink-0 items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] px-3.5 py-2 text-left transition-colors hover:border-white/[0.13] hover:bg-white/[0.05] 2xl:flex"
+        className="hidden shrink-0 items-center gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3.5 py-2 text-left transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-elevated)] 2xl:flex"
         title={selectedProperty}
       >
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400/[0.09] text-amber-300">
@@ -97,19 +97,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search guests, rooms or reservations"
-              className="h-10 w-full rounded-xl border border-white/[0.08] bg-[#111a2b] pl-10 pr-4 text-xs text-slate-100 shadow-inner placeholder:text-slate-500 focus:border-amber-300/45 focus:outline-none focus:ring-2 focus:ring-amber-300/10"
+              className="h-10 w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] pl-10 pr-4 text-xs text-slate-100 shadow-inner placeholder:text-slate-500 focus:border-amber-300/45 focus:outline-none focus:ring-2 focus:ring-amber-300/10"
             />
           </form>
         )}
 
-        <div className="hidden shrink-0 items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] px-3.5 py-2 2xl:flex">
+        <div className="hidden shrink-0 items-center gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3.5 py-2 2xl:flex">
           <Flame className="h-4 w-4 text-amber-300" />
           <div className="min-w-[126px]">
             <div className="flex items-center justify-between gap-4 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
               <span>Occupancy</span>
               <span className="text-emerald-300">{metrics.occupancyRate}%</span>
             </div>
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-800">
+            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-700">
               <div
                 className="h-full rounded-full bg-emerald-400 transition-[width] duration-500"
                 style={{ width: `${metrics.occupancyRate}%` }}
@@ -124,7 +124,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={onRunNightAudit}
-            className="hidden h-10 items-center gap-2 rounded-xl border border-white/[0.09] bg-white/[0.035] px-3.5 text-xs font-semibold text-slate-300 transition-colors hover:border-white/[0.16] hover:bg-white/[0.07] hover:text-white xl:flex"
+            className="hidden h-10 items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3.5 text-xs font-semibold text-slate-300 transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-elevated)] hover:text-white xl:flex"
             title="Run the idempotent daily financial audit"
           >
             <Moon className="h-4 w-4 text-indigo-300" />
@@ -148,19 +148,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => setShowNotifications((isOpen) => !isOpen)}
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.025] text-slate-400 transition-colors hover:border-white/[0.15] hover:bg-white/[0.06] hover:text-slate-100"
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] text-slate-400 transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-elevated)] hover:text-slate-100"
             aria-label="Show operational snapshot"
             aria-expanded={showNotifications}
           >
             <Bell className="h-[18px] w-[18px]" />
             {(metrics.arrivalsToday > 0 || metrics.dirtyRooms > 0) && (
-              <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-amber-300 ring-2 ring-[#0a1120]" />
+              <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-amber-300 ring-2 ring-[#111827]" />
             )}
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 top-full z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-white/[0.09] bg-[#111a2b] p-4 shadow-[0_24px_70px_rgba(0,0,0,0.55)] animate-slide-up">
-              <div className="flex items-start justify-between border-b border-white/[0.07] pb-3">
+            <div className="absolute right-0 top-full z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-[0_24px_70px_rgba(0,0,0,0.55)] animate-slide-up">
+              <div className="flex items-start justify-between border-b border-[var(--border-color)] pb-3">
                 <div>
                   <h2 className="text-sm font-semibold text-slate-100">Today at a glance</h2>
                   <p className="mt-1 text-[11px] text-slate-500">Live property operations</p>
@@ -171,18 +171,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2.5 py-3">
-                <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-3">
+                <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">In house</p>
                   <p className="mt-1 text-xl font-semibold text-slate-100">{metrics.inHouseGuests}</p>
                   <p className="mt-0.5 text-[10px] text-slate-500">registered guests</p>
                 </div>
-                <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-3">
+                <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Occupancy</p>
                   <p className="mt-1 text-xl font-semibold text-emerald-300">{metrics.occupancyRate}%</p>
                   <p className="mt-0.5 text-[10px] text-slate-500">current inventory</p>
                 </div>
               </div>
-              <div className="space-y-2 border-t border-white/[0.07] pt-3 text-xs">
+              <div className="space-y-2 border-t border-[var(--border-color)] pt-3 text-xs">
                 <div className="flex items-center justify-between text-slate-400">
                   <span>Arrivals / departures</span>
                   <span className="font-semibold text-slate-200">{metrics.arrivalsToday} / {metrics.departuresToday}</span>
@@ -198,7 +198,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
 
-        <div className="ml-1 flex items-center gap-2.5 border-l border-white/[0.08] pl-3">
+        <div className="ml-1 flex items-center gap-2.5 border-l border-[var(--border-color)] pl-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full border border-amber-300/25 bg-amber-300/[0.08] text-[11px] font-bold text-amber-200">
             {initials}
           </div>
