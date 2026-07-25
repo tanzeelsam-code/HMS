@@ -109,8 +109,8 @@ export const HrBoard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="glass-panel p-10 flex items-center justify-center text-sm text-gray-400 animate-slide-up">
-        <RefreshCw className="w-4 h-4 mr-2 animate-spin text-amber-400" /> Loading staff directory…
+      <div className="surface-panel bg-white p-10 flex items-center justify-center text-sm font-semibold text-slate-500 border border-slate-200 animate-slide-up">
+        <RefreshCw className="w-4 h-4 mr-2 animate-spin text-amber-600" /> Loading staff directory…
       </div>
     );
   }
@@ -118,46 +118,46 @@ export const HrBoard: React.FC = () => {
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 surface-panel bg-white p-5 border border-slate-200 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Staff & Shift Management</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-300 border border-blue-500/30">
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Staff & Shift Management</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
               HR Roster • Scheduling
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-slate-600 mt-1">
             Employee directory, department roster, and daily shift scheduling.
           </p>
         </div>
 
-        <div className="flex items-center gap-4 bg-slate-900/90 px-4 py-2 rounded-xl border border-blue-500/30">
-          <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-300 font-black text-base">
+        <div className="flex items-center gap-4 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
+          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-800 font-black text-base">
             {employees.filter(e => e.status === 'Active').length}
           </div>
           <div>
-            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Active Staff</div>
-            <div className="text-xs font-extrabold text-blue-300">{shifts.length} shifts scheduled</div>
+            <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Active Staff</div>
+            <div className="text-xs font-extrabold text-blue-700">{shifts.length} shifts scheduled</div>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs font-semibold flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4" /> {error}
+        <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-rose-600" /> {error}
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Employees */}
-        <div className="lg:col-span-7 glass-panel p-5 space-y-3">
-          <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <Users className="w-4 h-4 text-blue-400" /> Employee Directory
+        <div className="lg:col-span-7 surface-panel bg-white p-5 space-y-3 border border-slate-200 shadow-xs">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <Users className="w-4 h-4 text-blue-600" /> Employee Directory
           </h3>
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+            <table className="w-full text-xs border-collapse">
               <thead>
-                <tr className="text-left text-[10px] uppercase tracking-wider text-gray-500 border-b border-white/10">
+                <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
                   <th className="pb-2 font-bold">Name</th>
                   <th className="pb-2 font-bold">Role</th>
                   <th className="pb-2 font-bold">Department</th>
@@ -166,19 +166,19 @@ export const HrBoard: React.FC = () => {
                   <th className="pb-2 font-bold">Status</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100">
                 {employees.map(e => (
-                  <tr key={e.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="py-2 font-semibold text-gray-100">{e.name}</td>
-                    <td className="py-2 text-gray-300">{e.role}</td>
-                    <td className="py-2 text-gray-400">{e.department}</td>
-                    <td className="py-2 text-gray-400">{e.shift}</td>
-                    <td className="py-2 text-right font-mono text-gray-200">${e.hourlyRate.toFixed(2)}</td>
-                    <td className="py-2">
+                  <tr key={e.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-2.5 font-bold text-slate-900">{e.name}</td>
+                    <td className="py-2.5 text-slate-700 font-semibold">{e.role}</td>
+                    <td className="py-2.5 text-slate-600">{e.department}</td>
+                    <td className="py-2.5 text-slate-600">{e.shift}</td>
+                    <td className="py-2.5 text-right font-mono font-bold text-slate-900">${e.hourlyRate.toFixed(2)}</td>
+                    <td className="py-2.5">
                       <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase ${
                         e.status === 'Active'
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                          : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : 'bg-amber-50 text-amber-800 border-amber-200'
                       }`}>
                         {e.status}
                       </span>
@@ -190,45 +190,45 @@ export const HrBoard: React.FC = () => {
           </div>
 
           {/* Add employee */}
-          <form onSubmit={handleAddEmployee} className="pt-3 border-t border-white/10 space-y-3 text-xs">
-            <div className="font-bold text-gray-100 flex items-center gap-2">
-              <Plus className="w-3.5 h-3.5 text-blue-400" /> Add Employee
+          <form onSubmit={handleAddEmployee} className="pt-3 border-t border-slate-200 space-y-3 text-xs">
+            <div className="font-bold text-slate-900 flex items-center gap-2">
+              <Plus className="w-3.5 h-3.5 text-blue-600" /> Add Employee
             </div>
             <div className="grid grid-cols-2 gap-3">
               <input
                 type="text" placeholder="Full name"
                 value={empName} onChange={e => setEmpName(e.target.value)}
-                className="p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-blue-400/50"
+                className="field-control text-xs"
                 required
               />
               <input
                 type="text" placeholder="Role (e.g. Concierge)"
                 value={empRole} onChange={e => setEmpRole(e.target.value)}
-                className="p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-blue-400/50"
+                className="field-control text-xs"
                 required
               />
               <select
                 value={empDept} onChange={e => setEmpDept(e.target.value)}
-                className="p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                className="field-control text-xs"
               >
                 {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
               <div className="flex gap-3">
                 <select
                   value={empShift} onChange={e => setEmpShift(e.target.value)}
-                  className="flex-1 p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                  className="field-control text-xs flex-1"
                 >
                   {SHIFT_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
                 <input
                   type="number" min="0" step="0.5" placeholder="$/hr"
                   value={empRate} onChange={e => setEmpRate(e.target.value)}
-                  className="w-24 p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200 font-mono"
+                  className="field-control text-xs w-24 font-mono"
                 />
               </div>
             </div>
             {empError && (
-              <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/40 text-rose-300 text-[11px] font-semibold">
+              <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-[11px] font-bold">
                 {empError}
               </div>
             )}
@@ -239,27 +239,27 @@ export const HrBoard: React.FC = () => {
         </div>
 
         {/* Shifts */}
-        <div className="lg:col-span-5 glass-panel p-5 space-y-3">
-          <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <CalendarClock className="w-4 h-4 text-blue-400" /> Shift Schedule
+        <div className="lg:col-span-5 surface-panel bg-white p-5 space-y-3 border border-slate-200 shadow-xs">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <CalendarClock className="w-4 h-4 text-blue-600" /> Shift Schedule
           </h3>
 
           <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
             {shiftsByDate.length === 0 && (
-              <div className="p-3 rounded-xl bg-slate-900 border border-white/10 text-xs text-gray-400">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 font-semibold">
                 No shifts scheduled.
               </div>
             )}
             {shiftsByDate.map(([date, dayShifts]) => (
-              <div key={date} className="rounded-xl bg-slate-900/80 border border-white/10 overflow-hidden">
-                <div className="px-3 py-2 bg-white/5 text-[11px] font-bold text-blue-300 flex items-center gap-2">
-                  <Briefcase className="w-3.5 h-3.5" /> {date}
+              <div key={date} className="rounded-xl bg-slate-50 border border-slate-200 overflow-hidden">
+                <div className="px-3 py-2 bg-slate-100 text-[11px] font-bold text-blue-900 flex items-center gap-2 border-b border-slate-200">
+                  <Briefcase className="w-3.5 h-3.5 text-blue-600" /> {date}
                 </div>
-                <div className="divide-y divide-white/5">
+                <div className="divide-y divide-slate-100 bg-white">
                   {dayShifts.map(s => (
                     <div key={s.id} className="px-3 py-2 flex items-center justify-between text-xs">
-                      <span className="text-gray-200 font-semibold">{s.employeeName}</span>
-                      <span className="font-mono text-gray-400">{s.start} – {s.end}</span>
+                      <span className="text-slate-900 font-bold">{s.employeeName}</span>
+                      <span className="font-mono text-slate-600 font-semibold">{s.start} – {s.end}</span>
                     </div>
                   ))}
                 </div>
@@ -268,13 +268,13 @@ export const HrBoard: React.FC = () => {
           </div>
 
           {/* Add shift */}
-          <form onSubmit={handleAddShift} className="pt-3 border-t border-white/10 space-y-3 text-xs">
-            <div className="font-bold text-gray-100 flex items-center gap-2">
-              <Plus className="w-3.5 h-3.5 text-blue-400" /> Schedule Shift
+          <form onSubmit={handleAddShift} className="pt-3 border-t border-slate-200 space-y-3 text-xs">
+            <div className="font-bold text-slate-900 flex items-center gap-2">
+              <Plus className="w-3.5 h-3.5 text-blue-600" /> Schedule Shift
             </div>
             <select
               value={shEmployee} onChange={e => setShEmployee(e.target.value)}
-              className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+              className="field-control text-xs"
               required
             >
               <option value="">Select employee…</option>
@@ -283,22 +283,22 @@ export const HrBoard: React.FC = () => {
             <div className="grid grid-cols-3 gap-3">
               <input
                 type="date" value={shDate} onChange={e => setShDate(e.target.value)}
-                className="p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                className="field-control text-xs"
                 required
               />
               <input
                 type="time" value={shStart} onChange={e => setShStart(e.target.value)}
-                className="p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                className="field-control text-xs"
                 required
               />
               <input
                 type="time" value={shEnd} onChange={e => setShEnd(e.target.value)}
-                className="p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                className="field-control text-xs"
                 required
               />
             </div>
             {shError && (
-              <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/40 text-rose-300 text-[11px] font-semibold">
+              <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-[11px] font-bold">
                 {shError}
               </div>
             )}

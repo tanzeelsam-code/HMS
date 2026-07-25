@@ -123,8 +123,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     }
 
     const timestamp = Date.now();
-    // Room revenue is posted one night at a time by Night Audit. Only the
-    // one-time tax and any advance payment belong on the folio at booking.
     const folioItems: Reservation['folioItems'] = [
       {
         id: `f-${timestamp}-tax`,
@@ -162,8 +160,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       guestsCount,
       status: 'Confirmed',
       channel,
-      // Night Audit divides this contracted room total by the stay length.
-      // Taxes remain a separate folio line so room revenue is not overstated.
       totalAmount: roomTotal,
       paidAmount,
       contactlessCheckInCompleted: false,
@@ -183,22 +179,22 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 animate-slide-up">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 animate-slide-up">
       <div
-        className="glass-panel w-full max-w-2xl p-6 space-y-5 border border-white/20 shadow-2xl relative max-h-[92vh] overflow-y-auto"
+        className="surface-panel bg-white w-full max-w-2xl p-6 space-y-5 border border-slate-200 shadow-2xl relative max-h-[92vh] overflow-y-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="booking-dialog-title"
       >
-        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div>
-            <h3 id="booking-dialog-title" className="text-lg font-bold text-gray-100">Create New Reservation</h3>
-            <p className="text-xs text-gray-400">Availability-checked direct booking and room allocation</p>
+            <h3 id="booking-dialog-title" className="text-lg font-bold text-slate-900">Create New Reservation</h3>
+            <p className="text-xs text-slate-500 font-medium">Availability-checked direct booking and room allocation</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"
             aria-label="Close reservation dialog"
           >
             <X className="w-5 h-5" />
@@ -206,17 +202,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         </div>
 
         {error && (
-          <div role="alert" className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-xs font-semibold text-rose-200">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0" /> {error}
+          <div role="alert" className="flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs font-bold text-rose-800">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-600" /> {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="booking-guest-name" className="block text-gray-400 font-semibold mb-1">Guest Full Name</label>
+              <label htmlFor="booking-guest-name" className="block text-slate-700 font-bold mb-1">Guest Full Name</label>
               <div className="relative">
-                <User className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   ref={firstInputRef}
                   id="booking-guest-name"
@@ -224,23 +220,23 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   placeholder="e.g. Eleanor Vance"
                   value={guestName}
                   onChange={(event) => setGuestName(event.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-400/50"
+                  className="field-control !pl-9 text-xs"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="booking-email" className="block text-gray-400 font-semibold mb-1">Email Address</label>
+              <label htmlFor="booking-email" className="block text-slate-700 font-bold mb-1">Email Address</label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   id="booking-email"
                   type="email"
                   placeholder="eleanor@example.com"
                   value={guestEmail}
                   onChange={(event) => setGuestEmail(event.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-400/50"
+                  className="field-control !pl-9 text-xs"
                   required
                 />
               </div>
@@ -249,27 +245,27 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div className="sm:col-span-2">
-              <label htmlFor="booking-phone" className="block text-gray-400 font-semibold mb-1">Phone Number</label>
+              <label htmlFor="booking-phone" className="block text-slate-700 font-bold mb-1">Phone Number</label>
               <div className="relative">
-                <Phone className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   id="booking-phone"
                   type="tel"
                   placeholder="+1 555 000 0000"
                   value={guestPhone}
                   onChange={(event) => setGuestPhone(event.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                  className="field-control !pl-9 text-xs"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="booking-vip" className="block text-gray-400 font-semibold mb-1">VIP Tier</label>
+              <label htmlFor="booking-vip" className="block text-slate-700 font-bold mb-1">VIP Tier</label>
               <select
                 id="booking-vip"
                 value={vipTier}
                 onChange={(event) => setVipTier(event.target.value as Reservation['vipTier'])}
-                className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                className="field-control text-xs"
               >
                 <option value="Member">Member</option>
                 <option value="Silver">Silver</option>
@@ -279,7 +275,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             </div>
 
             <div>
-              <label htmlFor="booking-guests" className="block text-gray-400 font-semibold mb-1">Guests</label>
+              <label htmlFor="booking-guests" className="block text-slate-700 font-bold mb-1">Guests</label>
               <input
                 id="booking-guests"
                 type="number"
@@ -287,45 +283,45 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 max="8"
                 value={guestsCount}
                 onChange={(event) => setGuestsCount(Number(event.target.value))}
-                className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                className="field-control text-xs"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label htmlFor="booking-check-in" className="block text-gray-400 font-semibold mb-1">Check-in Date</label>
+              <label htmlFor="booking-check-in" className="block text-slate-700 font-bold mb-1">Check-in Date</label>
               <input
                 id="booking-check-in"
                 type="date"
                 min={today}
                 value={checkIn}
                 onChange={(event) => handleCheckInChange(event.target.value)}
-                className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                className="field-control text-xs"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="booking-check-out" className="block text-gray-400 font-semibold mb-1">Check-out Date</label>
+              <label htmlFor="booking-check-out" className="block text-slate-700 font-bold mb-1">Check-out Date</label>
               <input
                 id="booking-check-out"
                 type="date"
                 min={addDays(checkIn, 1)}
                 value={checkOut}
                 onChange={(event) => setCheckOut(event.target.value)}
-                className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                className="field-control text-xs"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="booking-room" className="block text-gray-400 font-semibold mb-1">Available Room</label>
+              <label htmlFor="booking-room" className="block text-slate-700 font-bold mb-1">Available Room</label>
               <select
                 id="booking-room"
                 value={roomNumber}
                 onChange={(event) => setRoomNumber(event.target.value)}
-                className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-amber-300 font-bold font-mono"
+                className="field-control text-xs text-amber-800 font-bold font-mono"
                 required
                 disabled={availableRooms.length === 0}
               >
@@ -341,12 +337,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="booking-channel" className="block text-gray-400 font-semibold mb-1">Booking Source</label>
+              <label htmlFor="booking-channel" className="block text-slate-700 font-bold mb-1">Booking Source</label>
               <select
                 id="booking-channel"
                 value={channel}
                 onChange={(event) => setChannel(event.target.value as OTAChannel)}
-                className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                className="field-control text-xs"
               >
                 <option value="Direct Web">Direct Web</option>
                 <option value="Booking.com">Booking.com</option>
@@ -357,12 +353,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             </div>
 
             <div>
-              <label htmlFor="booking-payment" className="block text-gray-400 font-semibold mb-1">Payment</label>
+              <label htmlFor="booking-payment" className="block text-slate-700 font-bold mb-1">Payment</label>
               <select
                 id="booking-payment"
                 value={paymentTiming}
                 onChange={(event) => setPaymentTiming(event.target.value as 'arrival' | 'full')}
-                className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                className="field-control text-xs"
               >
                 <option value="arrival">Pay at hotel</option>
                 <option value="full">Pay in full now</option>
@@ -371,25 +367,25 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           </div>
 
           <div>
-            <label htmlFor="booking-requests" className="block text-gray-400 font-semibold mb-1">Special Requests</label>
+            <label htmlFor="booking-requests" className="block text-slate-700 font-bold mb-1">Special Requests</label>
             <textarea
               id="booking-requests"
               rows={2}
               value={specialRequests}
               onChange={(event) => setSpecialRequests(event.target.value)}
               placeholder="Accessibility needs, arrival time, dietary notes…"
-              className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+              className="field-control text-xs resize-y"
             />
           </div>
 
-          <div className="p-3.5 rounded-xl bg-slate-900/90 border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
             <div>
-              <div className="text-[11px] text-gray-400 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5" /> {nights} night{nights === 1 ? '' : 's'} at ${pricePerNight.toFixed(2)} + 12% tax
+              <div className="text-[11px] text-slate-600 font-medium flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-amber-700" /> {nights} night{nights === 1 ? '' : 's'} at ${pricePerNight.toFixed(2)} + 12% tax
               </div>
-              <div className="text-base font-extrabold text-amber-300 font-mono">${grandTotal.toFixed(2)}</div>
-              <div className="text-[10px] text-gray-500 flex items-center gap-1 mt-0.5">
-                <ShieldCheck className="w-3 h-3" /> Due now: ${paidAmount.toFixed(2)}
+              <div className="text-base font-extrabold text-amber-900 font-mono">${grandTotal.toFixed(2)}</div>
+              <div className="text-[10px] text-slate-500 font-bold flex items-center gap-1 mt-0.5">
+                <ShieldCheck className="w-3 h-3 text-emerald-600" /> Due now: ${paidAmount.toFixed(2)}
               </div>
             </div>
             <button

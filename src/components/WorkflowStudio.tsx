@@ -210,33 +210,33 @@ const isApprovalRequired = (risk: RiskLevel, mode: ApprovalMode) =>
   mode === 'always' || (mode === 'risk-based' && (risk === 'High' || risk === 'Critical'));
 
 const riskStyle = (risk: RiskLevel) => ({
-  Low: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
-  Medium: 'bg-blue-500/10 text-blue-300 border-blue-500/30',
-  High: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
-  Critical: 'bg-rose-500/10 text-rose-300 border-rose-500/40',
+  Low: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  Medium: 'bg-blue-50 text-blue-800 border-blue-200',
+  High: 'bg-amber-50 text-amber-800 border-amber-200',
+  Critical: 'bg-rose-50 text-rose-800 border-rose-200',
 }[risk]);
 
 const priorityStyle = (priority: TaskPriority) => ({
-  Low: 'bg-slate-500/10 text-slate-300 border-white/10',
-  Normal: 'bg-blue-500/10 text-blue-300 border-blue-500/30',
-  High: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
-  Urgent: 'bg-rose-500/10 text-rose-300 border-rose-500/40',
+  Low: 'bg-slate-100 text-slate-700 border-slate-200',
+  Normal: 'bg-blue-50 text-blue-800 border-blue-200',
+  High: 'bg-amber-50 text-amber-800 border-amber-200',
+  Urgent: 'bg-rose-50 text-rose-800 border-rose-200',
 }[priority]);
 
 const runStatusStyle = (status: RunStatus) => ({
-  'Awaiting Approval': 'bg-amber-500/10 text-amber-300 border-amber-500/30',
-  Running: 'bg-blue-500/10 text-blue-300 border-blue-500/30',
-  Completed: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
-  Rejected: 'bg-rose-500/10 text-rose-300 border-rose-500/30',
-  Failed: 'bg-rose-500/10 text-rose-300 border-rose-500/30',
+  'Awaiting Approval': 'bg-amber-50 text-amber-800 border-amber-200',
+  Running: 'bg-blue-50 text-blue-800 border-blue-200',
+  Completed: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  Rejected: 'bg-rose-50 text-rose-800 border-rose-200',
+  Failed: 'bg-rose-50 text-rose-800 border-rose-200',
 }[status]);
 
 const taskStatusStyle = (status: TaskStatus) => ({
-  Open: 'bg-slate-500/10 text-slate-300 border-white/10',
-  'In Progress': 'bg-blue-500/10 text-blue-300 border-blue-500/30',
-  Blocked: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
-  Completed: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
-  Cancelled: 'bg-rose-500/10 text-rose-300 border-rose-500/30',
+  Open: 'bg-slate-100 text-slate-700 border-slate-200',
+  'In Progress': 'bg-blue-50 text-blue-800 border-blue-200',
+  Blocked: 'bg-amber-50 text-amber-800 border-amber-200',
+  Completed: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  Cancelled: 'bg-rose-50 text-rose-800 border-rose-200',
 }[status]);
 
 const triggerLabel = (trigger: string) => trigger
@@ -246,8 +246,8 @@ const triggerLabel = (trigger: string) => trigger
 
 const actionLabel = (action: string) => action.replace(/_/g, ' ').replace(/\b\w/g, (char: string) => char.toUpperCase());
 
-const fieldClass = 'w-full rounded-lg border border-white/10 bg-slate-950/80 px-3 py-2.5 text-sm text-gray-100 outline-none transition focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/10';
-const labelClass = 'mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-gray-400';
+const fieldClass = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10';
+const labelClass = 'mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-700';
 
 function Pill({ children, className }: { children: React.ReactNode; className: string }) {
   return <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold ${className}`}>{children}</span>;
@@ -259,10 +259,10 @@ function EmptyState({ icon: Icon, title, body }: {
   body: string;
 }) {
   return (
-    <div className="flex min-h-40 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-slate-950/30 px-6 text-center">
-      <Icon className="mb-3 h-6 w-6 text-gray-500" />
-      <p className="text-sm font-bold text-gray-200">{title}</p>
-      <p className="mt-1 max-w-md text-xs leading-relaxed text-gray-500">{body}</p>
+    <div className="flex min-h-40 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
+      <Icon className="mb-3 h-6 w-6 text-slate-400" />
+      <p className="text-sm font-bold text-slate-900">{title}</p>
+      <p className="mt-1 max-w-md text-xs leading-relaxed text-slate-600">{body}</p>
     </div>
   );
 }
@@ -519,8 +519,8 @@ export const WorkflowStudio: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="glass-panel flex min-h-72 items-center justify-center p-10 text-sm text-gray-400 animate-slide-up">
-        <RefreshCw className="mr-2 h-4 w-4 animate-spin text-amber-400" /> Loading workflow command center…
+      <div className="surface-panel bg-white border border-slate-200 flex min-h-72 items-center justify-center p-10 text-sm font-semibold text-slate-500 animate-slide-up">
+        <RefreshCw className="mr-2 h-4 w-4 animate-spin text-amber-600" /> Loading workflow command center…
       </div>
     );
   }
@@ -530,39 +530,39 @@ export const WorkflowStudio: React.FC = () => {
     return (
       <article
         key={template.id}
-        className="group rounded-xl border border-white/10 bg-slate-950/55 p-4 transition hover:border-amber-400/30 hover:bg-slate-950/75"
+        className="group rounded-xl border border-slate-200 bg-white p-4 transition hover:border-amber-300 shadow-xs"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h4 className="truncate text-sm font-bold text-gray-100">{template.name}</h4>
+              <h4 className="truncate text-sm font-bold text-slate-900">{template.name}</h4>
               <Pill className={riskStyle(template.riskLevel)}>{template.riskLevel} risk</Pill>
               {template.status !== 'Active' && (
-                <Pill className="border-white/10 bg-white/5 text-gray-400">{template.status}</Pill>
+                <Pill className="border-slate-300 bg-slate-100 text-slate-700">{template.status}</Pill>
               )}
             </div>
-            <p className={`mt-2 text-xs leading-relaxed text-gray-400 ${compact ? 'line-clamp-2' : ''}`}>
+            <p className={`mt-2 text-xs leading-relaxed font-medium text-slate-600 ${compact ? 'line-clamp-2' : ''}`}>
               {template.description || 'No workflow description has been added.'}
             </p>
           </div>
-          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${approval ? 'border-amber-500/30 bg-amber-500/10 text-amber-300' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'}`}>
-            {approval ? <LockKeyhole className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
+          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${approval ? 'border-amber-300 bg-amber-50 text-amber-900 font-bold' : 'border-emerald-200 bg-emerald-50 text-emerald-900 font-bold'}`}>
+            {approval ? <LockKeyhole className="h-4 w-4 text-amber-700" /> : <Zap className="h-4 w-4 text-emerald-600" />}
           </div>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2 text-[11px]">
-          <div className="rounded-lg border border-white/5 bg-white/[0.025] px-3 py-2">
-            <p className="text-gray-500">Trigger</p>
-            <p className="mt-0.5 truncate font-semibold text-gray-300">{triggerLabel(template.triggerType)}</p>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <p className="text-slate-500 font-bold uppercase text-[9px]">Trigger</p>
+            <p className="mt-0.5 truncate font-bold text-slate-900">{triggerLabel(template.triggerType)}</p>
           </div>
-          <div className="rounded-lg border border-white/5 bg-white/[0.025] px-3 py-2">
-            <p className="text-gray-500">Control</p>
-            <p className="mt-0.5 truncate font-semibold text-gray-300">{approval ? 'Manager approval' : 'Policy auto-run'}</p>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <p className="text-slate-500 font-bold uppercase text-[9px]">Control</p>
+            <p className="mt-0.5 truncate font-bold text-slate-900">{approval ? 'Manager approval' : 'Policy auto-run'}</p>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-white/5 pt-3">
-          <div className="text-[10px] text-gray-500">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
+          <div className="text-[10px] font-semibold text-slate-500">
             v{template.version} · {template.runCount || 0} runs · {relativeTime(template.lastRunAt)}
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -593,23 +593,23 @@ export const WorkflowStudio: React.FC = () => {
     const terminal = task.status === 'Completed' || task.status === 'Cancelled';
     const overdue = !terminal && task.dueAt && new Date(task.dueAt).getTime() < Date.now();
     return (
-      <article key={task.id} className="rounded-xl border border-white/10 bg-slate-950/55 p-4 transition hover:border-blue-400/30">
+      <article key={task.id} className="rounded-xl border border-slate-200 bg-white p-4 transition hover:border-blue-300 shadow-xs">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 items-start gap-3">
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${overdue ? 'border-rose-500/40 bg-rose-500/10 text-rose-300' : 'border-blue-500/30 bg-blue-500/10 text-blue-300'}`}>
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${overdue ? 'border-rose-200 bg-rose-50 text-rose-800' : 'border-blue-200 bg-blue-50 text-blue-800'}`}>
               {task.roomNumber ? <span className="font-mono text-xs font-bold">#{task.roomNumber}</span> : <ClipboardCheck className="h-4 w-4" />}
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h4 className="text-sm font-bold text-gray-100">{task.title}</h4>
+                <h4 className="text-sm font-bold text-slate-900">{task.title}</h4>
                 <Pill className={priorityStyle(task.priority)}>{task.priority}</Pill>
                 <Pill className={taskStatusStyle(task.status)}>{task.status}</Pill>
               </div>
-              {task.description && <p className="mt-1.5 text-xs leading-relaxed text-gray-400">{task.description}</p>}
-              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-gray-500">
+              {task.description && <p className="mt-1.5 text-xs leading-relaxed font-medium text-slate-600">{task.description}</p>}
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-semibold text-slate-500">
                 <span>{task.department}</span>
                 <span>{task.assignedTo || 'Unassigned queue'}</span>
-                <span className={overdue ? 'font-semibold text-rose-300' : ''}>
+                <span className={overdue ? 'font-bold text-rose-700' : ''}>
                   {task.dueAt ? `${overdue ? 'Overdue' : 'Due'} ${relativeTime(task.dueAt)}` : 'No deadline'}
                 </span>
                 <span>{task.runId ? 'Automated' : 'Manual'}</span>
@@ -634,7 +634,7 @@ export const WorkflowStudio: React.FC = () => {
                   type="button"
                   disabled={busyId === `task-${task.id}`}
                   onClick={() => void updateTaskStatus(task, 'Blocked')}
-                  className="btn-secondary px-2.5 py-1.5 text-[11px] text-amber-300 disabled:opacity-50"
+                  className="btn-secondary px-2.5 py-1.5 text-[11px] text-amber-800 disabled:opacity-50"
                 >
                   <CircleAlert className="h-3.5 w-3.5" /> Block
                 </button>
@@ -667,19 +667,19 @@ export const WorkflowStudio: React.FC = () => {
   return (
     <div className="space-y-6 animate-slide-up">
       <header className="glass-panel overflow-hidden p-0">
-        <div className="relative p-5 sm:p-6">
-          <div className="pointer-events-none absolute -right-16 -top-24 h-56 w-56 rounded-full bg-amber-500/10 blur-3xl" />
+        <div className="relative p-5 sm:p-6 bg-white">
+          <div className="pointer-events-none absolute -right-16 -top-24 h-56 w-56 rounded-full bg-amber-500/5 blur-3xl" />
           <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-300 bg-amber-50 text-amber-700">
                   <Workflow className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold tracking-tight text-gray-100">Frontline Workflow Studio</h2>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-gray-400">
-                    <span className="inline-flex items-center gap-1 text-emerald-300">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Persisted execution
+                  <h2 className="text-xl font-bold tracking-tight text-slate-900">Frontline Workflow Studio</h2>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-600">
+                    <span className="inline-flex items-center gap-1 text-emerald-700">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" /> Persisted execution
                     </span>
                     <span>·</span>
                     <span>Risk gates</span>
@@ -688,7 +688,7 @@ export const WorkflowStudio: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <p className="mt-3 max-w-3xl text-xs leading-relaxed text-gray-400">
+              <p className="mt-3 max-w-3xl text-xs leading-relaxed text-slate-600">
                 Turn repeatable hotel procedures into permissioned task flows. Every request, approval, task, and outcome is written to the operational audit trail.
               </p>
             </div>
@@ -721,7 +721,7 @@ export const WorkflowStudio: React.FC = () => {
           </div>
         </div>
 
-        <nav className="flex gap-1 overflow-x-auto border-t border-white/10 bg-slate-950/35 px-3 py-2" aria-label="Workflow Studio sections">
+        <nav className="flex gap-1 overflow-x-auto border-t border-slate-200 bg-slate-50 px-3 py-2" aria-label="Workflow Studio sections">
           {([
             ['command', 'Command center', Activity],
             ['templates', 'Automations', GitBranch],
@@ -734,10 +734,10 @@ export const WorkflowStudio: React.FC = () => {
                 key={id}
                 onClick={() => setView(id)}
                 aria-current={view === id ? 'page' : undefined}
-                className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold transition ${
                   view === id
-                    ? 'border border-amber-500/30 bg-amber-500/10 text-amber-300'
-                    : 'border border-transparent text-gray-400 hover:bg-white/5 hover:text-gray-200'
+                    ? 'border border-amber-300 bg-amber-100 text-amber-900 shadow-xs'
+                    : 'border border-transparent text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
                 }`}
               >
                 <Icon className="h-3.5 w-3.5" /> {label}
@@ -762,34 +762,34 @@ export const WorkflowStudio: React.FC = () => {
         <>
           <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {[
-              { label: 'Active workflows', value: activeTemplates.length, detail: `${templates.length} total versions`, icon: Zap, tone: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' },
-              { label: 'Approval queue', value: approvalQueue.length, detail: approvalQueue.length ? 'Manager decision needed' : 'No gated runs waiting', icon: ShieldCheck, tone: 'text-amber-300 bg-amber-500/10 border-amber-500/30' },
-              { label: 'Open tasks', value: openTasks.length, detail: overdueTasks.length ? `${overdueTasks.length} overdue` : 'All within due time', icon: ClipboardCheck, tone: overdueTasks.length ? 'text-rose-300 bg-rose-500/10 border-rose-500/30' : 'text-blue-300 bg-blue-500/10 border-blue-500/30' },
-              { label: 'Policy auto-runs', value: autoExecuted, detail: `${completedRuns.length} completed executions`, icon: Sparkles, tone: 'text-purple-300 bg-purple-500/10 border-purple-500/30' },
+              { label: 'Active workflows', value: activeTemplates.length, detail: `${templates.length} total versions`, icon: Zap, tone: 'text-emerald-800 bg-emerald-50 border-emerald-200' },
+              { label: 'Approval queue', value: approvalQueue.length, detail: approvalQueue.length ? 'Manager decision needed' : 'No gated runs waiting', icon: ShieldCheck, tone: 'text-amber-900 bg-amber-50 border-amber-300' },
+              { label: 'Open tasks', value: openTasks.length, detail: overdueTasks.length ? `${overdueTasks.length} overdue` : 'All within due time', icon: ClipboardCheck, tone: overdueTasks.length ? 'text-rose-800 bg-rose-50 border-rose-200' : 'text-blue-800 bg-blue-50 border-blue-200' },
+              { label: 'Policy auto-runs', value: autoExecuted, detail: `${completedRuns.length} completed executions`, icon: Sparkles, tone: 'text-purple-800 bg-purple-50 border-purple-200' },
             ].map(({ label, value, detail, icon: Icon, tone }) => (
-              <div key={label} className="glass-panel p-4">
+              <div key={label} className="surface-panel bg-white p-4 border border-slate-200 shadow-xs">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{label}</p>
-                    <p className="mt-1 text-2xl font-extrabold text-gray-100">{value}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
+                    <p className="mt-1 text-2xl font-extrabold text-slate-900">{value}</p>
                   </div>
                   <div className={`flex h-9 w-9 items-center justify-center rounded-lg border ${tone}`}><Icon className="h-4 w-4" /></div>
                 </div>
-                <p className="mt-2 text-[11px] text-gray-500">{detail}</p>
+                <p className="mt-2 text-[11px] font-semibold text-slate-600">{detail}</p>
               </div>
             ))}
           </section>
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-            <section className="glass-panel space-y-4 p-5 xl:col-span-5">
+            <section className="surface-panel bg-white space-y-4 p-5 xl:col-span-5 border border-slate-200 shadow-xs">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="flex items-center gap-2 text-sm font-bold text-gray-100">
-                    <LockKeyhole className="h-4 w-4 text-amber-400" /> Approval inbox
+                  <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
+                    <LockKeyhole className="h-4 w-4 text-amber-600" /> Approval inbox
                   </h3>
-                  <p className="mt-1 text-[11px] text-gray-500">High-impact runs remain inert until a manager decides.</p>
+                  <p className="mt-1 text-[11px] font-medium text-slate-600">High-impact runs remain inert until a manager decides.</p>
                 </div>
-                <Pill className="border-amber-500/30 bg-amber-500/10 text-amber-300">{approvalQueue.length} waiting</Pill>
+                <Pill className="border-amber-300 bg-amber-50 text-amber-900 font-bold">{approvalQueue.length} waiting</Pill>
               </div>
 
               {approvalQueue.length === 0 ? (
@@ -797,25 +797,25 @@ export const WorkflowStudio: React.FC = () => {
               ) : (
                 <div className="space-y-3">
                   {approvalQueue.slice(0, 6).map((run) => (
-                    <article key={run.id} className="rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-4">
+                    <article key={run.id} className="rounded-xl border border-amber-300 bg-amber-50/70 p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <h4 className="text-sm font-bold text-gray-100">{run.templateName}</h4>
+                            <h4 className="text-sm font-bold text-slate-900">{run.templateName}</h4>
                             <Pill className={riskStyle(run.riskLevel)}>{run.riskLevel}</Pill>
                           </div>
-                          <p className="mt-1 text-[11px] text-gray-500">Requested by {run.requestedBy} · {relativeTime(run.requestedAt)}</p>
+                          <p className="mt-1 text-[11px] font-semibold text-slate-600">Requested by {run.requestedBy} · {relativeTime(run.requestedAt)}</p>
                           {Boolean(run.context.roomNumber || run.context.guestName) && (
-                            <p className="mt-2 text-xs text-gray-300">
+                            <p className="mt-2 text-xs font-bold text-slate-800">
                               {run.context.roomNumber ? `Room ${String(run.context.roomNumber)}` : 'Property-wide'}
                               {run.context.guestName ? ` · ${String(run.context.guestName)}` : ''}
                             </p>
                           )}
                         </div>
-                        <LockKeyhole className="h-4 w-4 shrink-0 text-amber-400" />
+                        <LockKeyhole className="h-4 w-4 shrink-0 text-amber-700" />
                       </div>
                       {canManage ? (
-                        <div className="mt-4 flex gap-2 border-t border-amber-500/10 pt-3">
+                        <div className="mt-4 flex gap-2 border-t border-amber-200 pt-3">
                           <button
                             type="button"
                             disabled={busyId === `approve-${run.id}`}
@@ -830,13 +830,13 @@ export const WorkflowStudio: React.FC = () => {
                               setRejectTarget(run);
                               setRejectReason('');
                             }}
-                            className="btn-secondary px-3 py-2 text-[11px] text-rose-300"
+                            className="btn-secondary px-3 py-2 text-[11px] text-rose-700"
                           >
                             <XCircle className="h-3.5 w-3.5" /> Reject
                           </button>
                         </div>
                       ) : (
-                        <p className="mt-3 border-t border-amber-500/10 pt-3 text-[11px] text-amber-200/70">A General Manager must approve this run.</p>
+                        <p className="mt-3 border-t border-amber-200 pt-3 text-[11px] font-bold text-amber-900">A General Manager must approve this run.</p>
                       )}
                     </article>
                   ))}
@@ -844,22 +844,22 @@ export const WorkflowStudio: React.FC = () => {
               )}
             </section>
 
-            <section className="glass-panel space-y-4 p-5 xl:col-span-7">
+            <section className="surface-panel bg-white space-y-4 p-5 xl:col-span-7 border border-slate-200 shadow-xs">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="flex items-center gap-2 text-sm font-bold text-gray-100">
-                    <Activity className="h-4 w-4 text-blue-400" /> Recent executions
+                  <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
+                    <Activity className="h-4 w-4 text-blue-600" /> Recent executions
                   </h3>
-                  <p className="mt-1 text-[11px] text-gray-500">Immutable snapshots preserve what ran, under which policy, and when.</p>
+                  <p className="mt-1 text-[11px] font-medium text-slate-600">Immutable snapshots preserve what ran, under which policy, and when.</p>
                 </div>
-                <button type="button" onClick={() => setView('audit')} className="text-[11px] font-semibold text-amber-300 hover:text-amber-200">
+                <button type="button" onClick={() => setView('audit')} className="text-[11px] font-bold text-amber-700 hover:text-amber-900">
                   View audit <ChevronRight className="inline h-3.5 w-3.5" />
                 </button>
               </div>
               {runs.length === 0 ? (
                 <EmptyState icon={Activity} title="No workflow executions yet" body="Run an active automation to create the first persisted execution record." />
               ) : (
-                <div className="divide-y divide-white/5">
+                <div className="divide-y divide-slate-100">
                   {runs.slice(0, 8).map((run) => (
                     <div key={run.id} className="flex flex-col gap-3 py-3 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex min-w-0 items-center gap-3">
@@ -867,14 +867,14 @@ export const WorkflowStudio: React.FC = () => {
                           {run.status === 'Completed' ? <CheckCircle2 className="h-4 w-4" /> : run.status === 'Awaiting Approval' ? <Clock3 className="h-4 w-4" /> : <Activity className="h-4 w-4" />}
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate text-xs font-bold text-gray-200">{run.templateName}</p>
-                          <p className="mt-0.5 text-[10px] text-gray-500">v{run.templateVersion} · {run.requestedBy} · {relativeTime(run.requestedAt)}</p>
+                          <p className="truncate text-xs font-bold text-slate-900">{run.templateName}</p>
+                          <p className="mt-0.5 text-[10px] font-medium text-slate-500">v{run.templateVersion} · {run.requestedBy} · {relativeTime(run.requestedAt)}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 pl-12 sm:pl-0">
                         <Pill className={riskStyle(run.riskLevel)}>{run.riskLevel}</Pill>
                         <Pill className={runStatusStyle(run.status)}>{run.status}</Pill>
-                        <span className="min-w-14 text-right text-[10px] text-gray-500">{run.taskCount || 0} tasks</span>
+                        <span className="min-w-14 text-right text-[10px] font-semibold text-slate-600">{run.taskCount || 0} tasks</span>
                       </div>
                     </div>
                   ))}
@@ -883,15 +883,15 @@ export const WorkflowStudio: React.FC = () => {
             </section>
           </div>
 
-          <section className="glass-panel space-y-4 p-5">
+          <section className="surface-panel bg-white space-y-4 p-5 border border-slate-200 shadow-xs">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h3 className="flex items-center gap-2 text-sm font-bold text-gray-100">
-                  <Zap className="h-4 w-4 text-amber-400" /> Ready-to-run playbooks
+                <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
+                  <Zap className="h-4 w-4 text-amber-600" /> Ready-to-run playbooks
                 </h3>
-                <p className="mt-1 text-[11px] text-gray-500">Start a controlled workflow with live guest, room, and operational context.</p>
+                <p className="mt-1 text-[11px] font-medium text-slate-600">Start a controlled workflow with live guest, room, and operational context.</p>
               </div>
-              <button type="button" onClick={() => setView('templates')} className="text-[11px] font-semibold text-amber-300 hover:text-amber-200">
+              <button type="button" onClick={() => setView('templates')} className="text-[11px] font-bold text-amber-700 hover:text-amber-900">
                 Manage all <ChevronRight className="inline h-3.5 w-3.5" />
               </button>
             </div>
@@ -902,15 +902,15 @@ export const WorkflowStudio: React.FC = () => {
             )}
           </section>
 
-          <section className="glass-panel space-y-4 p-5">
+          <section className="surface-panel bg-white space-y-4 p-5 border border-slate-200 shadow-xs">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h3 className="flex items-center gap-2 text-sm font-bold text-gray-100">
-                  <ListChecks className="h-4 w-4 text-blue-400" /> Frontline task pulse
+                <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
+                  <ListChecks className="h-4 w-4 text-blue-600" /> Frontline task pulse
                 </h3>
-                <p className="mt-1 text-[11px] text-gray-500">Urgent, overdue, and active work stays visible across departments.</p>
+                <p className="mt-1 text-[11px] font-medium text-slate-600">Urgent, overdue, and active work stays visible across departments.</p>
               </div>
-              <button type="button" onClick={() => setView('tasks')} className="text-[11px] font-semibold text-amber-300 hover:text-amber-200">
+              <button type="button" onClick={() => setView('tasks')} className="text-[11px] font-bold text-amber-700 hover:text-amber-900">
                 Full queue <ChevronRight className="inline h-3.5 w-3.5" />
               </button>
             </div>
@@ -1033,18 +1033,18 @@ export const WorkflowStudio: React.FC = () => {
       )}
 
       {templateEditor && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/80 p-0 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="workflow-editor-title">
-          <form onSubmit={saveTemplate} className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl border border-white/10 bg-slate-900 shadow-2xl sm:rounded-2xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-slate-900/95 px-5 py-4 backdrop-blur">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 p-0 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="workflow-editor-title">
+          <form onSubmit={saveTemplate} className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl border border-slate-200 bg-white shadow-2xl sm:rounded-2xl">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 backdrop-blur">
               <div>
-                <h3 id="workflow-editor-title" className="text-base font-bold text-gray-100">{templateEditor === 'new' ? 'Create frontline workflow' : `Edit ${templateEditor.name}`}</h3>
-                <p className="mt-1 text-[11px] text-gray-500">Saving creates an auditable template version. Existing runs retain their original snapshot.</p>
+                <h3 id="workflow-editor-title" className="text-base font-bold text-slate-900">{templateEditor === 'new' ? 'Create frontline workflow' : `Edit ${templateEditor.name}`}</h3>
+                <p className="mt-1 text-[11px] font-medium text-slate-600">Saving creates an auditable template version. Existing runs retain their original snapshot.</p>
               </div>
-              <button type="button" onClick={() => setTemplateEditor(null)} className="rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-gray-200" aria-label="Close workflow editor"><X className="h-5 w-5" /></button>
+              <button type="button" onClick={() => setTemplateEditor(null)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-900" aria-label="Close workflow editor"><X className="h-5 w-5" /></button>
             </div>
             <div className="space-y-6 p-5 sm:p-6">
               <fieldset className="space-y-4">
-                <legend className="text-xs font-bold uppercase tracking-wider text-amber-300">Definition</legend>
+                <legend className="text-xs font-bold uppercase tracking-wider text-amber-800">Definition</legend>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <label><span className={labelClass}>Workflow name</span><input required maxLength={100} value={templateDraft.name} onChange={(event) => setTemplateDraft((draft) => ({ ...draft, name: event.target.value }))} className={fieldClass} placeholder="e.g. Early arrival readiness" /></label>
                   <label><span className={labelClass}>Trigger identifier</span><input required maxLength={80} value={templateDraft.triggerType} onChange={(event) => setTemplateDraft((draft) => ({ ...draft, triggerType: event.target.value }))} className={fieldClass} placeholder="reservation.early-arrival" /></label>
@@ -1052,20 +1052,20 @@ export const WorkflowStudio: React.FC = () => {
                 <label><span className={labelClass}>Purpose</span><textarea rows={2} maxLength={700} value={templateDraft.description} onChange={(event) => setTemplateDraft((draft) => ({ ...draft, description: event.target.value }))} className={fieldClass} placeholder="Describe when staff should use this workflow and the outcome it guarantees." /></label>
               </fieldset>
 
-              <fieldset className="space-y-4 border-t border-white/10 pt-5">
-                <legend className="text-xs font-bold uppercase tracking-wider text-amber-300">Risk & approval policy</legend>
+              <fieldset className="space-y-4 border-t border-slate-200 pt-5">
+                <legend className="text-xs font-bold uppercase tracking-wider text-amber-800">Risk & approval policy</legend>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <label><span className={labelClass}>Risk level</span><select value={templateDraft.riskLevel} onChange={(event) => { const riskLevel = event.target.value as RiskLevel; setTemplateDraft((draft) => ({ ...draft, riskLevel, approvalMode: (riskLevel === 'High' || riskLevel === 'Critical') && draft.approvalMode === 'never' ? 'risk-based' : draft.approvalMode })); }} className={fieldClass}><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></label>
                   <label><span className={labelClass}>Approval mode</span><select value={templateDraft.approvalMode} onChange={(event) => setTemplateDraft((draft) => ({ ...draft, approvalMode: event.target.value as ApprovalMode }))} className={fieldClass}><option value="risk-based">Risk-based gate</option><option value="always">Always require manager</option><option value="never" disabled={templateDraft.riskLevel === 'High' || templateDraft.riskLevel === 'Critical'}>Never require approval</option></select></label>
                 </div>
-                <div className={`flex items-start gap-3 rounded-xl border p-3 text-xs ${isApprovalRequired(templateDraft.riskLevel, templateDraft.approvalMode) ? 'border-amber-500/30 bg-amber-500/10 text-amber-200' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'}`}>
-                  {isApprovalRequired(templateDraft.riskLevel, templateDraft.approvalMode) ? <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" /> : <Zap className="mt-0.5 h-4 w-4 shrink-0" />}
+                <div className={`flex items-start gap-3 rounded-xl border p-3 text-xs ${isApprovalRequired(templateDraft.riskLevel, templateDraft.approvalMode) ? 'border-amber-300 bg-amber-50 text-amber-900 font-bold' : 'border-emerald-200 bg-emerald-50 text-emerald-900 font-bold'}`}>
+                  {isApprovalRequired(templateDraft.riskLevel, templateDraft.approvalMode) ? <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" /> : <Zap className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />}
                   <span>{isApprovalRequired(templateDraft.riskLevel, templateDraft.approvalMode) ? 'Execution will stop before task creation until a General Manager approves it.' : 'The policy engine will execute this run immediately and record the auto-approval decision.'}</span>
                 </div>
               </fieldset>
 
-              <fieldset className="space-y-4 border-t border-white/10 pt-5">
-                <legend className="text-xs font-bold uppercase tracking-wider text-amber-300">Task output</legend>
+              <fieldset className="space-y-4 border-t border-slate-200 pt-5">
+                <legend className="text-xs font-bold uppercase tracking-wider text-amber-800">Task output</legend>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <label className="sm:col-span-2"><span className={labelClass}>Task title</span><input required maxLength={140} value={templateDraft.taskTitle} onChange={(event) => setTemplateDraft((draft) => ({ ...draft, taskTitle: event.target.value }))} className={fieldClass} placeholder="Prepare arrival for {{guestName}}" /></label>
                   <label><span className={labelClass}>Department</span><input required maxLength={80} value={templateDraft.department} onChange={(event) => setTemplateDraft((draft) => ({ ...draft, department: event.target.value }))} className={fieldClass} /></label>
@@ -1076,7 +1076,7 @@ export const WorkflowStudio: React.FC = () => {
                 </div>
               </fieldset>
             </div>
-            <div className="sticky bottom-0 flex items-center justify-end gap-2 border-t border-white/10 bg-slate-900/95 px-5 py-4 backdrop-blur">
+            <div className="sticky bottom-0 flex items-center justify-end gap-2 border-t border-slate-200 bg-white px-5 py-4 backdrop-blur">
               <button type="button" onClick={() => setTemplateEditor(null)} className="btn-secondary px-4 py-2 text-xs">Cancel</button>
               <button type="submit" disabled={busyId === (templateEditor === 'new' ? 'new-template' : templateEditor.id)} className="btn-primary px-4 py-2 text-xs disabled:opacity-50"><ShieldCheck className="h-4 w-4" /> {busyId ? 'Saving…' : 'Save version'}</button>
             </div>
@@ -1085,25 +1085,25 @@ export const WorkflowStudio: React.FC = () => {
       )}
 
       {runTarget && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/80 p-0 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="workflow-run-title">
-          <form onSubmit={runWorkflow} className="w-full max-w-lg rounded-t-2xl border border-white/10 bg-slate-900 shadow-2xl sm:rounded-2xl">
-            <div className="flex items-start justify-between border-b border-white/10 px-5 py-4">
-              <div><h3 id="workflow-run-title" className="text-base font-bold text-gray-100">Run {runTarget.name}</h3><p className="mt-1 text-[11px] text-gray-500">Context is frozen into this execution record.</p></div>
-              <button type="button" onClick={() => setRunTarget(null)} className="rounded-lg p-2 text-gray-400 hover:bg-white/5" aria-label="Close run dialog"><X className="h-5 w-5" /></button>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 p-0 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="workflow-run-title">
+          <form onSubmit={runWorkflow} className="w-full max-w-lg rounded-t-2xl border border-slate-200 bg-white shadow-2xl sm:rounded-2xl">
+            <div className="flex items-start justify-between border-b border-slate-200 px-5 py-4">
+              <div><h3 id="workflow-run-title" className="text-base font-bold text-slate-900">Run {runTarget.name}</h3><p className="mt-1 text-[11px] font-medium text-slate-600">Context is frozen into this execution record.</p></div>
+              <button type="button" onClick={() => setRunTarget(null)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close run dialog"><X className="h-5 w-5" /></button>
             </div>
             <div className="space-y-4 p-5">
-              <div className={`flex items-start gap-3 rounded-xl border p-3 text-xs ${isApprovalRequired(runTarget.riskLevel, runTarget.approvalMode) ? 'border-amber-500/30 bg-amber-500/10 text-amber-200' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'}`}>
-                {isApprovalRequired(runTarget.riskLevel, runTarget.approvalMode) ? <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" /> : <Zap className="mt-0.5 h-4 w-4 shrink-0" />}
-                <div><p className="font-bold">{runTarget.riskLevel} risk · {isApprovalRequired(runTarget.riskLevel, runTarget.approvalMode) ? 'Approval required' : 'Auto-execution'}</p><p className="mt-1 opacity-80">{isApprovalRequired(runTarget.riskLevel, runTarget.approvalMode) ? 'No task is created before manager approval.' : 'The task will be created transactionally when submitted.'}</p></div>
+              <div className={`flex items-start gap-3 rounded-xl border p-3 text-xs ${isApprovalRequired(runTarget.riskLevel, runTarget.approvalMode) ? 'border-amber-300 bg-amber-50 text-amber-900 font-bold' : 'border-emerald-200 bg-emerald-50 text-emerald-900 font-bold'}`}>
+                {isApprovalRequired(runTarget.riskLevel, runTarget.approvalMode) ? <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" /> : <Zap className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />}
+                <div><p className="font-bold">{runTarget.riskLevel} risk · {isApprovalRequired(runTarget.riskLevel, runTarget.approvalMode) ? 'Approval required' : 'Auto-execution'}</p><p className="mt-1 opacity-90">{isApprovalRequired(runTarget.riskLevel, runTarget.approvalMode) ? 'No task is created before manager approval.' : 'The task will be created transactionally when submitted.'}</p></div>
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <label><span className={labelClass}>Guest or subject</span><input maxLength={120} value={runContext.guestName} onChange={(event) => setRunContext((context) => ({ ...context, guestName: event.target.value }))} className={fieldClass} placeholder="Guest name" /></label>
                 <label><span className={labelClass}>Room</span><input maxLength={40} value={runContext.roomNumber} onChange={(event) => setRunContext((context) => ({ ...context, roomNumber: event.target.value }))} className={fieldClass} placeholder="e.g. 304" /></label>
               </div>
               <label><span className={labelClass}>Operational note</span><textarea rows={3} maxLength={800} value={runContext.note} onChange={(event) => setRunContext((context) => ({ ...context, note: event.target.value }))} className={fieldClass} placeholder="Add only the context staff need to execute safely." /></label>
-              <div className="rounded-lg border border-white/5 bg-slate-950/50 px-3 py-2 font-mono text-[9px] text-gray-600">Idempotency: {runRequestId}</div>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-[9px] text-slate-500 font-bold">Idempotency: {runRequestId}</div>
             </div>
-            <div className="flex justify-end gap-2 border-t border-white/10 px-5 py-4">
+            <div className="flex justify-end gap-2 border-t border-slate-200 px-5 py-4">
               <button type="button" onClick={() => setRunTarget(null)} className="btn-secondary px-4 py-2 text-xs">Cancel</button>
               <button type="submit" disabled={busyId === `run-${runTarget.id}`} className="btn-primary px-4 py-2 text-xs disabled:opacity-50">{isApprovalRequired(runTarget.riskLevel, runTarget.approvalMode) ? <LockKeyhole className="h-4 w-4" /> : <Play className="h-4 w-4" />}{busyId ? 'Submitting…' : isApprovalRequired(runTarget.riskLevel, runTarget.approvalMode) ? 'Request approval' : 'Execute workflow'}</button>
             </div>
@@ -1112,9 +1112,9 @@ export const WorkflowStudio: React.FC = () => {
       )}
 
       {taskEditorOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/80 p-0 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="task-editor-title">
-          <form onSubmit={saveManualTask} className="w-full max-w-xl rounded-t-2xl border border-white/10 bg-slate-900 shadow-2xl sm:rounded-2xl">
-            <div className="flex items-start justify-between border-b border-white/10 px-5 py-4"><div><h3 id="task-editor-title" className="text-base font-bold text-gray-100">Dispatch operational task</h3><p className="mt-1 text-[11px] text-gray-500">Manual work uses the same queue and audit model as automation output.</p></div><button type="button" onClick={() => setTaskEditorOpen(false)} className="rounded-lg p-2 text-gray-400 hover:bg-white/5" aria-label="Close task editor"><X className="h-5 w-5" /></button></div>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 p-0 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="task-editor-title">
+          <form onSubmit={saveManualTask} className="w-full max-w-xl rounded-t-2xl border border-slate-200 bg-white shadow-2xl sm:rounded-2xl">
+            <div className="flex items-start justify-between border-b border-slate-200 px-5 py-4"><div><h3 id="task-editor-title" className="text-base font-bold text-slate-900">Dispatch operational task</h3><p className="mt-1 text-[11px] font-medium text-slate-600">Manual work uses the same queue and audit model as automation output.</p></div><button type="button" onClick={() => setTaskEditorOpen(false)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close task editor"><X className="h-5 w-5" /></button></div>
             <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
               <label className="sm:col-span-2"><span className={labelClass}>Task title</span><input required maxLength={140} value={taskDraft.title} onChange={(event) => setTaskDraft((draft) => ({ ...draft, title: event.target.value }))} className={fieldClass} placeholder="Inspect room before arrival" /></label>
               <label><span className={labelClass}>Department</span><input required maxLength={80} value={taskDraft.department} onChange={(event) => setTaskDraft((draft) => ({ ...draft, department: event.target.value }))} className={fieldClass} /></label>
@@ -1124,17 +1124,17 @@ export const WorkflowStudio: React.FC = () => {
               <label className="sm:col-span-2"><span className={labelClass}>Due date & time (optional)</span><input type="datetime-local" value={taskDraft.dueAt} onChange={(event) => setTaskDraft((draft) => ({ ...draft, dueAt: event.target.value }))} className={fieldClass} /></label>
               <label className="sm:col-span-2"><span className={labelClass}>Instructions</span><textarea rows={3} maxLength={1200} value={taskDraft.description} onChange={(event) => setTaskDraft((draft) => ({ ...draft, description: event.target.value }))} className={fieldClass} /></label>
             </div>
-            <div className="flex justify-end gap-2 border-t border-white/10 px-5 py-4"><button type="button" onClick={() => setTaskEditorOpen(false)} className="btn-secondary px-4 py-2 text-xs">Cancel</button><button type="submit" disabled={busyId === 'new-task'} className="btn-primary px-4 py-2 text-xs disabled:opacity-50"><Plus className="h-4 w-4" /> {busyId === 'new-task' ? 'Creating…' : 'Create task'}</button></div>
+            <div className="flex justify-end gap-2 border-t border-slate-200 px-5 py-4"><button type="button" onClick={() => setTaskEditorOpen(false)} className="btn-secondary px-4 py-2 text-xs">Cancel</button><button type="submit" disabled={busyId === 'new-task'} className="btn-primary px-4 py-2 text-xs disabled:opacity-50"><Plus className="h-4 w-4" /> {busyId === 'new-task' ? 'Creating…' : 'Create task'}</button></div>
           </form>
         </div>
       )}
 
       {rejectTarget && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/80 p-0 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="reject-run-title">
-          <form onSubmit={rejectRun} className="w-full max-w-md rounded-t-2xl border border-white/10 bg-slate-900 shadow-2xl sm:rounded-2xl">
-            <div className="flex items-start justify-between border-b border-white/10 px-5 py-4"><div><h3 id="reject-run-title" className="text-base font-bold text-gray-100">Reject workflow run</h3><p className="mt-1 text-[11px] text-gray-500">{rejectTarget.templateName} · {rejectTarget.riskLevel} risk</p></div><button type="button" onClick={() => setRejectTarget(null)} className="rounded-lg p-2 text-gray-400 hover:bg-white/5" aria-label="Close rejection dialog"><X className="h-5 w-5" /></button></div>
-            <div className="space-y-3 p-5"><div className="flex items-start gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-200"><XCircle className="mt-0.5 h-4 w-4 shrink-0" /><span>Rejecting is terminal. No workflow tasks will be created for this run.</span></div><label><span className={labelClass}>Decision reason</span><textarea required rows={3} maxLength={500} value={rejectReason} onChange={(event) => setRejectReason(event.target.value)} className={fieldClass} placeholder="Explain why this run should not proceed." /></label></div>
-            <div className="flex justify-end gap-2 border-t border-white/10 px-5 py-4"><button type="button" onClick={() => setRejectTarget(null)} className="btn-secondary px-4 py-2 text-xs">Keep pending</button><button type="submit" disabled={busyId === `reject-${rejectTarget.id}`} className="btn-secondary px-4 py-2 text-xs text-rose-300 disabled:opacity-50"><XCircle className="h-4 w-4" /> {busyId ? 'Rejecting…' : 'Reject run'}</button></div>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 p-0 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="reject-run-title">
+          <form onSubmit={rejectRun} className="w-full max-w-md rounded-t-2xl border border-slate-200 bg-white shadow-2xl sm:rounded-2xl">
+            <div className="flex items-start justify-between border-b border-slate-200 px-5 py-4"><div><h3 id="reject-run-title" className="text-base font-bold text-slate-900">Reject workflow run</h3><p className="mt-1 text-[11px] font-medium text-slate-600">{rejectTarget.templateName} · {rejectTarget.riskLevel} risk</p></div><button type="button" onClick={() => setRejectTarget(null)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close rejection dialog"><X className="h-5 w-5" /></button></div>
+            <div className="space-y-3 p-5"><div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 font-bold"><XCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" /><span>Rejecting is terminal. No workflow tasks will be created for this run.</span></div><label><span className={labelClass}>Decision reason</span><textarea required rows={3} maxLength={500} value={rejectReason} onChange={(event) => setRejectReason(event.target.value)} className={fieldClass} placeholder="Explain why this run should not proceed." /></label></div>
+            <div className="flex justify-end gap-2 border-t border-slate-200 px-5 py-4"><button type="button" onClick={() => setRejectTarget(null)} className="btn-secondary px-4 py-2 text-xs">Keep pending</button><button type="submit" disabled={busyId === `reject-${rejectTarget.id}`} className="btn-secondary px-4 py-2 text-xs text-rose-700 disabled:opacity-50"><XCircle className="h-4 w-4" /> {busyId ? 'Rejecting…' : 'Reject run'}</button></div>
           </form>
         </div>
       )}

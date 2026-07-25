@@ -3,9 +3,6 @@ import { Reservation } from '../types';
 import { api } from '../api';
 import { X, CreditCard, ShieldAlert, CheckCircle2, Loader2 } from 'lucide-react';
 
-// Stripe.js is loaded on demand from Stripe's CDN (PCI isolation: card data
-// never touches this app). No @stripe/* npm packages are used, so the SDK is
-// typed structurally here.
 interface StripeCardElement {
   mount: (element: HTMLElement) => void;
   unmount: () => void;
@@ -126,17 +123,16 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ reservation, onClose
       const card = stripe.elements().create('card', {
         style: {
           base: {
-            color: '#f5f7fb',
+            color: '#0f172a',
             fontFamily: 'Inter, system-ui, sans-serif',
             fontSize: '15px',
-            '::placeholder': { color: '#657187' },
+            '::placeholder': { color: '#64748b' },
           },
-          invalid: { color: '#f099aa' },
+          invalid: { color: '#e11d48' },
         },
       });
       stripeRef.current = { stripe, card, clientSecret };
       setPhase('card');
-      // The card element can only mount once its host div is on screen.
       requestAnimationFrame(() => {
         if (cardHostRef.current) card.mount(cardHostRef.current);
       });
@@ -161,7 +157,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ reservation, onClose
       if (result.paymentIntent?.status !== 'succeeded') {
         throw new Error(`Payment did not complete (status: ${result.paymentIntent?.status || 'unknown'})`);
       }
-      // The server re-retrieves the PaymentIntent from Stripe before posting.
       await api.post('/payments/confirm', { paymentIntentId: result.paymentIntent.id });
       setPhase('done');
       onPosted();
@@ -174,24 +169,24 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ reservation, onClose
   const notConfigured = status !== null && !status.configured;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 animate-slide-up">
+    <div className="fixed inset-0 z-[60] bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 animate-slide-up">
       <div
-        className="glass-panel w-full max-w-md p-6 space-y-5 border border-white/20 shadow-2xl"
+        className="surface-panel bg-white w-full max-w-md p-6 space-y-5 border border-slate-200 shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="payment-dialog-title"
       >
-        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div>
-            <h3 id="payment-dialog-title" className="text-lg font-bold text-gray-100">Take Card Payment</h3>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <h3 id="payment-dialog-title" className="text-lg font-bold text-slate-900">Take Card Payment</h3>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
               {reservation.guestName} • {reservation.code} • Outstanding ${balance.toFixed(2)}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"
             aria-label="Close payment dialog"
           >
             <X className="w-5 h-5" />
@@ -199,39 +194,39 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ reservation, onClose
         </div>
 
         {error && (
-          <div role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-xs font-semibold text-rose-200">
+          <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs font-bold text-rose-800">
             {error}
           </div>
         )}
 
         {statusError && (
-          <div role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-xs font-semibold text-rose-200">
+          <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs font-bold text-rose-800">
             {statusError}
           </div>
         )}
 
         {phase === 'loading' && !statusError && (
-          <div className="flex items-center justify-center gap-2 py-8 text-xs text-gray-400">
-            <Loader2 className="w-4 h-4 animate-spin" /> Checking payments provider…
+          <div className="flex items-center justify-center gap-2 py-8 text-xs font-semibold text-slate-500">
+            <Loader2 className="w-4 h-4 animate-spin text-amber-600" /> Checking payments provider…
           </div>
         )}
 
         {notConfigured ? (
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-2 text-xs">
-            <div className="flex items-center gap-2 font-bold text-amber-300">
-              <ShieldAlert className="w-4 h-4" /> Payments provider not configured
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-2 text-xs">
+            <div className="flex items-center gap-2 font-bold text-amber-900">
+              <ShieldAlert className="w-4 h-4 text-amber-700" /> Payments provider not configured
             </div>
-            <p className="text-gray-300 leading-relaxed">
+            <p className="text-slate-700 font-medium leading-relaxed">
               Card payments are disabled until Stripe credentials are supplied. Set{' '}
-              <code className="font-mono text-amber-200">STRIPE_SECRET_KEY</code> and{' '}
-              <code className="font-mono text-amber-200">STRIPE_PUBLISHABLE_KEY</code> in the server
+              <code className="font-mono text-amber-900 font-bold bg-amber-100 px-1 rounded">STRIPE_SECRET_KEY</code> and{' '}
+              <code className="font-mono text-amber-900 font-bold bg-amber-100 px-1 rounded">STRIPE_PUBLISHABLE_KEY</code> in the server
               environment, then restart the backend.
             </p>
           </div>
         ) : phase === 'amount' || (phase === 'processing' && !stripeRef.current) ? (
           <form onSubmit={handleCreateIntent} className="space-y-4">
             <div className="space-y-1.5">
-              <label htmlFor="payment-amount" className="text-xs font-bold text-gray-300">
+              <label htmlFor="payment-amount" className="text-xs font-bold text-slate-700">
                 Amount
               </label>
               <input
@@ -242,7 +237,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ reservation, onClose
                 max={balance > 0 ? balance.toFixed(2) : undefined}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="field-control font-mono font-bold text-amber-300"
+                className="field-control text-xs font-mono font-bold text-amber-800"
               />
             </div>
             <button
@@ -258,9 +253,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ reservation, onClose
         ) : phase === 'card' || phase === 'processing' ? (
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <span className="text-xs font-bold text-gray-300">Card details</span>
-              <div ref={cardHostRef} className="field-control flex items-center" />
-              <p className="text-[11px] text-gray-500">
+              <span className="text-xs font-bold text-slate-700">Card details</span>
+              <div ref={cardHostRef} className="field-control flex items-center min-h-10" />
+              <p className="text-[11px] text-slate-500 font-medium">
                 Card data is handled directly by Stripe and never touches NexusHOS servers.
               </p>
             </div>
@@ -276,8 +271,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ reservation, onClose
             </button>
           </div>
         ) : phase === 'done' ? (
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 flex items-center gap-2 text-xs font-bold text-emerald-300">
-            <CheckCircle2 className="w-4 h-4" /> Payment posted to the guest folio.
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-center gap-2 text-xs font-bold text-emerald-800">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Payment posted to the guest folio.
           </div>
         ) : null}
       </div>

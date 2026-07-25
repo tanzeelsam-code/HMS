@@ -148,16 +148,16 @@ const parseEventTypes = (value: string) => [...new Set(
 )];
 
 const outcomeStyle: Record<AuditOutcome, string> = {
-  success: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
-  failure: 'bg-rose-500/10 text-rose-300 border-rose-500/30',
-  denied: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+  success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  failure: 'bg-rose-50 text-rose-800 border-rose-200',
+  denied: 'bg-amber-50 text-amber-800 border-amber-200',
 };
 
 const deliveryStyle: Record<DeliveryStatus, string> = {
-  Pending: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
-  Delivering: 'bg-blue-500/10 text-blue-300 border-blue-500/30',
-  Succeeded: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
-  Failed: 'bg-rose-500/10 text-rose-300 border-rose-500/30',
+  Pending: 'bg-amber-50 text-amber-800 border-amber-200',
+  Delivering: 'bg-blue-50 text-blue-800 border-blue-200',
+  Succeeded: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  Failed: 'bg-rose-50 text-rose-800 border-rose-200',
 };
 
 export const PlatformControlCenter: React.FC<PlatformControlCenterProps> = ({ user }) => {
@@ -517,20 +517,20 @@ export const PlatformControlCenter: React.FC<PlatformControlCenterProps> = ({ us
 
   return (
     <div className="space-y-6 animate-slide-up">
-      <div className="glass-panel p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="surface-panel bg-white p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border border-slate-200 shadow-xs">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Platform Control Center</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/30">
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Platform Control Center</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300">
               {isGeneralManager ? 'Platform administrator' : 'Audit read-only'}
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-1 max-w-3xl">
+          <p className="text-xs text-slate-600 mt-1 max-w-3xl leading-relaxed">
             Inspect tamper-evident security events and manage signed outbound integrations. Authorization is enforced again by the API.
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-gray-400">
-          <Fingerprint className="w-4 h-4 text-amber-400" />
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+          <Fingerprint className="w-4 h-4 text-amber-600" />
           <span>{user.name}</span>
           <span aria-hidden="true">•</span>
           <span>{user.role}</span>
@@ -540,36 +540,36 @@ export const PlatformControlCenter: React.FC<PlatformControlCenterProps> = ({ us
       {notice && (
         <div
           role={notice.tone === 'error' ? 'alert' : 'status'}
-          className={`rounded-xl border px-4 py-3 text-xs font-semibold flex items-start gap-2 ${
+          className={`rounded-xl border px-4 py-3 text-xs font-bold flex items-start gap-2 ${
             notice.tone === 'success'
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
-              : 'bg-rose-500/10 border-rose-500/30 text-rose-200'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+              : 'bg-rose-50 border-rose-200 text-rose-900'
           }`}
         >
           {notice.tone === 'success'
-            ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-            : <AlertTriangle className="w-4 h-4 flex-shrink-0" />}
+            ? <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-600" />
+            : <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-600" />}
           <span>{notice.message}</span>
         </div>
       )}
 
       {platformError && (
-        <div role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs text-rose-200 flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+        <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-900 flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-600" />
           <span>{platformError}</span>
         </div>
       )}
 
       {secretNotice && (
-        <section className="glass-panel-gold rounded-xl p-4 space-y-3" aria-labelledby="signing-secret-title">
+        <section className="rounded-xl p-4 space-y-3 bg-amber-50 border border-amber-300 shadow-xs" aria-labelledby="signing-secret-title">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <KeyRound className="w-5 h-5 text-amber-300 mt-0.5 flex-shrink-0" />
+              <KeyRound className="w-5 h-5 text-amber-700 mt-0.5 flex-shrink-0" />
               <div>
-                <h3 id="signing-secret-title" className="text-sm font-bold text-amber-200">
+                <h3 id="signing-secret-title" className="text-sm font-bold text-amber-900">
                   One-time signing secret {secretNotice.reason === 'created' ? 'created' : 'rotated'}
                 </h3>
-                <p className="text-xs text-gray-300 mt-1">
+                <p className="text-xs text-slate-700 mt-1">
                   Save this in the receiver&apos;s secret manager. NexusHOS will not show it again, and this panel clears after five minutes.
                 </p>
               </div>
@@ -577,7 +577,7 @@ export const PlatformControlCenter: React.FC<PlatformControlCenterProps> = ({ us
             <button
               type="button"
               onClick={() => { setSecretNotice(null); setSecretVisible(false); }}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10"
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200/50"
               aria-label="Dismiss signing secret"
             >
               <X className="w-4 h-4" />
@@ -591,7 +591,7 @@ export const PlatformControlCenter: React.FC<PlatformControlCenterProps> = ({ us
               type={secretVisible ? 'text' : 'password'}
               value={secretNotice.value}
               onFocus={(event) => event.currentTarget.select()}
-              className="flex-1 min-w-0 rounded-lg border border-amber-500/30 bg-slate-950 px-3 py-2 text-xs font-mono text-amber-100 outline-none focus:border-amber-400"
+              className="flex-1 min-w-0 rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-mono text-slate-900 outline-none focus:border-amber-500"
             />
             <div className="flex gap-2">
               <button
@@ -608,11 +608,11 @@ export const PlatformControlCenter: React.FC<PlatformControlCenterProps> = ({ us
               </button>
             </div>
           </div>
-          <p className="text-[11px] text-gray-500 font-mono break-all">Subscription: {secretNotice.subscriptionId}</p>
+          <p className="text-[11px] text-slate-600 font-mono break-all">Subscription: {secretNotice.subscriptionId}</p>
         </section>
       )}
 
-      <div className="glass-panel p-2 overflow-x-auto">
+      <div className="surface-panel bg-white p-2 overflow-x-auto border border-slate-200 shadow-xs">
         <div className="flex min-w-max gap-1" role="tablist" aria-label="Platform control sections">
           {tabs.map((tab) => (
             <button
@@ -625,8 +625,8 @@ export const PlatformControlCenter: React.FC<PlatformControlCenterProps> = ({ us
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-bold transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-amber-500/15 text-amber-200 border border-amber-500/30'
-                  : 'text-gray-400 border border-transparent hover:text-gray-100 hover:bg-white/5'
+                  ? 'bg-amber-100 text-amber-900 border border-amber-300 shadow-xs'
+                  : 'text-slate-600 border border-transparent hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               {tab.icon}{tab.label}
@@ -643,13 +643,13 @@ export const PlatformControlCenter: React.FC<PlatformControlCenterProps> = ({ us
           className="space-y-4"
         >
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-            <div className="glass-panel p-5 xl:col-span-2">
+            <div className="surface-panel bg-white p-5 xl:col-span-2 border border-slate-200 shadow-xs">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-                    <FileKey2 className="w-4 h-4 text-amber-400" /> Immutable security events
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <FileKey2 className="w-4 h-4 text-amber-600" /> Immutable security events
                   </h3>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-slate-600 mt-1">
                     Append-only records are linked by signed hashes. Event payloads exclude request bodies and credentials.
                   </p>
                 </div>
@@ -664,35 +664,35 @@ export const PlatformControlCenter: React.FC<PlatformControlCenterProps> = ({ us
               </div>
             </div>
 
-            <div className={`glass-panel p-5 border ${
+            <div className={`surface-panel bg-white p-5 border shadow-xs ${
               verification == null
-                ? 'border-white/10'
-                : verification.valid ? 'border-emerald-500/30' : 'border-rose-500/40'
+                ? 'border-slate-200'
+                : verification.valid ? 'border-emerald-300' : 'border-rose-300'
             }`}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[10px] uppercase tracking-wider font-bold text-gray-500">Chain integrity</div>
+                  <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Chain integrity</div>
                   <div className={`text-sm font-bold mt-1 ${
                     verification == null
-                      ? 'text-gray-200'
-                      : verification.valid ? 'text-emerald-300' : 'text-rose-300'
+                      ? 'text-slate-800'
+                      : verification.valid ? 'text-emerald-700' : 'text-rose-700'
                   }`}>
                     {verification == null
                       ? (isGeneralManager ? 'Not verified this session' : 'GM verification required')
                       : verification.valid ? 'Signature chain valid' : 'Integrity failure detected'}
                   </div>
                   {verification && (
-                    <p className="text-[11px] text-gray-500 mt-1">
+                    <p className="text-[11px] text-slate-600 mt-1">
                       {verification.checked} event(s) checked
                       {verification.reason ? ` • ${verification.reason}` : ''}
                     </p>
                   )}
                 </div>
                 {verification?.valid
-                  ? <ShieldCheck className="w-6 h-6 text-emerald-400" />
+                  ? <ShieldCheck className="w-6 h-6 text-emerald-600" />
                   : verification
-                    ? <ShieldX className="w-6 h-6 text-rose-400" />
-                    : <Fingerprint className="w-6 h-6 text-gray-500" />}
+                    ? <ShieldX className="w-6 h-6 text-rose-600" />
+                    : <Fingerprint className="w-6 h-6 text-slate-400" />}
               </div>
               {isGeneralManager && (
                 <button
@@ -709,31 +709,31 @@ export const PlatformControlCenter: React.FC<PlatformControlCenterProps> = ({ us
           </div>
 
           {auditError && (
-            <div role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-200">
+            <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-bold text-rose-800">
               {auditError}
             </div>
           )}
 
-          <div className="glass-panel p-4 space-y-4">
+          <div className="surface-panel bg-white p-4 space-y-4 border border-slate-200 shadow-xs">
             <div className="flex flex-col md:flex-row gap-3 md:items-end">
-              <label className="flex-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              <label className="flex-1 text-[11px] font-bold uppercase tracking-wider text-slate-700">
                 Search loaded events
                 <span className="relative block mt-1.5">
-                  <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-gray-500" aria-hidden="true" />
+                  <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
                   <input
                     value={auditSearch}
                     onChange={(event) => setAuditSearch(event.target.value)}
                     placeholder="Action, actor, resource, request ID…"
-                    className="w-full rounded-lg border border-white/10 bg-slate-950 pl-9 pr-3 py-2 text-xs text-gray-200 normal-case tracking-normal outline-none focus:border-amber-400"
+                    className="w-full rounded-lg border border-slate-300 bg-white pl-9 pr-3 py-2 text-xs text-slate-900 normal-case tracking-normal outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10"
                   />
                 </span>
               </label>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700">
                 Outcome
                 <select
                   value={auditOutcome}
                   onChange={(event) => setAuditOutcome(event.target.value as 'all' | AuditOutcome)}
-                  className="block mt-1.5 min-w-40 rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-xs text-gray-200 normal-case tracking-normal outline-none focus:border-amber-400"
+                  className="block mt-1.5 min-w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 normal-case tracking-normal outline-none focus:border-amber-500"
                 >
                   <option value="all">All outcomes</option>
                   <option value="success">Success</option>
@@ -741,7 +741,7 @@ export const PlatformControlCenter: React.FC<PlatformControlCenterProps> = ({ us
                   <option value="denied">Denied</option>
                 </select>
               </label>
-              <div className="text-xs text-gray-500 pb-2 md:text-right">
+              <div className="text-xs text-slate-600 font-semibold pb-2 md:text-right">
                 {filteredAuditEvents.length} of {auditEvents.length} loaded
               </div>
             </div>

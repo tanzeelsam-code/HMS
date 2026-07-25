@@ -21,10 +21,10 @@ const emptyLine = (): DraftLine => ({ accountId: '', debit: '', credit: '' });
 
 const severityStyle = (sev: AnomalyAlert['severity']) =>
   sev.toLowerCase() === 'high'
-    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+    ? 'bg-rose-100 text-rose-800 border-rose-200'
     : sev.toLowerCase() === 'medium'
-      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-      : 'bg-blue-500/20 text-blue-300 border-blue-500/40';
+      ? 'bg-amber-100 text-amber-900 border-amber-200'
+      : 'bg-blue-100 text-blue-900 border-blue-200';
 
 const fmt = (n: number) => `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -144,8 +144,8 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
 
   if (loading) {
     return (
-      <div className="glass-panel p-10 flex items-center justify-center text-sm text-gray-400 animate-slide-up">
-        <RefreshCw className="w-4 h-4 mr-2 animate-spin text-amber-400" /> Loading general ledger…
+      <div className="surface-panel bg-white p-10 flex items-center justify-center text-sm font-semibold text-slate-500 border border-slate-200 animate-slide-up">
+        <RefreshCw className="w-4 h-4 mr-2 animate-spin text-amber-600" /> Loading general ledger…
       </div>
     );
   }
@@ -153,15 +153,15 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 surface-panel bg-white p-5 border border-slate-200 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Finance & General Ledger</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Finance & General Ledger</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
               As of {metrics?.businessDate || 'current business date'}
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-slate-600 mt-1">
             Double-entry GL, idempotent night-audit posting, and rule-based anomaly detection. Future-dated entries are excluded from these balances.
           </p>
         </div>
@@ -176,92 +176,92 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs font-semibold flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4" /> {error}
+        <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-rose-600" /> {error}
         </div>
       )}
 
       {/* Night audit summary */}
       {auditSummary && (
-        <div className="glass-panel-gold rounded-xl p-4 text-xs space-y-1">
-          <div className="font-bold text-amber-300 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4" /> Night Audit Complete
+        <div className="rounded-xl p-4 text-xs space-y-1 bg-amber-50 border border-amber-300 shadow-xs">
+          <div className="font-bold text-amber-900 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-amber-600" /> Night Audit Complete
           </div>
-          <p className="text-gray-300">
-            Posted room charges to <strong>{auditSummary.foliosPosted}</strong> folio(s) — total room revenue{' '}
-            <strong className="text-amber-300">{fmt(auditSummary.totalRoomRevenue)}</strong>
+          <p className="text-slate-800 font-medium">
+            Posted room charges to <strong className="text-slate-900">{auditSummary.foliosPosted}</strong> folio(s) — total room revenue{' '}
+            <strong className="text-amber-800 font-bold">{fmt(auditSummary.totalRoomRevenue)}</strong>
             {auditSummary.journalEntryId ? ` — GL entry ${auditSummary.journalEntryId}` : ' — no in-house guests, no GL entry'}.
           </p>
-          <p className="text-gray-500 text-[11px]">Ran at {new Date(auditSummary.ranAt).toLocaleString()}</p>
+          <p className="text-slate-500 text-[11px] font-medium">Ran at {new Date(auditSummary.ranAt).toLocaleString()}</p>
         </div>
       )}
 
       {/* KPI Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel p-4">
+        <div className="surface-panel bg-white p-4 border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Cash & Bank</span>
-            <Wallet className="w-4 h-4 text-emerald-400" />
+            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Cash & Bank</span>
+            <Wallet className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className="text-lg font-extrabold text-emerald-300 mt-1">{fmt(cashBalance)}</div>
-          <div className="text-[11px] text-gray-500">GL 1000</div>
+          <div className="text-xl font-extrabold text-emerald-700 mt-1">{fmt(cashBalance)}</div>
+          <div className="text-[11px] text-slate-500 font-semibold">GL 1000</div>
         </div>
-        <div className="glass-panel p-4">
+        <div className="surface-panel bg-white p-4 border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">AR Guest Ledger</span>
-            <Landmark className="w-4 h-4 text-amber-400" />
+            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">AR Guest Ledger</span>
+            <Landmark className="w-4 h-4 text-amber-600" />
           </div>
-          <div className="text-lg font-extrabold text-amber-300 mt-1">{fmt(arBalance)}</div>
-          <div className="text-[11px] text-gray-500">GL 1100</div>
+          <div className="text-xl font-extrabold text-amber-800 mt-1">{fmt(arBalance)}</div>
+          <div className="text-[11px] text-slate-500 font-semibold">GL 1100</div>
         </div>
-        <div className="glass-panel p-4">
+        <div className="surface-panel bg-white p-4 border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Rooms Revenue (Posted)</span>
-            <BookOpen className="w-4 h-4 text-purple-400" />
+            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Rooms Revenue (Posted)</span>
+            <BookOpen className="w-4 h-4 text-purple-600" />
           </div>
-          <div className="text-lg font-extrabold text-purple-300 mt-1">{fmt(roomRevenue)}</div>
-          <div className="text-[11px] text-gray-500">GL 4000</div>
+          <div className="text-xl font-extrabold text-purple-800 mt-1">{fmt(roomRevenue)}</div>
+          <div className="text-[11px] text-slate-500 font-semibold">GL 4000</div>
         </div>
-        <div className="glass-panel p-4">
+        <div className="surface-panel bg-white p-4 border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">RevPAR Today</span>
-            <Sparkles className="w-4 h-4 text-cyan-400" />
+            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">RevPAR Today</span>
+            <Sparkles className="w-4 h-4 text-cyan-600" />
           </div>
-          <div className="text-lg font-extrabold text-cyan-300 mt-1">{metrics ? fmt(metrics.revPar) : '—'}</div>
-          <div className="text-[11px] text-gray-500">{metrics ? `Occ ${metrics.occupancyRate}% • ADR ${fmt(metrics.adr)}` : 'Metrics unavailable'}</div>
+          <div className="text-xl font-extrabold text-cyan-800 mt-1">{metrics ? fmt(metrics.revPar) : '—'}</div>
+          <div className="text-[11px] text-slate-500 font-medium">{metrics ? `Occ ${metrics.occupancyRate}% • ADR ${fmt(metrics.adr)}` : 'Metrics unavailable'}</div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* GL Accounts */}
-        <div className="lg:col-span-5 glass-panel p-5 space-y-3">
-          <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <Landmark className="w-4 h-4 text-amber-400" /> Chart of Accounts
+        <div className="lg:col-span-5 surface-panel bg-white p-5 space-y-3 border border-slate-200 shadow-xs">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <Landmark className="w-4 h-4 text-amber-600" /> Chart of Accounts
           </h3>
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+            <table className="w-full text-xs border-collapse">
               <thead>
-                <tr className="text-left text-[10px] uppercase tracking-wider text-gray-500 border-b border-white/10">
+                <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
                   <th className="pb-2 font-bold">Code</th>
                   <th className="pb-2 font-bold">Account</th>
                   <th className="pb-2 font-bold">Type</th>
                   <th className="pb-2 font-bold text-right">Balance</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100">
                 {accounts.map(a => (
-                  <tr key={a.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="py-2 font-mono text-amber-300 font-bold">{a.code}</td>
-                    <td className="py-2 text-gray-200">{a.name}</td>
-                    <td className="py-2">
+                  <tr key={a.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-2.5 font-mono text-amber-900 font-bold bg-amber-50/60 px-1.5 rounded">{a.code}</td>
+                    <td className="py-2.5 text-slate-900 font-bold">{a.name}</td>
+                    <td className="py-2.5">
                       <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${
-                        a.type === 'Asset' ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
-                        : a.type === 'Revenue' ? 'bg-purple-500/10 text-purple-300 border-purple-500/30'
-                        : a.type === 'Expense' ? 'bg-rose-500/10 text-rose-300 border-rose-500/30'
-                        : 'bg-blue-500/10 text-blue-300 border-blue-500/30'
+                        a.type === 'Asset' ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                        : a.type === 'Revenue' ? 'bg-purple-50 text-purple-800 border-purple-200'
+                        : a.type === 'Expense' ? 'bg-rose-50 text-rose-800 border-rose-200'
+                        : 'bg-blue-50 text-blue-800 border-blue-200'
                       }`}>{a.type}</span>
                     </td>
-                    <td className="py-2 text-right font-mono text-gray-100">{fmt(balanceOf(a))}</td>
+                    <td className="py-2.5 text-right font-mono font-bold text-slate-900">{fmt(balanceOf(a))}</td>
                   </tr>
                 ))}
               </tbody>
@@ -270,25 +270,25 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
         </div>
 
         {/* AI Anomaly Detection */}
-        <div className="lg:col-span-7 glass-panel p-5 space-y-3">
+        <div className="lg:col-span-7 surface-panel bg-white p-5 space-y-3 border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-rose-400" /> AI Anomaly Detection
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-rose-600" /> AI Anomaly Detection
             </h3>
-            <span className="text-[11px] text-gray-400">{anomalies.length} finding(s)</span>
+            <span className="text-[11px] text-slate-500 font-semibold">{anomalies.length} finding(s)</span>
           </div>
           <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
             {anomalies.length === 0 && (
-              <div className="p-3 rounded-xl bg-slate-900 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" /> No anomalies detected across ledgers, rooms, and inventory.
+              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" /> No anomalies detected across ledgers, rooms, and inventory.
               </div>
             )}
             {anomalies.map((a, i) => (
-              <div key={i} className="p-3 rounded-xl bg-slate-900/80 border border-white/10 flex items-start gap-3 text-xs">
+              <div key={i} className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3 text-xs">
                 <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase flex-shrink-0 ${severityStyle(a.severity)}`}>
                   {a.severity}
                 </span>
-                <p className="text-gray-300 leading-relaxed">{a.message}</p>
+                <p className="text-slate-800 font-semibold leading-relaxed">{a.message}</p>
               </div>
             ))}
           </div>
@@ -297,29 +297,29 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Journal entries */}
-        <div className="lg:col-span-7 glass-panel p-5 space-y-3">
-          <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-amber-400" /> Journal Entries
+        <div className="lg:col-span-7 surface-panel bg-white p-5 space-y-3 border border-slate-200 shadow-xs">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-amber-600" /> Journal Entries
           </h3>
           <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
             {entries.map(e => (
-              <div key={e.id} className="p-3 rounded-xl bg-slate-900/80 border border-white/10 text-xs space-y-2">
+              <div key={e.id} className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-bold text-gray-100">{e.description}</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full border font-bold bg-white/5 text-gray-400 border-white/10 flex-shrink-0">
+                  <span className="font-bold text-slate-900">{e.description}</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full border font-bold bg-white text-slate-700 border-slate-300 flex-shrink-0">
                     {e.source}
                   </span>
                 </div>
-                <div className="text-[11px] text-gray-500 font-mono">{e.id} • {e.date}</div>
-                <table className="w-full text-[11px]">
+                <div className="text-[11px] text-slate-500 font-mono font-medium">{e.id} • {e.date}</div>
+                <table className="w-full text-[11px] border-collapse">
                   <tbody>
                     {e.lines.map(l => (
-                      <tr key={l.id} className="border-t border-white/5">
-                        <td className="py-1 text-gray-300">
-                          <span className="font-mono text-amber-300/80 mr-1.5">{l.accountCode}</span>{l.accountName}
+                      <tr key={l.id} className="border-t border-slate-200">
+                        <td className="py-1 text-slate-800 font-medium">
+                          <span className="font-mono text-amber-800 font-bold mr-1.5">{l.accountCode}</span>{l.accountName}
                         </td>
-                        <td className="py-1 text-right font-mono text-emerald-300 w-20">{l.debit ? fmt(l.debit) : ''}</td>
-                        <td className="py-1 text-right font-mono text-rose-300 w-20">{l.credit ? fmt(l.credit) : ''}</td>
+                        <td className="py-1 text-right font-mono font-bold text-emerald-700 w-20">{l.debit ? fmt(l.debit) : ''}</td>
+                        <td className="py-1 text-right font-mono font-bold text-rose-700 w-20">{l.credit ? fmt(l.credit) : ''}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -330,31 +330,31 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
         </div>
 
         {/* New journal entry */}
-        <div className="lg:col-span-5 glass-panel p-5 space-y-4">
-          <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <Plus className="w-4 h-4 text-amber-400" /> New Journal Entry
+        <div className="lg:col-span-5 surface-panel bg-white p-5 space-y-4 border border-slate-200 shadow-xs">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <Plus className="w-4 h-4 text-amber-600" /> New Journal Entry
           </h3>
 
           <form onSubmit={handlePostEntry} className="space-y-3 text-xs">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-gray-400 font-semibold mb-1">Date</label>
+                <label className="block text-slate-700 font-bold mb-1">Date</label>
                 <input
                   type="date"
                   value={jeDate}
                   onChange={e => setJeDate(e.target.value)}
-                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-400/50"
+                  className="field-control text-xs"
                   required
                 />
               </div>
               <div>
-                <label className="block text-gray-400 font-semibold mb-1">Description</label>
+                <label className="block text-slate-700 font-bold mb-1">Description</label>
                 <input
                   type="text"
                   value={jeDescription}
                   onChange={e => setJeDescription(e.target.value)}
                   placeholder="e.g. Owner draw"
-                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-400/50"
+                  className="field-control text-xs"
                 />
               </div>
             </div>
@@ -365,7 +365,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
                   <select
                     value={line.accountId}
                     onChange={e => setJeLines(prev => prev.map((l, i) => i === idx ? { ...l, accountId: e.target.value } : l))}
-                    className="flex-1 p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                    className="field-control text-xs flex-1"
                     required
                   >
                     <option value="">Select account…</option>
@@ -377,19 +377,19 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
                     type="number" min="0" step="0.01" placeholder="Debit"
                     value={line.debit}
                     onChange={e => setJeLines(prev => prev.map((l, i) => i === idx ? { ...l, debit: e.target.value } : l))}
-                    className="w-24 p-2 rounded-lg bg-slate-900 border border-white/10 text-emerald-300 font-mono"
+                    className="field-control text-xs w-24 font-mono font-bold text-emerald-700"
                   />
                   <input
                     type="number" min="0" step="0.01" placeholder="Credit"
                     value={line.credit}
                     onChange={e => setJeLines(prev => prev.map((l, i) => i === idx ? { ...l, credit: e.target.value } : l))}
-                    className="w-24 p-2 rounded-lg bg-slate-900 border border-white/10 text-rose-300 font-mono"
+                    className="field-control text-xs w-24 font-mono font-bold text-rose-700"
                   />
                   {jeLines.length > 2 && (
                     <button
                       type="button"
                       onClick={() => setJeLines(prev => prev.filter((_, i) => i !== idx))}
-                      className="text-gray-500 hover:text-rose-300 transition-colors"
+                      className="text-slate-400 hover:text-rose-600 transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -399,7 +399,7 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
               <button
                 type="button"
                 onClick={() => setJeLines(prev => [...prev, emptyLine()])}
-                className="text-[11px] text-amber-300 hover:text-amber-200 font-semibold"
+                className="text-[11px] text-amber-700 hover:text-amber-900 font-bold"
               >
                 + Add line
               </button>
@@ -407,15 +407,15 @@ export const AccountingDashboard: React.FC<AccountingDashboardProps> = ({ metric
 
             <div className={`flex items-center justify-between p-2.5 rounded-lg border text-[11px] font-bold ${
               draftTotals.balanced
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-rose-50 border-rose-200 text-rose-800'
             }`}>
               <span>Dr {fmt(draftTotals.debit)} / Cr {fmt(draftTotals.credit)}</span>
               <span>{draftTotals.balanced ? 'Balanced ✓' : 'Out of balance'}</span>
             </div>
 
             {jeError && (
-              <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/40 text-rose-300 text-[11px] font-semibold">
+              <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-[11px] font-bold">
                 {jeError}
               </div>
             )}

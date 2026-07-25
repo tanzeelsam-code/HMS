@@ -43,27 +43,27 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 surface-panel bg-white p-5 border border-slate-200 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Rule-Based Pricing & Revenue Forecast</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/30">
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Rule-Based Pricing & Revenue Forecast</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200">
               Deterministic model
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-slate-600 mt-1">
             Transparent 14-day booking-pace calculations using live reservations, room capacity, base rates, and weekend mix.
           </p>
         </div>
 
         {/* Live Market Demand Score Banner */}
-        <div className="flex items-center gap-4 bg-slate-900/90 px-4 py-2 rounded-xl border border-purple-500/30 shadow-lg shadow-purple-500/10">
-          <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400 font-black text-base">
+        <div className="flex items-center gap-4 bg-purple-50/80 px-4 py-2 rounded-xl border border-purple-200 shadow-xs">
+          <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-800 font-black text-base">
             {forecastLoading ? '…' : averageOccupancy}
           </div>
           <div>
-            <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">14-day occupancy outlook</div>
-            <div className="text-xs font-extrabold text-purple-300 flex items-center gap-1">
+            <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">14-day occupancy outlook</div>
+            <div className="text-xs font-extrabold text-purple-900 flex items-center gap-1">
               {forecastLoading ? 'Calculating…' : `${paceLabel} · ${averageOccupancy}% average`}
             </div>
           </div>
@@ -71,22 +71,22 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
       </div>
 
       {/* Live AI Pricing Forecast */}
-      <div className="glass-panel p-5 space-y-4">
+      <div className="surface-panel bg-white p-5 space-y-4 border border-slate-200 shadow-xs">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <BrainCircuit className="w-4 h-4 text-purple-400" /> Live Booking-Pace Pricing Forecast
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <BrainCircuit className="w-4 h-4 text-purple-600" /> Live Booking-Pace Pricing Forecast
           </h3>
-          <span className="text-xs text-gray-400">Computed live from bookings on the books (14-day horizon)</span>
+          <span className="text-xs text-slate-500 font-semibold">Computed live from bookings on the books (14-day horizon)</span>
         </div>
 
         {forecastLoading && (
-          <div className="p-6 flex items-center justify-center text-xs text-gray-400">
-            <RefreshCw className="w-4 h-4 mr-2 animate-spin text-purple-400" /> Computing live forecast…
+          <div className="p-6 flex items-center justify-center text-xs text-slate-500 font-semibold">
+            <RefreshCw className="w-4 h-4 mr-2 animate-spin text-purple-600" /> Computing live forecast…
           </div>
         )}
 
         {forecastError && (
-          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs font-semibold">
+          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">
             {forecastError}
           </div>
         )}
@@ -100,22 +100,22 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
                 return (
                   <div
                     key={f.roomType}
-                    className="p-4 rounded-xl bg-slate-900/70 border border-white/10 space-y-3 hover:border-purple-400/40 transition-all"
+                    className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 hover:border-purple-300 transition-all"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h4 className="font-extrabold text-sm text-gray-100">{f.roomType}</h4>
-                        <div className="flex items-center gap-3 text-xs text-gray-400 mt-1 flex-wrap">
-                          <span>Base: <strong className="text-gray-300">${f.baseRate.toFixed(0)}</strong></span>
-                          <span>• Demand: <strong className="text-purple-300 font-bold">{f.demandMultiplier}x</strong></span>
-                          <span>• 14d Occ: <strong className="text-cyan-300 font-bold">{f.occupancyForecast}%</strong></span>
+                        <h4 className="font-extrabold text-sm text-slate-900">{f.roomType}</h4>
+                        <div className="flex items-center gap-3 text-xs text-slate-600 mt-1 flex-wrap font-semibold">
+                          <span>Base: <strong className="text-slate-900">${f.baseRate.toFixed(0)}</strong></span>
+                          <span>• Demand: <strong className="text-purple-800 font-bold">{f.demandMultiplier}x</strong></span>
+                          <span>• 14d Occ: <strong className="text-cyan-800 font-bold">{f.occupancyForecast}%</strong></span>
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <div className="text-[10px] text-gray-400 uppercase font-bold">Forecast Rate</div>
-                        <div className="text-base font-extrabold text-amber-300">
+                        <div className="text-[10px] text-slate-500 uppercase font-bold">Forecast Rate</div>
+                        <div className="text-base font-extrabold text-amber-800">
                           ${f.recommendedRate}
-                          <span className={`text-[10px] font-bold ml-1 ${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          <span className={`text-[10px] font-bold ml-1 ${diff >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
                             ({diff >= 0 ? '+' : ''}{pct}%)
                           </span>
                         </div>
@@ -123,17 +123,17 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
                     </div>
 
                     {/* Occupancy forecast bar */}
-                    <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-purple-500 to-cyan-400"
+                        className="h-full rounded-full bg-purple-600"
                         style={{ width: `${Math.min(100, f.occupancyForecast)}%` }}
                       />
                     </div>
 
-                    <ul className="space-y-1 text-[11px] text-gray-400 leading-relaxed">
+                    <ul className="space-y-1 text-[11px] text-slate-700 font-semibold leading-relaxed">
                       {f.reasoning.map((r, i) => (
                         <li key={i} className="flex gap-1.5">
-                          <span className="text-purple-400 flex-shrink-0">▸</span>{r}
+                          <span className="text-purple-700 flex-shrink-0 font-bold">▸</span>{r}
                         </li>
                       ))}
                     </ul>
@@ -143,20 +143,20 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
             </div>
 
             {/* 14-day demand strip */}
-            <div className="pt-2 border-t border-white/10 space-y-2">
-              <div className="text-xs font-bold text-gray-100 flex items-center gap-2">
-                <CalendarDays className="w-3.5 h-3.5 text-cyan-400" /> 14-Day Demand Outlook
+            <div className="pt-2 border-t border-slate-200 space-y-2">
+              <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                <CalendarDays className="w-3.5 h-3.5 text-cyan-600" /> 14-Day Demand Outlook
               </div>
-              <div className="flex items-end gap-1.5 h-24">
+              <div className="flex items-end gap-1.5 h-24 pt-2">
                 {demand.map(d => (
                   <div key={d.date} className="flex-1 flex flex-col items-center gap-1 group" title={`${d.date}: ${d.expectedOccupancy}% occupancy, ${d.arrivals} arrival(s)`}>
-                    <span className="text-[9px] font-mono text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-[9px] font-mono text-slate-700 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
                       {d.expectedOccupancy}%
                     </span>
-                    <div className="w-full rounded-t bg-gradient-to-t from-cyan-500/40 to-cyan-400/80 hover:to-amber-400/80 transition-colors"
-                      style={{ height: `${Math.max(4, d.expectedOccupancy)}%` }}
+                    <div className="w-full rounded-t bg-cyan-600/60 hover:bg-amber-500 transition-colors"
+                      style={{ height: `${Math.max(8, d.expectedOccupancy)}%` }}
                     />
-                    <span className="text-[9px] font-mono text-gray-500">{d.date.slice(5)}</span>
+                    <span className="text-[9px] font-mono text-slate-500 font-bold">{d.date.slice(5)}</span>
                   </div>
                 ))}
               </div>
@@ -166,12 +166,12 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
       </div>
 
       {/* Dynamic Rate Recommendations Table */}
-      <div className="glass-panel p-5 space-y-4">
+      <div className="surface-panel bg-white p-5 space-y-4 border border-slate-200 shadow-xs">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-400" /> Configured Pricing Policy Rules
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-purple-600" /> Configured Pricing Policy Rules
           </h3>
-          <span className="text-xs text-gray-400">Apply uses the configured target below, independently of the live forecast above</span>
+          <span className="text-xs text-slate-500 font-semibold">Apply uses the configured target below, independently of the live forecast above</span>
         </div>
 
         <div className="grid grid-cols-1 gap-4">
@@ -182,41 +182,41 @@ export const AiRevenueManager: React.FC<AiRevenueManagerProps> = ({
             return (
               <div 
                 key={rule.id}
-                className="p-4 rounded-xl bg-slate-900/70 border border-white/10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 hover:border-purple-400/40 transition-all"
+                className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4 hover:border-purple-300 transition-all"
               >
                 {/* Room Category & Factors */}
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 font-extrabold text-base flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-purple-100 border border-purple-200 flex items-center justify-center text-purple-900 font-extrabold text-base flex-shrink-0">
                     +{percentageIncrease}%
                   </div>
 
                   <div>
-                    <h4 className="font-extrabold text-sm text-gray-100">{rule.roomType}</h4>
-                    <div className="flex items-center gap-3 text-xs text-gray-400 mt-1 flex-wrap">
-                      <span>Base Rate: <strong className="text-gray-300">${rule.baseRate}</strong></span>
-                      <span>• Reference Benchmark: <strong className="text-gray-300">${rule.competitorAvgRate}</strong></span>
-                      <span>• Configured Multiplier: <strong className="text-purple-300 font-bold">{rule.demandFactor}x</strong></span>
+                    <h4 className="font-extrabold text-sm text-slate-900">{rule.roomType}</h4>
+                    <div className="flex items-center gap-3 text-xs text-slate-600 mt-1 flex-wrap font-semibold">
+                      <span>Base Rate: <strong className="text-slate-900">${rule.baseRate}</strong></span>
+                      <span>• Benchmark: <strong className="text-slate-900">${rule.competitorAvgRate}</strong></span>
+                      <span>• Multiplier: <strong className="text-purple-800 font-bold">{rule.demandFactor}x</strong></span>
                     </div>
                   </div>
                 </div>
 
                 {/* Rates Comparison & Controls */}
-                <div className="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/10">
+                <div className="flex items-center justify-between lg:justify-end gap-6 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-200">
                   <div className="text-left lg:text-right">
-                    <div className="text-[10px] text-gray-400 uppercase font-bold">Configured Target Rate</div>
-                    <div className="text-base font-extrabold text-amber-300 flex items-center gap-1">
+                    <div className="text-[10px] text-slate-500 uppercase font-bold">Configured Target Rate</div>
+                    <div className="text-base font-extrabold text-amber-800 flex items-center gap-1">
                       ${rule.recommendedRate}
-                      <span className="text-[10px] text-emerald-400 font-bold">(${rateDiff > 0 ? `+${rateDiff}` : rateDiff})</span>
+                      <span className="text-[10px] text-emerald-700 font-bold">(${rateDiff > 0 ? `+${rateDiff}` : rateDiff})</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => onToggleAutoApply(rule.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 ${
                         rule.autoApply 
-                          ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' 
-                          : 'bg-slate-800 text-gray-400 border-white/10'
+                          ? 'bg-purple-100 text-purple-900 border-purple-300' 
+                          : 'bg-white text-slate-700 border-slate-300'
                       }`}
                     >
                       <Sliders className="w-3.5 h-3.5" />
