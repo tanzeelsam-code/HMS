@@ -99,8 +99,8 @@ export const ProcurementBoard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="glass-panel p-10 flex items-center justify-center text-sm text-gray-400 animate-slide-up">
-        <RefreshCw className="w-4 h-4 mr-2 animate-spin text-amber-400" /> Loading inventory & procurement…
+      <div className="surface-panel bg-white border border-slate-200 p-10 flex items-center justify-center text-xs font-semibold text-slate-500 animate-slide-up shadow-xs">
+        <RefreshCw className="w-4 h-4 mr-2 animate-spin text-amber-600" /> Loading inventory & procurement…
       </div>
     );
   }
@@ -108,35 +108,35 @@ export const ProcurementBoard: React.FC = () => {
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 surface-panel bg-white p-5 border border-slate-200 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Procurement & Stock Control</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Procurement & Stock Control</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-50 text-cyan-900 border border-cyan-200">
               Inventory • Vendors • POs
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-slate-600 mt-1 font-medium">
             Par-level stock monitoring, vendor management, and purchase order receiving.
           </p>
         </div>
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs font-semibold flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4" /> {error}
+        <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-bold flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-rose-700" /> {error}
         </div>
       )}
 
       {/* Low stock alert strip */}
       {lowStock.length > 0 && (
-        <div className="glass-panel p-4 border-l-2 border-l-rose-500/60 space-y-2">
-          <div className="text-xs font-bold text-rose-300 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4" /> {lowStock.length} item(s) at or below par level
+        <div className="surface-panel bg-white p-4 border border-rose-200 border-l-4 border-l-rose-500 space-y-2 shadow-xs">
+          <div className="text-xs font-bold text-rose-900 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-rose-700" /> {lowStock.length} item(s) at or below par level
           </div>
           <div className="flex flex-wrap gap-2">
             {lowStock.map(i => (
-              <span key={i.id} className="text-[11px] px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-200 font-semibold">
+              <span key={i.id} className="text-[11px] px-2.5 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-900 font-bold">
                 {i.name}: {i.onHand} {i.unit} (par {i.parLevel})
               </span>
             ))}
@@ -145,14 +145,14 @@ export const ProcurementBoard: React.FC = () => {
       )}
 
       {/* Inventory table */}
-      <div className="glass-panel p-5 space-y-3">
-        <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-          <Boxes className="w-4 h-4 text-cyan-400" /> Inventory On-Hand vs Par
+      <div className="surface-panel bg-white p-5 space-y-3 border border-slate-200 shadow-xs">
+        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <Boxes className="w-4 h-4 text-cyan-700" /> Inventory On-Hand vs Par
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="text-left text-[10px] uppercase tracking-wider text-gray-500 border-b border-white/10">
+              <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
                 <th className="pb-2 font-bold">Item</th>
                 <th className="pb-2 font-bold">Category</th>
                 <th className="pb-2 font-bold text-right">On Hand</th>
@@ -162,40 +162,40 @@ export const ProcurementBoard: React.FC = () => {
                 <th className="pb-2 font-bold text-right">Adjust</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {items.map(i => {
                 const pct = i.parLevel > 0 ? Math.min(100, (i.onHand / (i.parLevel * 2)) * 100) : 100;
                 const isLow = i.onHand <= i.parLevel;
                 return (
-                  <tr key={i.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="py-2 text-gray-100 font-semibold">{i.name}</td>
-                    <td className="py-2 text-gray-400">{i.category}</td>
-                    <td className={`py-2 text-right font-mono font-bold ${isLow ? 'text-rose-300' : 'text-gray-100'}`}>
-                      {i.onHand} <span className="text-gray-500 font-normal">{i.unit}</span>
+                  <tr key={i.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-2.5 text-slate-900 font-bold">{i.name}</td>
+                    <td className="py-2.5 text-slate-600 font-semibold">{i.category}</td>
+                    <td className={`py-2.5 text-right font-mono font-extrabold ${isLow ? 'text-rose-700' : 'text-slate-900'}`}>
+                      {i.onHand} <span className="text-slate-500 font-normal">{i.unit}</span>
                     </td>
-                    <td className="py-2 text-right font-mono text-gray-400">{i.parLevel}</td>
-                    <td className="py-2">
-                      <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                    <td className="py-2.5 text-right font-mono text-slate-500 font-bold">{i.parLevel}</td>
+                    <td className="py-2.5">
+                      <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
                         <div
                           className={`h-full rounded-full ${isLow ? 'bg-rose-500' : 'bg-emerald-500'}`}
                           style={{ width: `${pct}%` }}
                         />
                       </div>
                     </td>
-                    <td className="py-2 text-right font-mono text-gray-300">${i.costPerUnit.toFixed(2)}</td>
-                    <td className="py-2">
+                    <td className="py-2.5 text-right font-mono text-slate-700 font-bold">${i.costPerUnit.toFixed(2)}</td>
+                    <td className="py-2.5">
                       <div className="flex items-center justify-end gap-1.5">
                         <input
                           type="number" min="0" step="1"
                           value={adjusting[i.id] ?? ''}
                           placeholder={String(i.onHand)}
                           onChange={e => setAdjusting(prev => ({ ...prev, [i.id]: e.target.value }))}
-                          className="w-16 p-1 rounded-md bg-slate-900 border border-white/10 text-gray-200 font-mono text-right"
+                          className="w-16 p-1 rounded-md field-control text-xs font-mono text-right"
                         />
                         <button
                           onClick={() => handleAdjust(i)}
                           disabled={adjusting[i.id] === undefined || adjusting[i.id] === ''}
-                          className="btn-secondary text-[10px] px-2 py-1 disabled:opacity-40"
+                          className="btn-secondary text-[10px] px-2 py-1 font-bold disabled:opacity-40"
                         >
                           Set
                         </button>
@@ -211,15 +211,15 @@ export const ProcurementBoard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Vendors */}
-        <div className="lg:col-span-4 glass-panel p-5 space-y-3">
-          <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <Truck className="w-4 h-4 text-cyan-400" /> Approved Vendors
+        <div className="lg:col-span-4 surface-panel bg-white p-5 space-y-3 border border-slate-200 shadow-xs">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <Truck className="w-4 h-4 text-cyan-700" /> Approved Vendors
           </h3>
           <div className="space-y-2">
             {vendors.map(v => (
-              <div key={v.id} className="p-3 rounded-xl bg-slate-900/80 border border-white/10 text-xs">
-                <div className="font-bold text-gray-100">{v.name}</div>
-                <div className="text-[11px] text-gray-400 mt-0.5">{v.category} • {v.contact}</div>
+              <div key={v.id} className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                <div className="font-bold text-slate-900">{v.name}</div>
+                <div className="text-[11px] font-semibold text-slate-500 mt-0.5">{v.category} • {v.contact}</div>
               </div>
             ))}
           </div>
@@ -227,17 +227,17 @@ export const ProcurementBoard: React.FC = () => {
 
         {/* Purchase orders + new PO form */}
         <div className="lg:col-span-8 space-y-6">
-          <div className="glass-panel p-5 space-y-3">
-            <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-              <Plus className="w-4 h-4 text-cyan-400" /> New Purchase Order
+          <div className="surface-panel bg-white p-5 space-y-3 border border-slate-200 shadow-xs">
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <Plus className="w-4 h-4 text-cyan-700" /> New Purchase Order
             </h3>
             <form onSubmit={handleCreatePo} className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 text-xs">
               <div className="flex-1">
-                <label className="block text-gray-400 font-semibold mb-1">Vendor</label>
+                <label className="block text-slate-700 font-bold mb-1">Vendor</label>
                 <select
                   value={poVendor}
                   onChange={e => setPoVendor(e.target.value)}
-                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                  className="field-control text-xs"
                   required
                 >
                   <option value="">Select vendor…</option>
@@ -245,11 +245,11 @@ export const ProcurementBoard: React.FC = () => {
                 </select>
               </div>
               <div className="flex-1">
-                <label className="block text-gray-400 font-semibold mb-1">Item</label>
+                <label className="block text-slate-700 font-bold mb-1">Item</label>
                 <select
                   value={poItem}
                   onChange={e => setPoItem(e.target.value)}
-                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                  className="field-control text-xs"
                   required
                 >
                   <option value="">Select item…</option>
@@ -257,34 +257,34 @@ export const ProcurementBoard: React.FC = () => {
                 </select>
               </div>
               <div className="w-28">
-                <label className="block text-gray-400 font-semibold mb-1">Qty</label>
+                <label className="block text-slate-700 font-bold mb-1">Qty</label>
                 <input
                   type="number" min="1" step="1"
                   value={poQty}
                   onChange={e => setPoQty(e.target.value)}
-                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200 font-mono"
+                  className="field-control text-xs font-mono font-bold"
                   required
                 />
               </div>
-              <button type="submit" disabled={poSaving} className="btn-primary text-xs px-4 py-2 disabled:opacity-60">
+              <button type="submit" disabled={poSaving} className="btn-primary text-xs px-4 py-2 font-bold disabled:opacity-60">
                 <Plus className="w-3.5 h-3.5" /> {poSaving ? 'Creating…' : 'Create PO'}
               </button>
             </form>
             {poError && (
-              <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/40 text-rose-300 text-[11px] font-semibold">
+              <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 text-[11px] font-bold">
                 {poError}
               </div>
             )}
           </div>
 
-          <div className="glass-panel p-5 space-y-3">
-            <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-              <Package className="w-4 h-4 text-cyan-400" /> Purchase Orders
+          <div className="surface-panel bg-white p-5 space-y-3 border border-slate-200 shadow-xs">
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <Package className="w-4 h-4 text-cyan-700" /> Purchase Orders
             </h3>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="text-left text-[10px] uppercase tracking-wider text-gray-500 border-b border-white/10">
+                  <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200">
                     <th className="pb-2 font-bold">PO</th>
                     <th className="pb-2 font-bold">Vendor</th>
                     <th className="pb-2 font-bold">Item</th>
@@ -295,40 +295,40 @@ export const ProcurementBoard: React.FC = () => {
                     <th className="pb-2 font-bold text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {orders.map(po => (
-                    <tr key={po.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                      <td className="py-2 font-mono text-cyan-300">{po.id}</td>
-                      <td className="py-2 text-gray-200">{po.vendorName}</td>
-                      <td className="py-2 text-gray-300">{po.itemName}</td>
-                      <td className="py-2 text-right font-mono text-gray-100">{po.qty}</td>
-                      <td className="py-2 text-right font-mono text-gray-100">${(po.qty * po.unitCost).toFixed(2)}</td>
-                      <td className="py-2 text-gray-400">{po.orderDate}</td>
-                      <td className="py-2">
+                    <tr key={po.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-2.5 font-mono font-bold text-cyan-900">{po.id}</td>
+                      <td className="py-2.5 text-slate-900 font-bold">{po.vendorName}</td>
+                      <td className="py-2.5 text-slate-700 font-semibold">{po.itemName}</td>
+                      <td className="py-2.5 text-right font-mono font-bold text-slate-900">{po.qty}</td>
+                      <td className="py-2.5 text-right font-mono font-bold text-slate-900">${(po.qty * po.unitCost).toFixed(2)}</td>
+                      <td className="py-2.5 text-slate-500 font-semibold">{po.orderDate}</td>
+                      <td className="py-2.5">
                         <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase ${
                           po.status === 'Received'
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                            : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                            ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                            : 'bg-amber-100 text-amber-900 border-amber-300'
                         }`}>
                           {po.status}
                         </span>
                       </td>
-                      <td className="py-2 text-right">
+                      <td className="py-2.5 text-right">
                         {po.status === 'Open' ? (
                           <button
                             onClick={() => handleReceive(po.id)}
-                            className="btn-secondary text-[11px] px-2.5 py-1 text-emerald-300 hover:bg-emerald-500/10 border-emerald-500/30"
+                            className="btn-secondary text-[11px] px-2.5 py-1 text-emerald-900 border-emerald-300 hover:bg-emerald-50 font-bold"
                           >
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Receive
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" /> Receive
                           </button>
                         ) : (
-                          <span className="text-[11px] text-gray-500">—</span>
+                          <span className="text-[11px] text-slate-400 font-semibold">—</span>
                         )}
                       </td>
                     </tr>
                   ))}
                   {orders.length === 0 && (
-                    <tr><td colSpan={8} className="py-4 text-center text-gray-500">No purchase orders yet.</td></tr>
+                    <tr><td colSpan={8} className="py-4 text-center text-slate-500 font-semibold">No purchase orders yet.</td></tr>
                   )}
                 </tbody>
               </table>

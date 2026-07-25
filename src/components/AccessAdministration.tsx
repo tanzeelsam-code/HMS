@@ -86,10 +86,10 @@ const emptyNewUser = (): NewUserDraft => ({
 });
 
 const roleStyle: Record<UserRole, string> = {
-  'General Manager': 'bg-amber-500/10 text-amber-300 border-amber-500/30',
-  Finance: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
-  'Front Desk': 'bg-blue-500/10 text-blue-300 border-blue-500/30',
-  Housekeeping: 'bg-purple-500/10 text-purple-300 border-purple-500/30',
+  'General Manager': 'bg-amber-100 text-amber-900 border-amber-300',
+  Finance: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+  'Front Desk': 'bg-blue-100 text-blue-900 border-blue-300',
+  Housekeeping: 'bg-purple-100 text-purple-900 border-purple-300',
 };
 
 const passwordChecks = (password: string) => [
@@ -382,10 +382,10 @@ export const AccessAdministration: React.FC<AccessAdministrationProps> = ({ user
 
   if (!isGeneralManager) {
     return (
-      <div className="glass-panel p-8 text-center space-y-3 animate-slide-up" role="alert">
-        <ShieldX className="w-10 h-10 text-rose-400 mx-auto" />
-        <h2 className="text-lg font-bold text-gray-100">General Manager access required</h2>
-        <p className="text-sm text-gray-400 max-w-xl mx-auto">
+      <div className="surface-panel bg-white border border-slate-200 p-8 text-center space-y-3 animate-slide-up shadow-xs" role="alert">
+        <ShieldX className="w-10 h-10 text-rose-600 mx-auto" />
+        <h2 className="text-lg font-bold text-slate-900">General Manager access required</h2>
+        <p className="text-xs font-medium text-slate-600 max-w-xl mx-auto">
           Account lifecycle, session revocation, and property access are restricted to General Managers.
         </p>
       </div>
@@ -394,62 +394,62 @@ export const AccessAdministration: React.FC<AccessAdministrationProps> = ({ user
 
   if (loading && users.length === 0) {
     return (
-      <div className="glass-panel p-10 flex items-center justify-center text-sm text-gray-400 animate-slide-up" role="status">
-        <RefreshCw className="w-4 h-4 mr-2 animate-spin text-amber-400" /> Loading account directory…
+      <div className="surface-panel bg-white border border-slate-200 p-10 flex items-center justify-center text-xs font-semibold text-slate-500 animate-slide-up shadow-xs" role="status">
+        <RefreshCw className="w-4 h-4 mr-2 animate-spin text-amber-600" /> Loading account directory…
       </div>
     );
   }
 
   return (
     <div className="space-y-6 animate-slide-up">
-      <header className="glass-panel p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <header className="surface-panel bg-white p-5 border border-slate-200 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Account & Access Administration</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/30">
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Account & Access Administration</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300">
               General Manager only
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-1 max-w-3xl">
+          <p className="text-xs text-slate-600 mt-1 max-w-3xl font-medium">
             Create staff accounts, enforce credential rotation, revoke sessions, and scope access to managed properties.
           </p>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={() => void handleRefresh()} disabled={loading} className="btn-secondary text-xs px-3 py-2 disabled:opacity-60">
+          <button type="button" onClick={() => void handleRefresh()} disabled={loading} className="btn-secondary text-xs px-3 py-2 disabled:opacity-60 font-bold">
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </button>
-          <button type="button" onClick={() => setShowCreate((shown) => !shown)} className="btn-primary text-xs px-3 py-2" aria-expanded={showCreate} aria-controls="create-user-panel">
+          <button type="button" onClick={() => setShowCreate((shown) => !shown)} className="btn-primary text-xs px-3 py-2 font-bold" aria-expanded={showCreate} aria-controls="create-user-panel">
             <UserPlus className="w-3.5 h-3.5" /> New user
           </button>
         </div>
       </header>
 
       {error && (
-        <div role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs text-rose-200 flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 flex-shrink-0" /> <span>{error}</span>
+        <div role="alert" className="rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-900 flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-700" /> <span>{error}</span>
         </div>
       )}
       {notice && (
-        <div role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-200 flex items-start gap-2">
-          <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> <span>{notice}</span>
+        <div role="status" className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-xs font-bold text-emerald-900 flex items-start gap-2">
+          <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-700" /> <span>{notice}</span>
         </div>
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard label="Active users" value={activeUserCount} icon={<Users className="w-4 h-4 text-blue-400" />} />
-        <MetricCard label="Active GMs" value={activeGmCount} icon={<ShieldCheck className="w-4 h-4 text-amber-400" />} />
-        <MetricCard label="Password change due" value={forcedChangeCount} icon={<KeyRound className="w-4 h-4 text-rose-400" />} />
-        <MetricCard label="Managed properties" value={activeProperties.length} icon={<Building2 className="w-4 h-4 text-emerald-400" />} />
+        <MetricCard label="Active users" value={activeUserCount} icon={<Users className="w-4 h-4 text-blue-700" />} />
+        <MetricCard label="Active GMs" value={activeGmCount} icon={<ShieldCheck className="w-4 h-4 text-amber-700" />} />
+        <MetricCard label="Password change due" value={forcedChangeCount} icon={<KeyRound className="w-4 h-4 text-rose-700" />} />
+        <MetricCard label="Managed properties" value={activeProperties.length} icon={<Building2 className="w-4 h-4 text-emerald-700" />} />
       </div>
 
       {showCreate && (
-        <form id="create-user-panel" onSubmit={(event) => void handleCreateUser(event)} className="glass-panel-gold rounded-xl p-5 space-y-5">
+        <form id="create-user-panel" onSubmit={(event) => void handleCreateUser(event)} className="surface-panel bg-white border border-amber-300 rounded-xl p-5 space-y-5 shadow-xs">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-amber-200 flex items-center gap-2"><UserPlus className="w-4 h-4" /> Create staff account</h3>
-              <p className="text-[11px] text-gray-400 mt-1">The user must replace this temporary password after first sign-in.</p>
+              <h3 className="text-sm font-bold text-amber-900 flex items-center gap-2"><UserPlus className="w-4 h-4 text-amber-700" /> Create staff account</h3>
+              <p className="text-[11px] text-slate-600 font-semibold mt-1">The user must replace this temporary password after first sign-in.</p>
             </div>
-            <button type="button" onClick={() => setShowCreate(false)} className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10" aria-label="Close create user form">
+            <button type="button" onClick={() => setShowCreate(false)} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100" aria-label="Close create user form">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -457,9 +457,9 @@ export const AccessAdministration: React.FC<AccessAdministrationProps> = ({ user
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             <TextField id="new-user-name" label="Full name" value={newUser.name} onChange={(value) => setNewUser({ ...newUser, name: value })} autoComplete="name" required />
             <TextField id="new-user-email" label="Sign-in email" type="email" value={newUser.email} onChange={(value) => setNewUser({ ...newUser, email: value })} autoComplete="email" required />
-            <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400" htmlFor="new-user-role">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700" htmlFor="new-user-role">
               Global role
-              <select id="new-user-role" value={newUser.role} onChange={(event) => setNewUser({ ...newUser, role: event.target.value as UserRole })} className="block mt-1.5 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2.5 text-xs text-gray-200 normal-case tracking-normal outline-none focus:border-amber-400">
+              <select id="new-user-role" value={newUser.role} onChange={(event) => setNewUser({ ...newUser, role: event.target.value as UserRole })} className="field-control text-xs mt-1.5 font-bold">
                 {ROLES.map((role) => <option key={role}>{role}</option>)}
               </select>
             </label>
@@ -483,8 +483,8 @@ export const AccessAdministration: React.FC<AccessAdministrationProps> = ({ user
           />
 
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setShowCreate(false)} className="btn-secondary text-xs px-4 py-2">Cancel</button>
-            <button type="submit" disabled={busyAction !== null || !passwordChecks(newUser.password).every((check) => check.met) || newUser.propertyIds.length === 0} className="btn-primary text-xs px-4 py-2 disabled:opacity-50">
+            <button type="button" onClick={() => setShowCreate(false)} className="btn-secondary text-xs px-4 py-2 font-bold">Cancel</button>
+            <button type="submit" disabled={busyAction !== null || !passwordChecks(newUser.password).every((check) => check.met) || newUser.propertyIds.length === 0} className="btn-primary text-xs px-4 py-2 disabled:opacity-50 font-bold">
               <UserPlus className="w-3.5 h-3.5" /> {busyAction === 'create' ? 'Creating…' : 'Create account'}
             </button>
           </div>
@@ -492,15 +492,15 @@ export const AccessAdministration: React.FC<AccessAdministrationProps> = ({ user
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-        <aside className="xl:col-span-4 glass-panel p-4 space-y-4 xl:sticky xl:top-24">
+        <aside className="xl:col-span-4 surface-panel bg-white p-4 space-y-4 border border-slate-200 shadow-xs xl:sticky xl:top-24">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-sm font-bold text-gray-100">Staff directory</h3>
-            <span className="text-[11px] text-gray-500">{filteredUsers.length} user(s)</span>
+            <h3 className="text-sm font-bold text-slate-900">Staff directory</h3>
+            <span className="text-[11px] font-semibold text-slate-500">{filteredUsers.length} user(s)</span>
           </div>
           <label className="relative block" htmlFor="access-user-search">
             <span className="sr-only">Search staff accounts</span>
-            <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-gray-500" />
-            <input id="access-user-search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, email, role, property…" className="w-full rounded-lg border border-white/10 bg-slate-950 pl-9 pr-3 py-2 text-xs text-gray-200 outline-none focus:border-amber-400" />
+            <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400" />
+            <input id="access-user-search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, email, role, property…" className="field-control !pl-9 text-xs" />
           </label>
           <div className="space-y-2 max-h-[680px] overflow-y-auto pr-1">
             {filteredUsers.map((managedUser) => (
@@ -510,59 +510,59 @@ export const AccessAdministration: React.FC<AccessAdministrationProps> = ({ user
                 onClick={() => { setSelectedId(managedUser.id); setError(''); }}
                 className={`w-full rounded-xl border p-3.5 text-left transition-colors ${
                   selectedId === managedUser.id
-                    ? 'border-amber-500/40 bg-amber-500/10'
-                    : 'border-white/10 bg-slate-950/60 hover:border-white/20 hover:bg-white/[0.03]'
+                    ? 'border-amber-300 bg-amber-50 shadow-xs'
+                    : 'border-slate-200 bg-slate-50/70 hover:border-slate-300'
                 } ${managedUser.active ? '' : 'opacity-65'}`}
                 aria-pressed={selectedId === managedUser.id}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${managedUser.active ? 'bg-emerald-400' : 'bg-rose-400'}`} />
-                      <span className="text-xs font-bold text-gray-100 truncate">{managedUser.name}</span>
-                      {managedUser.email.toLowerCase() === user.email.toLowerCase() && <span className="text-[9px] font-bold text-amber-300">YOU</span>}
+                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${managedUser.active ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                      <span className="text-xs font-bold text-slate-900 truncate">{managedUser.name}</span>
+                      {managedUser.email.toLowerCase() === user.email.toLowerCase() && <span className="text-[9px] font-extrabold text-amber-800">YOU</span>}
                     </div>
-                    <div className="text-[10px] text-gray-500 truncate mt-1">{managedUser.email}</div>
+                    <div className="text-[10px] font-semibold text-slate-500 truncate mt-1">{managedUser.email}</div>
                   </div>
                   <span className={`px-2 py-0.5 rounded-full border text-[9px] font-bold flex-shrink-0 ${roleStyle[managedUser.role]}`}>{managedUser.role}</span>
                 </div>
-                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-3 text-[10px] text-gray-500">
+                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-3 text-[10px] font-semibold text-slate-500">
                   <span>{managedUser.memberships.length} propert{managedUser.memberships.length === 1 ? 'y' : 'ies'}</span>
                   <span>{managedUser.activeSessionCount} session(s)</span>
-                  {managedUser.mustChangePassword && <span className="text-rose-300">Password change due</span>}
+                  {managedUser.mustChangePassword && <span className="text-rose-700 font-bold">Password change due</span>}
                 </div>
               </button>
             ))}
-            {filteredUsers.length === 0 && <div className="py-8 text-center text-xs text-gray-500">No staff accounts match this search.</div>}
+            {filteredUsers.length === 0 && <div className="py-8 text-center text-xs font-semibold text-slate-500">No staff accounts match this search.</div>}
           </div>
         </aside>
 
         <main className="xl:col-span-8 space-y-5">
           {!selectedUser ? (
-            <div className="glass-panel p-10 text-center text-sm text-gray-500">Select a staff account to manage access.</div>
+            <div className="surface-panel bg-white border border-slate-200 p-10 text-center text-xs font-semibold text-slate-500 shadow-xs">Select a staff account to manage access.</div>
           ) : (
             <>
-              <section className="glass-panel p-5 space-y-4" aria-labelledby="selected-account-title">
+              <section className="surface-panel bg-white p-5 space-y-4 border border-slate-200 shadow-xs" aria-labelledby="selected-account-title">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 id="selected-account-title" className="text-lg font-bold text-gray-100">{selectedUser.name}</h3>
+                      <h3 id="selected-account-title" className="text-lg font-bold text-slate-900">{selectedUser.name}</h3>
                       <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${roleStyle[selectedUser.role]}`}>{selectedUser.role}</span>
-                      <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${selectedUser.active ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : 'bg-rose-500/10 text-rose-300 border-rose-500/30'}`}>{selectedUser.active ? 'Active' : 'Disabled'}</span>
-                      {selectedUser.mustChangePassword && <span className="px-2 py-0.5 rounded-full border text-[10px] font-bold bg-rose-500/10 text-rose-300 border-rose-500/30">Password change required</span>}
+                      <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${selectedUser.active ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-rose-100 text-rose-900 border-rose-300'}`}>{selectedUser.active ? 'Active' : 'Disabled'}</span>
+                      {selectedUser.mustChangePassword && <span className="px-2 py-0.5 rounded-full border text-[10px] font-bold bg-rose-100 text-rose-900 border-rose-300">Password change required</span>}
                     </div>
-                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> {selectedUser.email}</p>
+                    <p className="text-xs font-semibold text-slate-500 mt-1 flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-slate-400" /> {selectedUser.email}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <button type="button" onClick={() => void handleRevokeSessions()} disabled={isSelf || selectedUser.activeSessionCount === 0 || busyAction !== null} title={isSelf ? 'Use Sign Out for your own current session' : undefined} className="btn-secondary text-[11px] px-3 py-2 disabled:opacity-45">
+                    <button type="button" onClick={() => void handleRevokeSessions()} disabled={isSelf || selectedUser.activeSessionCount === 0 || busyAction !== null} title={isSelf ? 'Use Sign Out for your own current session' : undefined} className="btn-secondary text-[11px] px-3 py-2 disabled:opacity-45 font-bold">
                       <LogOut className="w-3.5 h-3.5" /> Revoke sessions
                     </button>
-                    <button type="button" onClick={() => void handleStatusChange()} disabled={isSelf || busyAction !== null} title={isSelf ? 'You cannot disable your own account' : undefined} className={`text-[11px] px-3 py-2 rounded-lg border font-bold flex items-center gap-1.5 disabled:opacity-45 ${selectedUser.active ? 'border-rose-500/30 bg-rose-500/10 text-rose-300' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'}`}>
+                    <button type="button" onClick={() => void handleStatusChange()} disabled={isSelf || busyAction !== null} title={isSelf ? 'You cannot disable your own account' : undefined} className={`text-[11px] px-3 py-2 rounded-lg border font-bold flex items-center gap-1.5 disabled:opacity-45 ${selectedUser.active ? 'border-rose-300 bg-rose-50 text-rose-800 hover:bg-rose-100' : 'border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'}`}>
                       <Power className="w-3.5 h-3.5" /> {busyAction === 'status' ? 'Updating…' : selectedUser.active ? 'Disable account' : 'Reactivate'}
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-white/10 pt-4 text-center">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-slate-200 pt-4 text-center">
                   <SummaryValue label="Sessions" value={selectedUser.activeSessionCount} />
                   <SummaryValue label="Properties" value={selectedUser.memberships.length} />
                   <SummaryValue label="Status" value={selectedUser.active ? 'Enabled' : 'Disabled'} />
@@ -570,41 +570,41 @@ export const AccessAdministration: React.FC<AccessAdministrationProps> = ({ user
                 </div>
               </section>
 
-              <form onSubmit={(event) => void handleSaveProfile(event)} className="glass-panel p-5 space-y-4">
+              <form onSubmit={(event) => void handleSaveProfile(event)} className="surface-panel bg-white p-5 space-y-4 border border-slate-200 shadow-xs">
                 <div>
-                  <h4 className="text-sm font-bold text-gray-100 flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-amber-400" /> Account identity & role</h4>
-                  <p className="text-[11px] text-gray-500 mt-1">Role and sign-in email changes invalidate existing sessions. Your own role and email require the personal account flow.</p>
+                  <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-amber-700" /> Account identity & role</h4>
+                  <p className="text-[11px] font-semibold text-slate-500 mt-1">Role and sign-in email changes invalidate existing sessions. Your own role and email require the personal account flow.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <TextField id="edit-user-name" label="Full name" value={editName} onChange={setEditName} required />
                   <TextField id="edit-user-email" label="Sign-in email" type="email" value={editEmail} onChange={setEditEmail} disabled={isSelf} required />
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400 md:col-span-2" htmlFor="edit-user-role">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 md:col-span-2" htmlFor="edit-user-role">
                     Global role
-                    <select id="edit-user-role" value={editRole} disabled={isSelf} onChange={(event) => setEditRole(event.target.value as UserRole)} className="block mt-1.5 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2.5 text-xs text-gray-200 normal-case tracking-normal outline-none focus:border-amber-400 disabled:opacity-50">
+                    <select id="edit-user-role" value={editRole} disabled={isSelf} onChange={(event) => setEditRole(event.target.value as UserRole)} className="field-control text-xs mt-1.5 font-bold disabled:opacity-50">
                       {ROLES.map((role) => <option key={role}>{role}</option>)}
                     </select>
                   </label>
                 </div>
                 <div className="flex justify-end">
-                  <button type="submit" disabled={busyAction !== null} className="btn-primary text-xs px-4 py-2 disabled:opacity-50"><Save className="w-3.5 h-3.5" /> {busyAction === 'profile' ? 'Saving…' : 'Save account'}</button>
+                  <button type="submit" disabled={busyAction !== null} className="btn-primary text-xs px-4 py-2 disabled:opacity-50 font-bold"><Save className="w-3.5 h-3.5" /> {busyAction === 'profile' ? 'Saving…' : 'Save account'}</button>
                 </div>
               </form>
 
-              <form onSubmit={(event) => void handleSaveMemberships(event)} className="glass-panel p-5 space-y-4">
+              <form onSubmit={(event) => void handleSaveMemberships(event)} className="surface-panel bg-white p-5 space-y-4 border border-slate-200 shadow-xs">
                 <div>
-                  <h4 className="text-sm font-bold text-gray-100 flex items-center gap-2"><Building2 className="w-4 h-4 text-emerald-400" /> Property memberships</h4>
-                  <p className="text-[11px] text-gray-500 mt-1">At least one active property is required. Membership roles follow the account&apos;s global role.</p>
+                  <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2"><Building2 className="w-4 h-4 text-emerald-700" /> Property memberships</h4>
+                  <p className="text-[11px] font-semibold text-slate-500 mt-1">At least one active property is required. Membership roles follow the account&apos;s global role.</p>
                 </div>
                 <PropertySelector legend="Assigned properties" properties={activeProperties} selectedIds={membershipIds} onToggle={(propertyId) => setMembershipIds(toggleValue(membershipIds, propertyId))} />
                 <div className="flex justify-end">
-                  <button type="submit" disabled={busyAction !== null || membershipIds.length === 0} className="btn-primary text-xs px-4 py-2 disabled:opacity-50"><Save className="w-3.5 h-3.5" /> {busyAction === 'memberships' ? 'Saving…' : 'Save property access'}</button>
+                  <button type="submit" disabled={busyAction !== null || membershipIds.length === 0} className="btn-primary text-xs px-4 py-2 disabled:opacity-50 font-bold"><Save className="w-3.5 h-3.5" /> {busyAction === 'memberships' ? 'Saving…' : 'Save property access'}</button>
                 </div>
               </form>
 
-              <form onSubmit={(event) => void handleResetPassword(event)} className="glass-panel p-5 space-y-4 border border-rose-500/20">
+              <form onSubmit={(event) => void handleResetPassword(event)} className="surface-panel bg-white p-5 space-y-4 border border-rose-200 shadow-xs">
                 <div>
-                  <h4 className="text-sm font-bold text-gray-100 flex items-center gap-2"><LockKeyhole className="w-4 h-4 text-rose-400" /> Administrative password reset</h4>
-                  <p className="text-[11px] text-gray-500 mt-1">This revokes all sessions and forces a password change at the next sign-in. Use the personal password flow for your own account.</p>
+                  <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2"><LockKeyhole className="w-4 h-4 text-rose-700" /> Administrative password reset</h4>
+                  <p className="text-[11px] font-semibold text-slate-500 mt-1">This revokes all sessions and forces a password change at the next sign-in. Use the personal password flow for your own account.</p>
                 </div>
                 <PasswordEditor
                   id="reset-user-password"
@@ -617,7 +617,7 @@ export const AccessAdministration: React.FC<AccessAdministrationProps> = ({ user
                   disabled={isSelf}
                 />
                 <div className="flex justify-end">
-                  <button type="submit" disabled={isSelf || busyAction !== null || !passwordChecks(resetPassword).every((check) => check.met)} className="text-xs px-4 py-2 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-200 font-bold flex items-center gap-1.5 disabled:opacity-45">
+                  <button type="submit" disabled={isSelf || busyAction !== null || !passwordChecks(resetPassword).every((check) => check.met)} className="text-xs px-4 py-2 rounded-lg border border-rose-300 bg-rose-50 text-rose-800 hover:bg-rose-100 font-bold flex items-center gap-1.5 disabled:opacity-45">
                     <KeyRound className="w-3.5 h-3.5" /> {busyAction === 'password' ? 'Resetting…' : 'Reset password'}
                   </button>
                 </div>
@@ -631,14 +631,14 @@ export const AccessAdministration: React.FC<AccessAdministrationProps> = ({ user
 };
 
 const MetricCard: React.FC<{ label: string; value: number; icon: React.ReactNode }> = ({ label, value, icon }) => (
-  <div className="glass-panel p-4">
-    <div className="flex items-center justify-between gap-2"><span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">{label}</span>{icon}</div>
-    <div className="text-xl font-extrabold text-gray-100 mt-1">{value}</div>
+  <div className="surface-panel bg-white p-4 border border-slate-200 shadow-xs">
+    <div className="flex items-center justify-between gap-2"><span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{label}</span>{icon}</div>
+    <div className="text-xl font-extrabold text-slate-900 mt-1">{value}</div>
   </div>
 );
 
 const SummaryValue: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
-  <div><div className="text-sm font-bold text-gray-200">{value}</div><div className="text-[9px] uppercase tracking-wider text-gray-500 mt-0.5">{label}</div></div>
+  <div><div className="text-sm font-extrabold text-slate-900">{value}</div><div className="text-[9px] uppercase tracking-wider font-bold text-slate-500 mt-0.5">{label}</div></div>
 );
 
 interface TextFieldProps {
@@ -653,9 +653,9 @@ interface TextFieldProps {
 }
 
 const TextField: React.FC<TextFieldProps> = ({ id, label, value, onChange, type = 'text', autoComplete, required, disabled }) => (
-  <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400" htmlFor={id}>
+  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700" htmlFor={id}>
     {label}
-    <input id={id} type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} required={required} disabled={disabled} className="block mt-1.5 w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2.5 text-xs text-gray-200 normal-case tracking-normal outline-none focus:border-amber-400 disabled:opacity-50" />
+    <input id={id} type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} required={required} disabled={disabled} className="field-control text-xs mt-1.5 font-bold disabled:opacity-50" />
   </label>
 );
 
@@ -674,25 +674,25 @@ const PasswordEditor: React.FC<PasswordEditorProps> = ({ id, value, visible, onV
   const checks = passwordChecks(value);
   return (
     <div className="space-y-2">
-      <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400" htmlFor={id}>Temporary password</label>
+      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700" htmlFor={id}>Temporary password</label>
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
-          <input id={id} type={visible ? 'text' : 'password'} value={value} onChange={(event) => onChange(event.target.value)} autoComplete="new-password" disabled={disabled} minLength={12} maxLength={128} required className="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2.5 pr-10 text-xs font-mono text-gray-200 outline-none focus:border-amber-400 disabled:opacity-50" />
-          <button type="button" onClick={() => onVisibleChange(!visible)} disabled={disabled} className="absolute right-2 top-2 p-1 rounded text-gray-500 hover:text-gray-200 disabled:opacity-40" aria-label={visible ? 'Hide password' : 'Show password'}>
+          <input id={id} type={visible ? 'text' : 'password'} value={value} onChange={(event) => onChange(event.target.value)} autoComplete="new-password" disabled={disabled} minLength={12} maxLength={128} required className="field-control text-xs font-mono font-bold pr-10 disabled:opacity-50" />
+          <button type="button" onClick={() => onVisibleChange(!visible)} disabled={disabled} className="absolute right-2 top-2.5 p-1 rounded text-slate-400 hover:text-slate-900 disabled:opacity-40" aria-label={visible ? 'Hide password' : 'Show password'}>
             {visible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
           </button>
         </div>
-        <button type="button" onClick={onGenerate} disabled={disabled} className="btn-secondary text-xs px-3 py-2 disabled:opacity-50"><Sparkles className="w-3.5 h-3.5" /> Generate</button>
-        <button type="button" onClick={onCopy} disabled={disabled || !value} className="btn-secondary text-xs px-3 py-2 disabled:opacity-50"><Clipboard className="w-3.5 h-3.5" /> Copy</button>
+        <button type="button" onClick={onGenerate} disabled={disabled} className="btn-secondary text-xs px-3 py-2 disabled:opacity-50 font-bold"><Sparkles className="w-3.5 h-3.5" /> Generate</button>
+        <button type="button" onClick={onCopy} disabled={disabled || !value} className="btn-secondary text-xs px-3 py-2 disabled:opacity-50 font-bold"><Clipboard className="w-3.5 h-3.5" /> Copy</button>
       </div>
       <div className="flex flex-wrap gap-1.5" aria-label="Password requirements">
         {checks.map((check) => (
-          <span key={check.label} className={`rounded-full border px-2 py-0.5 text-[9px] font-semibold ${check.met ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' : 'border-white/10 bg-white/[0.03] text-gray-500'}`}>
+          <span key={check.label} className={`rounded-full border px-2 py-0.5 text-[9px] font-bold ${check.met ? 'border-emerald-300 bg-emerald-50 text-emerald-900' : 'border-slate-200 bg-slate-100 text-slate-500'}`}>
             {check.met ? '✓ ' : ''}{check.label}
           </span>
         ))}
       </div>
-      <p className="text-[10px] text-gray-500">Avoid names, email identifiers, hotel terms, and previously shared passwords.</p>
+      <p className="text-[10px] font-medium text-slate-500">Avoid names, email identifiers, hotel terms, and previously shared passwords.</p>
     </div>
   );
 };
@@ -706,24 +706,24 @@ interface PropertySelectorProps {
 
 const PropertySelector: React.FC<PropertySelectorProps> = ({ legend, properties, selectedIds, onToggle }) => (
   <fieldset className="space-y-2">
-    <legend className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{legend}</legend>
+    <legend className="text-[11px] font-bold uppercase tracking-wider text-slate-700">{legend}</legend>
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
       {properties.map((property) => {
         const selected = selectedIds.includes(property.id);
         return (
-          <label key={property.id} className={`rounded-xl border p-3 cursor-pointer transition-colors ${selected ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/10 bg-slate-950/60 hover:border-white/20'}`}>
+          <label key={property.id} className={`rounded-xl border p-3 cursor-pointer transition-colors ${selected ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'}`}>
             <div className="flex items-start gap-3">
-              <input type="checkbox" checked={selected} onChange={() => onToggle(property.id)} className="mt-0.5 accent-emerald-500" />
+              <input type="checkbox" checked={selected} onChange={() => onToggle(property.id)} className="mt-0.5 accent-emerald-600" />
               <div className="min-w-0">
-                <div className="text-xs font-bold text-gray-200 truncate">{property.name}</div>
-                <div className="text-[10px] text-gray-500 mt-0.5">{property.code} • {property.timezone}</div>
-                <div className="text-[10px] text-gray-600 mt-1">{property.totalRooms} rooms • {property.currency}</div>
+                <div className="text-xs font-bold text-slate-900 truncate">{property.name}</div>
+                <div className="text-[10px] font-semibold text-slate-500 mt-0.5">{property.code} • {property.timezone}</div>
+                <div className="text-[10px] font-semibold text-slate-500 mt-1">{property.totalRooms} rooms • {property.currency}</div>
               </div>
             </div>
           </label>
         );
       })}
     </div>
-    {properties.length === 0 && <p className="text-xs text-rose-300">No active properties are available for assignment.</p>}
+    {properties.length === 0 && <p className="text-xs font-bold text-rose-800">No active properties are available for assignment.</p>}
   </fieldset>
 );

@@ -46,75 +46,75 @@ export const FinancialAnalytics: React.FC<FinancialAnalyticsProps> = ({ metrics,
 
   return (
     <div className="space-y-6 animate-slide-up">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 surface-panel bg-white p-5 border border-slate-200 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Financial Performance & RevPAR</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Financial Performance & RevPAR</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
               Live PMS Metrics
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-slate-600 mt-1 font-medium">
             Current occupancy, room yield, posted daily revenue, and operational anomaly checks.
           </p>
         </div>
 
-        <button onClick={onRunNightAudit} className="btn-primary text-xs">
+        <button onClick={onRunNightAudit} className="btn-primary text-xs font-bold">
           <Moon className="w-3.5 h-3.5" /> Run End-of-Day Night Audit
         </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 space-y-2 border-l-4 border-l-amber-400">
-          <div className="flex items-center justify-between text-xs text-gray-400">
-            <span className="font-semibold uppercase tracking-wider">RevPAR</span>
-            <TrendingUp className="w-4 h-4 text-amber-400" />
+        <div className="surface-panel bg-white p-5 space-y-2 border border-slate-200 shadow-xs border-l-4 border-l-amber-500">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+            <span className="uppercase tracking-wider">RevPAR</span>
+            <TrendingUp className="w-4 h-4 text-amber-600" />
           </div>
-          <div className="text-2xl font-extrabold text-gray-100 font-mono">{formatCurrency(metrics.revPar)}</div>
-          <div className="text-[11px] text-gray-500">ADR × current occupancy</div>
+          <div className="text-2xl font-extrabold text-slate-900 font-mono">{formatCurrency(metrics.revPar)}</div>
+          <div className="text-[11px] font-semibold text-slate-500">ADR × current occupancy</div>
         </div>
 
-        <div className="glass-panel p-5 space-y-2 border-l-4 border-l-blue-400">
-          <div className="flex items-center justify-between text-xs text-gray-400">
-            <span className="font-semibold uppercase tracking-wider">Average Daily Rate</span>
-            <DollarSign className="w-4 h-4 text-blue-400" />
+        <div className="surface-panel bg-white p-5 space-y-2 border border-slate-200 shadow-xs border-l-4 border-l-blue-500">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+            <span className="uppercase tracking-wider">Average Daily Rate</span>
+            <DollarSign className="w-4 h-4 text-blue-600" />
           </div>
-          <div className="text-2xl font-extrabold text-gray-100 font-mono">{formatCurrency(metrics.adr)}</div>
-          <div className="text-[11px] text-gray-500">Across occupied rooms</div>
+          <div className="text-2xl font-extrabold text-slate-900 font-mono">{formatCurrency(metrics.adr)}</div>
+          <div className="text-[11px] font-semibold text-slate-500">Across occupied rooms</div>
         </div>
 
-        <div className="glass-panel p-5 space-y-2 border-l-4 border-l-emerald-400">
-          <div className="flex items-center justify-between text-xs text-gray-400">
-            <span className="font-semibold uppercase tracking-wider">Occupancy Rate</span>
-            <Users className="w-4 h-4 text-emerald-400" />
+        <div className="surface-panel bg-white p-5 space-y-2 border border-slate-200 shadow-xs border-l-4 border-l-emerald-500">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+            <span className="uppercase tracking-wider">Occupancy Rate</span>
+            <Users className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className="text-2xl font-extrabold text-gray-100 font-mono">{metrics.occupancyRate}%</div>
-          <div className="text-[11px] text-gray-500">{metrics.inHouseGuests} in-house guest(s)</div>
+          <div className="text-2xl font-extrabold text-slate-900 font-mono">{metrics.occupancyRate}%</div>
+          <div className="text-[11px] font-semibold text-slate-500">{metrics.inHouseGuests} in-house guest(s)</div>
         </div>
 
-        <div className="glass-panel p-5 space-y-2 border-l-4 border-l-purple-400">
-          <div className="flex items-center justify-between text-xs text-gray-400">
-            <span className="font-semibold uppercase tracking-wider">Posted Revenue Today</span>
-            <Award className="w-4 h-4 text-purple-400" />
+        <div className="surface-panel bg-white p-5 space-y-2 border border-slate-200 shadow-xs border-l-4 border-l-purple-500">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+            <span className="uppercase tracking-wider">Posted Revenue Today</span>
+            <Award className="w-4 h-4 text-purple-600" />
           </div>
-          <div className="text-2xl font-extrabold text-gray-100 font-mono">{formatCurrency(metrics.totalRevenue)}</div>
-          <div className="text-[11px] text-gray-500">
+          <div className="text-2xl font-extrabold text-slate-900 font-mono">{formatCurrency(metrics.totalRevenue)}</div>
+          <div className="text-[11px] font-semibold text-slate-500">
             {metrics.arrivalsToday} arrival(s) • {metrics.departuresToday} departure(s)
           </div>
         </div>
       </div>
 
-      <div className="glass-panel p-5 space-y-4 border border-rose-500/30">
+      <div className="surface-panel bg-white p-5 space-y-4 border border-rose-200 shadow-xs">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-rose-400" />
-            <h3 className="text-sm font-bold text-gray-100">Operational & Ledger Anomaly Scan</h3>
+            <ShieldAlert className="w-4 h-4 text-rose-600" />
+            <h3 className="text-sm font-bold text-slate-900">Operational & Ledger Anomaly Scan</h3>
           </div>
           {!loadingAnomalies && !anomalyError && (
             <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${
               anomalies.length > 0
-                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                ? 'bg-rose-50 text-rose-800 border-rose-200'
+                : 'bg-emerald-50 text-emerald-800 border-emerald-200'
             }`}>
               {anomalies.length > 0 ? `${anomalies.length} finding(s)` : 'No findings'}
             </span>
@@ -122,31 +122,31 @@ export const FinancialAnalytics: React.FC<FinancialAnalyticsProps> = ({ metrics,
         </div>
 
         {loadingAnomalies && (
-          <div role="status" className="p-3 text-xs text-gray-400 flex items-center gap-2">
-            <RefreshCw className="w-4 h-4 animate-spin" /> Scanning current PMS records…
+          <div role="status" className="p-3 text-xs font-semibold text-slate-500 flex items-center gap-2">
+            <RefreshCw className="w-4 h-4 animate-spin text-amber-600" /> Scanning current PMS records…
           </div>
         )}
 
         {anomalyError && (
-          <div role="alert" className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-200 text-xs">
+          <div role="alert" className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">
             {anomalyError}
           </div>
         )}
 
         {!loadingAnomalies && !anomalyError && anomalies.length === 0 && (
-          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4" /> No ledger, room-state, or stock anomalies detected.
+          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" /> No ledger, room-state, or stock anomalies detected.
           </div>
         )}
 
         {!loadingAnomalies && anomalies.length > 0 && (
-          <div className="space-y-3 text-xs">
+          <div className="space-y-3 text-xs font-semibold">
             {anomalies.map((anomaly, index) => (
-              <div key={`${anomaly.message}-${index}`} className="p-3.5 rounded-xl bg-slate-900 border border-white/10 flex items-start gap-3">
-                <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+              <div key={`${anomaly.message}-${index}`} className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <span className="text-[10px] font-bold uppercase text-amber-300">{anomaly.severity}</span>
-                  <p className="text-gray-300 mt-0.5">{anomaly.message}</p>
+                  <span className="text-[10px] font-extrabold uppercase text-amber-800">{anomaly.severity}</span>
+                  <p className="text-slate-800 mt-0.5">{anomaly.message}</p>
                 </div>
               </div>
             ))}

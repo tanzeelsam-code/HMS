@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GroupBooking } from '../types';
-import { Building, Users, Calendar, DollarSign, Plus, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Building, Users, Plus } from 'lucide-react';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const dateFromNow = (days: number) => new Date(Date.now() + days * DAY_MS).toISOString().slice(0, 10);
@@ -75,15 +75,15 @@ export const GroupBookingBoard: React.FC<GroupBookingBoardProps> = ({
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 surface-panel bg-white p-5 border border-slate-200 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-100 tracking-tight">Groups & Events / MICE Manager</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-300 border border-amber-400/30">
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Groups & Events / MICE Manager</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300">
               Corporate Blocks & Banquet Billing
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-slate-600 mt-1 font-medium">
             Manage corporate room blocks, release dates, pick-up wash tracking, and event catering packages.
           </p>
         </div>
@@ -91,94 +91,94 @@ export const GroupBookingBoard: React.FC<GroupBookingBoardProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* New Group Block Form */}
-        <div className="lg:col-span-5 glass-panel p-5 space-y-4">
-          <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <Building className="w-4 h-4 text-amber-400" /> Create Corporate Group Room Block
+        <div className="lg:col-span-5 surface-panel bg-white p-5 space-y-4 border border-slate-200 shadow-xs">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <Building className="w-4 h-4 text-amber-600" /> Create Corporate Group Room Block
           </h3>
 
           <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
             <div>
-              <label className="block text-gray-400 font-semibold mb-1">Group / Event Name</label>
+              <label className="block text-slate-700 font-bold mb-1">Group / Event Name</label>
               <input
                 type="text"
                 placeholder="e.g. AI Leadership Summit 2026"
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
-                className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-400/50"
+                className="field-control text-xs"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-gray-400 font-semibold mb-1">Company / Organization</label>
+                <label className="block text-slate-700 font-bold mb-1">Company / Organization</label>
                 <input
                   type="text"
                   placeholder="Apex Corp"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                  className="field-control text-xs"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-gray-400 font-semibold mb-1">Contact Person</label>
+                <label className="block text-slate-700 font-bold mb-1">Contact Person</label>
                 <input
                   type="text"
                   placeholder="Jane Smith"
                   value={contactPerson}
                   onChange={(e) => setContactPerson(e.target.value)}
-                  className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                  className="field-control text-xs"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="group-contact-email" className="block text-gray-400 font-semibold mb-1">Contact Email</label>
+              <label htmlFor="group-contact-email" className="block text-slate-700 font-bold mb-1">Contact Email</label>
               <input
                 id="group-contact-email"
                 type="email"
                 placeholder="events@example.com"
                 value={contactEmail}
                 onChange={(event) => setContactEmail(event.target.value)}
-                className="w-full p-2.5 rounded-lg bg-slate-900 border border-white/10 text-gray-200 focus:outline-none focus:border-amber-400/50"
+                className="field-control text-xs"
               />
             </div>
 
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="block text-gray-400 font-semibold mb-1">Rooms</label>
+                <label className="block text-slate-700 font-bold mb-1">Rooms</label>
                 <input
                   type="number"
                   value={roomsAllocated}
                   onChange={(e) => setRoomsAllocated(e.target.value)}
-                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-amber-300 font-bold font-mono text-center"
+                  className="field-control text-xs text-amber-800 font-bold font-mono text-center"
                 />
               </div>
               <div>
-                <label className="block text-gray-400 font-semibold mb-1">Rate ($/n)</label>
+                <label className="block text-slate-700 font-bold mb-1">Rate ($/n)</label>
                 <input
                   type="number"
                   value={groupRate}
                   onChange={(e) => setGroupRate(e.target.value)}
-                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-amber-300 font-bold font-mono text-center"
+                  className="field-control text-xs text-amber-800 font-bold font-mono text-center"
                 />
               </div>
               <div>
-                <label className="block text-gray-400 font-semibold mb-1">Catering ($)</label>
+                <label className="block text-slate-700 font-bold mb-1">Catering ($)</label>
                 <input
                   type="number"
                   value={cateringTotal}
                   onChange={(e) => setCateringTotal(e.target.value)}
-                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-amber-300 font-bold font-mono text-center"
+                  className="field-control text-xs text-amber-800 font-bold font-mono text-center"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <div>
-                <label htmlFor="group-start-date" className="block text-gray-400 font-semibold mb-1">Arrival</label>
+                <label htmlFor="group-start-date" className="block text-slate-700 font-bold mb-1">Arrival</label>
                 <input
                   id="group-start-date"
                   type="date"
@@ -190,31 +190,31 @@ export const GroupBookingBoard: React.FC<GroupBookingBoardProps> = ({
                     if (endDate <= nextStart) setEndDate(addDays(nextStart, 1));
                     if (releaseDate > nextStart) setReleaseDate(nextStart);
                   }}
-                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                  className="field-control text-xs"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="group-end-date" className="block text-gray-400 font-semibold mb-1">Departure</label>
+                <label htmlFor="group-end-date" className="block text-slate-700 font-bold mb-1">Departure</label>
                 <input
                   id="group-end-date"
                   type="date"
                   min={addDays(startDate, 1)}
                   value={endDate}
                   onChange={(event) => setEndDate(event.target.value)}
-                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                  className="field-control text-xs"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="group-release-date" className="block text-gray-400 font-semibold mb-1">Release date</label>
+                <label htmlFor="group-release-date" className="block text-slate-700 font-bold mb-1">Release date</label>
                 <input
                   id="group-release-date"
                   type="date"
                   max={startDate}
                   value={releaseDate}
                   onChange={(event) => setReleaseDate(event.target.value)}
-                  className="w-full p-2 rounded-lg bg-slate-900 border border-white/10 text-gray-200"
+                  className="field-control text-xs"
                   required
                 />
               </div>
@@ -227,9 +227,9 @@ export const GroupBookingBoard: React.FC<GroupBookingBoardProps> = ({
         </div>
 
         {/* Group Contracts List */}
-        <div className="lg:col-span-7 glass-panel p-5 space-y-4">
-          <h3 className="text-sm font-bold text-gray-100 flex items-center gap-2">
-            <Users className="w-4 h-4 text-amber-400" /> Active Corporate Room Blocks
+        <div className="lg:col-span-7 surface-panel bg-white p-5 space-y-4 border border-slate-200 shadow-xs">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <Users className="w-4 h-4 text-amber-600" /> Active Corporate Room Blocks
           </h3>
 
           <div className="space-y-3">
@@ -239,34 +239,34 @@ export const GroupBookingBoard: React.FC<GroupBookingBoardProps> = ({
               return (
                 <div 
                   key={g.id}
-                  className="p-4 rounded-xl bg-slate-900/80 border border-white/10 space-y-3 hover:border-amber-400/40 transition-all text-xs"
+                  className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 hover:border-amber-300 transition-all text-xs"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-extrabold text-sm text-gray-100">{g.groupName}</div>
-                      <div className="text-[11px] text-gray-400 mt-0.5">
+                      <div className="font-extrabold text-sm text-slate-900">{g.groupName}</div>
+                      <div className="text-[11px] text-slate-600 font-medium mt-0.5">
                         {g.companyName} • Contact: {g.contactPerson || 'Unassigned'}{g.contactEmail ? ` · ${g.contactEmail}` : ''}
                       </div>
                     </div>
                     <span className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] border ${
-                      g.status === 'Definite Block' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                      g.status === 'Definite Block' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200'
                     }`}>
                       {g.status}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/10 text-center">
-                    <div className="bg-slate-950 p-2 rounded-lg">
-                      <div className="text-[10px] text-gray-400">Block Pickup</div>
-                      <div className="font-bold text-gray-200 mt-0.5">{g.roomsPickedUp} / {g.roomsAllocated} ({pickupPct}%)</div>
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200 text-center">
+                    <div className="bg-white p-2 rounded-lg border border-slate-200">
+                      <div className="text-[10px] text-slate-500 font-bold uppercase">Block Pickup</div>
+                      <div className="font-bold text-slate-900 mt-0.5">{g.roomsPickedUp} / {g.roomsAllocated} ({pickupPct}%)</div>
                     </div>
-                    <div className="bg-slate-950 p-2 rounded-lg">
-                      <div className="text-[10px] text-gray-400">Banquet & F&B</div>
-                      <div className="font-bold text-emerald-400 mt-0.5">${g.banquetCateringTotal.toLocaleString()}</div>
+                    <div className="bg-white p-2 rounded-lg border border-slate-200">
+                      <div className="text-[10px] text-slate-500 font-bold uppercase">Banquet & F&B</div>
+                      <div className="font-bold text-emerald-700 mt-0.5">${g.banquetCateringTotal.toLocaleString()}</div>
                     </div>
-                    <div className="bg-slate-950 p-2 rounded-lg">
-                      <div className="text-[10px] text-gray-400">Contract Total</div>
-                      <div className="font-bold text-amber-300 font-mono mt-0.5">${g.totalValue.toLocaleString()}</div>
+                    <div className="bg-white p-2 rounded-lg border border-slate-200">
+                      <div className="text-[10px] text-slate-500 font-bold uppercase">Contract Total</div>
+                      <div className="font-bold text-amber-800 font-mono mt-0.5">${g.totalValue.toLocaleString()}</div>
                     </div>
                   </div>
                 </div>

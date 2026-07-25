@@ -305,19 +305,19 @@ export const BookingEngine: React.FC<BookingEngineProps> = ({
           >
             <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-extrabold transition-colors ${
               complete
-                ? 'border-emerald-400/40 bg-emerald-400/15 text-emerald-300'
+                ? 'border-emerald-300 bg-emerald-100 text-emerald-900'
                 : active
-                  ? 'border-amber-300 bg-amber-300 text-slate-950 shadow-lg shadow-amber-500/20'
-                  : 'border-white/10 bg-white/5 text-gray-500'
+                  ? 'border-amber-400 bg-amber-600 text-white shadow-xs'
+                  : 'border-slate-300 bg-slate-100 text-slate-500'
             }`}>
               {complete ? <Check className="h-4 w-4" /> : number}
             </div>
             <span className={`ml-2 hidden truncate text-[11px] font-bold sm:block ${
-              active ? 'text-amber-200' : complete ? 'text-gray-300' : 'text-gray-600'
+              active ? 'text-slate-900' : complete ? 'text-slate-700' : 'text-slate-400'
             }`}>
               {label}
             </span>
-            {number < 3 && <ChevronRight className="mx-1 ml-auto h-4 w-4 shrink-0 text-white/10 sm:mx-3" />}
+            {number < 3 && <ChevronRight className="mx-1 ml-auto h-4 w-4 shrink-0 text-slate-300 sm:mx-3" />}
           </li>
         );
       })}
@@ -326,61 +326,61 @@ export const BookingEngine: React.FC<BookingEngineProps> = ({
 
   if (confirmation) {
     return (
-      <section className={`min-h-[760px] rounded-3xl border border-white/10 bg-slate-950 p-4 text-gray-100 shadow-2xl sm:p-8 ${className}`}>
+      <section className={`min-h-[760px] rounded-3xl border border-slate-200 bg-white p-4 text-slate-900 shadow-xl sm:p-8 ${className}`}>
         <div className="mx-auto max-w-4xl">
           <header className="mb-8 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-200 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/20">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-600 text-white shadow-xs font-bold">
                 <Hotel className="h-6 w-6" />
               </div>
               <div>
-                <div className="font-extrabold tracking-tight">{propertyName}</div>
-                <div className="flex items-center gap-1 text-[11px] text-gray-500"><MapPin className="h-3 w-3" /> {locationLabel}</div>
+                <div className="font-extrabold text-slate-900 tracking-tight">{propertyName}</div>
+                <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-500"><MapPin className="h-3 w-3 text-slate-400" /> {locationLabel}</div>
               </div>
             </div>
           </header>
           <div className="mb-10">{stepper}</div>
-          <div className="glass-panel-gold overflow-hidden rounded-3xl border border-emerald-400/25 p-6 text-center sm:p-10">
-            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300 ring-8 ring-emerald-400/5">
-              <CheckCircle2 className="h-9 w-9" />
+          <div className="overflow-hidden rounded-3xl border border-emerald-300 bg-emerald-50 p-6 text-center sm:p-10 shadow-xs">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-900">
+              <CheckCircle2 className="h-9 w-9 text-emerald-700" />
             </div>
-            <p className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-300">Reservation confirmed</p>
-            <h2 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">We look forward to welcoming you.</h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-gray-400">
+            <p className="text-xs font-bold uppercase tracking-wider text-emerald-900">Reservation confirmed</p>
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">We look forward to welcoming you.</h2>
+            <p className="mx-auto mt-3 max-w-xl text-xs leading-relaxed font-semibold text-slate-600">
               Your confirmation is ready. Save the reference below; the hotel can use it to find your stay.
             </p>
 
-            <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-white/10 bg-slate-950/70 p-5 text-left">
-              <div className="flex flex-col justify-between gap-4 border-b border-white/10 pb-5 sm:flex-row sm:items-center">
+            <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-xs">
+              <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center">
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Confirmation</div>
-                  <div className="mt-1 font-mono text-2xl font-black text-amber-300">{confirmation.code}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Confirmation</div>
+                  <div className="mt-1 font-mono text-2xl font-extrabold text-amber-900">{confirmation.code}</div>
                 </div>
-                <span className="w-fit rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-bold text-emerald-300">
+                <span className="w-fit rounded-full border border-emerald-300 bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-900">
                   {confirmation.status}
                 </span>
               </div>
-              <dl className="grid grid-cols-1 gap-5 pt-5 text-sm sm:grid-cols-2">
-                <div><dt className="text-xs text-gray-500">Guest</dt><dd className="mt-1 font-semibold text-gray-200">{confirmation.guestName}</dd></div>
-                <div><dt className="text-xs text-gray-500">Room</dt><dd className="mt-1 font-semibold text-gray-200">{confirmation.roomType}</dd></div>
-                <div><dt className="text-xs text-gray-500">Arrival</dt><dd className="mt-1 font-semibold text-gray-200">{formatDate(confirmation.checkIn)}</dd></div>
-                <div><dt className="text-xs text-gray-500">Departure</dt><dd className="mt-1 font-semibold text-gray-200">{formatDate(confirmation.checkOut)}</dd></div>
+              <dl className="grid grid-cols-1 gap-5 pt-5 text-xs font-semibold sm:grid-cols-2">
+                <div><dt className="text-slate-500 font-bold">Guest</dt><dd className="mt-1 font-extrabold text-slate-900">{confirmation.guestName}</dd></div>
+                <div><dt className="text-slate-500 font-bold">Room</dt><dd className="mt-1 font-extrabold text-slate-900">{confirmation.roomType}</dd></div>
+                <div><dt className="text-slate-500 font-bold">Arrival</dt><dd className="mt-1 font-extrabold text-slate-900">{formatDate(confirmation.checkIn)}</dd></div>
+                <div><dt className="text-slate-500 font-bold">Departure</dt><dd className="mt-1 font-extrabold text-slate-900">{formatDate(confirmation.checkOut)}</dd></div>
               </dl>
-              <div className="mt-5 flex items-end justify-between gap-4 border-t border-white/10 pt-5">
+              <div className="mt-5 flex items-end justify-between gap-4 border-t border-slate-200 pt-5">
                 <div>
-                  <div className="text-xs text-gray-500">Due at the property</div>
-                  <div className="mt-1 text-xs text-gray-400">No payment was collected online.</div>
+                  <div className="text-xs font-bold text-slate-500">Due at the property</div>
+                  <div className="mt-1 text-xs font-semibold text-slate-600">No payment was collected online.</div>
                 </div>
-                <div className="font-mono text-2xl font-black text-white">{formatMoney(confirmation.grandTotal, confirmation.currency)}</div>
+                <div className="font-mono text-2xl font-extrabold text-slate-900">{formatMoney(confirmation.grandTotal, confirmation.currency)}</div>
               </div>
             </div>
 
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <button type="button" onClick={returnToSearch} className="btn-secondary justify-center text-xs">
+              <button type="button" onClick={returnToSearch} className="btn-secondary justify-center text-xs font-bold">
                 Book another stay
               </button>
               {onExit && (
-                <button type="button" onClick={onExit} className="btn-primary justify-center text-xs">
+                <button type="button" onClick={onExit} className="btn-primary justify-center text-xs font-bold">
                   Return to hotel <ArrowRight className="h-4 w-4" />
                 </button>
               )}
@@ -392,21 +392,20 @@ export const BookingEngine: React.FC<BookingEngineProps> = ({
   }
 
   return (
-    <section className={`min-h-[760px] overflow-hidden rounded-3xl border border-white/10 bg-slate-950 text-gray-100 shadow-2xl ${className}`}>
-      <div className="relative border-b border-white/10 bg-[radial-gradient(circle_at_top_right,rgba(226,177,83,0.18),transparent_42%),linear-gradient(135deg,#111827,#090d16)] px-4 py-5 sm:px-8">
-        <div className="pointer-events-none absolute right-10 top-0 h-36 w-36 rounded-full bg-amber-400/5 blur-3xl" />
+    <section className={`min-h-[760px] overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-xl ${className}`}>
+      <div className="relative border-b border-slate-200 bg-slate-50 px-4 py-5 sm:px-8">
         <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-200 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/20">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-600 text-white shadow-xs font-bold">
               <Hotel className="h-6 w-6" />
             </div>
             <div>
-              <div className="font-extrabold tracking-tight">{propertyName}</div>
-              <div className="flex items-center gap-1 text-[11px] text-gray-500"><MapPin className="h-3 w-3" /> {locationLabel}</div>
+              <div className="font-extrabold text-slate-900 tracking-tight">{propertyName}</div>
+              <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-500"><MapPin className="h-3 w-3 text-slate-400" /> {locationLabel}</div>
             </div>
           </div>
           {onExit && (
-            <button type="button" onClick={onExit} className="btn-secondary px-3 py-2 text-xs">
+            <button type="button" onClick={onExit} className="btn-secondary px-3 py-2 text-xs font-bold">
               <ArrowLeft className="h-3.5 w-3.5" /> Exit booking
             </button>
           )}
@@ -417,82 +416,82 @@ export const BookingEngine: React.FC<BookingEngineProps> = ({
         <div className="mb-8">{stepper}</div>
 
         {error && (
-          <div role="alert" className="mb-5 rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm font-semibold text-rose-200">
+          <div role="alert" className="mb-5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-900">
             {error}
           </div>
         )}
 
         {step === 1 && (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.5fr_0.75fr]">
-            <div className="glass-panel-gold rounded-3xl p-5 sm:p-8">
+            <div className="surface-panel bg-white border border-slate-200 rounded-3xl p-5 sm:p-8 shadow-xs">
               <div className="mb-8 max-w-2xl">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-200">
-                  <Sparkles className="h-3 w-3" /> Book direct
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-900">
+                  <Sparkles className="h-3 w-3 text-amber-700" /> Book direct
                 </span>
-                <h1 className="mt-4 text-3xl font-black tracking-tight text-white sm:text-5xl">
+                <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
                   Your next remarkable stay starts here.
                 </h1>
-                <p className="mt-3 max-w-xl text-sm leading-6 text-gray-400 sm:text-base">
+                <p className="mt-3 max-w-xl text-xs leading-relaxed font-medium text-slate-600 sm:text-sm">
                   Live availability, a flexible rate, and no booking commission. Reserve in a few simple steps.
                 </p>
               </div>
 
-              <form onSubmit={searchAvailability} className="rounded-2xl border border-white/10 bg-slate-950/70 p-4 sm:p-5">
+              <form onSubmit={searchAvailability} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_0.7fr]">
                   <div>
-                    <label htmlFor="direct-check-in" className="mb-1.5 block text-xs font-bold text-gray-400">Check-in</label>
+                    <label htmlFor="direct-check-in" className="mb-1.5 block text-xs font-bold text-slate-700">Check-in</label>
                     <div className="relative">
-                      <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-300" />
+                      <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-700" />
                       <input
                         id="direct-check-in"
                         type="date"
                         min={dateFromNow(0)}
                         value={checkIn}
                         onChange={(event) => handleCheckIn(event.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-slate-900 py-3 pl-10 pr-3 text-sm text-gray-100"
+                        className="field-control !pl-10 text-xs"
                         required
                       />
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="direct-check-out" className="mb-1.5 block text-xs font-bold text-gray-400">Check-out</label>
+                    <label htmlFor="direct-check-out" className="mb-1.5 block text-xs font-bold text-slate-700">Check-out</label>
                     <div className="relative">
-                      <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-300" />
+                      <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-700" />
                       <input
                         id="direct-check-out"
                         type="date"
                         min={minimumCheckOut}
                         value={checkOut}
                         onChange={(event) => setCheckOut(event.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-slate-900 py-3 pl-10 pr-3 text-sm text-gray-100"
+                        className="field-control !pl-10 text-xs"
                         required
                       />
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="direct-guests" className="mb-1.5 block text-xs font-bold text-gray-400">Guests</label>
+                    <label htmlFor="direct-guests" className="mb-1.5 block text-xs font-bold text-slate-700">Guests</label>
                     <div className="relative">
-                      <UsersRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-300" />
+                      <UsersRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-700" />
                       <select
                         id="direct-guests"
                         value={guests}
                         onChange={(event) => setGuests(Number(event.target.value))}
-                        className="w-full appearance-none rounded-xl border border-white/10 bg-slate-900 py-3 pl-10 pr-8 text-sm text-gray-100"
+                        className="field-control !pl-10 text-xs"
                       >
                         {[1, 2, 3, 4, 5, 6].map((count) => <option key={count} value={count}>{count} guest{count === 1 ? '' : 's'}</option>)}
                       </select>
                     </div>
                   </div>
                 </div>
-                <button type="submit" disabled={loading} className="btn-primary mt-5 w-full justify-center py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">
+                <button type="submit" disabled={loading} className="btn-primary mt-5 w-full justify-center py-3 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <BedDouble className="h-4 w-4" />}
                   {loading ? 'Checking live availability…' : 'Search available rooms'}
                 </button>
               </form>
             </div>
 
-            <aside className="glass-panel rounded-3xl p-5 sm:p-6">
-              <h2 className="text-sm font-extrabold text-white">Why book direct?</h2>
+            <aside className="surface-panel bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs">
+              <h2 className="text-sm font-extrabold text-slate-900">Why book direct?</h2>
               <ul className="mt-5 space-y-5">
                 {[
                   [ShieldCheck, 'Flexible booking', 'Cancel without charge until the arrival business date.'],
@@ -500,10 +499,10 @@ export const BookingEngine: React.FC<BookingEngineProps> = ({
                   [Clock3, 'Current availability', 'Every search checks the same inventory used by the hotel.'],
                 ].map(([Icon, title, copy]) => (
                   <li key={String(title)} className="flex gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-300/10 text-amber-300">
-                      <Icon className="h-4 w-4" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-800 border border-amber-200 font-bold">
+                      <Icon className="h-4 w-4 text-amber-700" />
                     </div>
-                    <div><div className="text-xs font-bold text-gray-200">{title as string}</div><p className="mt-1 text-xs leading-5 text-gray-500">{copy as string}</p></div>
+                    <div><div className="text-xs font-bold text-slate-900">{title as string}</div><p className="mt-1 text-xs font-medium leading-relaxed text-slate-600">{copy as string}</p></div>
                   </li>
                 ))}
               </ul>
@@ -515,51 +514,51 @@ export const BookingEngine: React.FC<BookingEngineProps> = ({
           <div>
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div>
-                <button type="button" onClick={() => { setStep(1); setError(''); }} className="mb-3 inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-amber-300">
+                <button type="button" onClick={() => { setStep(1); setError(''); }} className="mb-3 inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-amber-800">
                   <ArrowLeft className="h-3.5 w-3.5" /> Change dates
                 </button>
-                <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">Choose your room</h1>
-                <p className="mt-1 text-sm text-gray-500">{formatDate(availability.checkIn)} — {formatDate(availability.checkOut)} · {availability.nights} night{availability.nights === 1 ? '' : 's'} · {availability.guests} guest{availability.guests === 1 ? '' : 's'}</p>
+                <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Choose your room</h1>
+                <p className="mt-1 text-xs font-semibold text-slate-500">{formatDate(availability.checkIn)} — {formatDate(availability.checkOut)} · {availability.nights} night{availability.nights === 1 ? '' : 's'} · {availability.guests} guest{availability.guests === 1 ? '' : 's'}</p>
               </div>
-              <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-xs font-semibold text-emerald-300">
+              <div className="rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-900">
                 Live inventory checked
               </div>
             </div>
 
             {availability.roomTypes.length === 0 ? (
-              <div className="glass-panel rounded-3xl p-10 text-center">
-                <BedDouble className="mx-auto h-10 w-10 text-gray-600" />
-                <h2 className="mt-4 text-lg font-bold text-gray-200">No rooms match this stay</h2>
-                <p className="mt-2 text-sm text-gray-500">Try different dates or fewer guests.</p>
-                <button type="button" onClick={() => setStep(1)} className="btn-primary mt-5 text-xs">Adjust your search</button>
+              <div className="surface-panel bg-white border border-slate-200 rounded-3xl p-10 text-center shadow-xs">
+                <BedDouble className="mx-auto h-10 w-10 text-slate-400" />
+                <h2 className="mt-4 text-lg font-bold text-slate-900">No rooms match this stay</h2>
+                <p className="mt-2 text-xs font-semibold text-slate-500">Try different dates or fewer guests.</p>
+                <button type="button" onClick={() => setStep(1)} className="btn-primary mt-5 text-xs font-bold">Adjust your search</button>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                 {availability.roomTypes.map((room) => (
-                  <article key={room.roomType} className="glass-card group overflow-hidden rounded-3xl">
-                    <div className="flex min-h-32 items-end bg-[radial-gradient(circle_at_top_right,rgba(226,177,83,0.22),transparent_46%),linear-gradient(135deg,#1b2538,#111827)] p-5">
+                  <article key={room.roomType} className="surface-panel bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs hover:border-amber-300 transition-all">
+                    <div className="flex min-h-32 items-end bg-slate-50 border-b border-slate-200 p-5">
                       <div className="flex w-full items-end justify-between gap-4">
                         <div>
-                          <span className="rounded-full border border-white/10 bg-slate-950/50 px-2.5 py-1 text-[10px] font-bold text-gray-300">{room.availableCount} available</span>
-                          <h2 className="mt-3 text-xl font-black text-white">{room.roomType}</h2>
+                          <span className="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[10px] font-bold text-slate-700">{room.availableCount} available</span>
+                          <h2 className="mt-3 text-xl font-extrabold text-slate-900">{room.roomType}</h2>
                         </div>
-                        <BedDouble className="h-10 w-10 text-amber-300/70" />
+                        <BedDouble className="h-10 w-10 text-amber-700" />
                       </div>
                     </div>
                     <div className="p-5">
-                      <p className="min-h-10 text-xs leading-5 text-gray-400">{room.description}</p>
-                      <ul className="mt-4 grid grid-cols-2 gap-2 text-[11px] text-gray-400">
+                      <p className="min-h-10 text-xs leading-relaxed font-semibold text-slate-600">{room.description}</p>
+                      <ul className="mt-4 grid grid-cols-2 gap-2 text-[11px] font-semibold text-slate-600">
                         {room.amenities.slice(0, 4).map((amenity) => (
-                          <li key={amenity} className="flex items-center gap-1.5"><Check className="h-3 w-3 text-emerald-300" /> {amenity}</li>
+                          <li key={amenity} className="flex items-center gap-1.5"><Check className="h-3 w-3 text-emerald-600" /> {amenity}</li>
                         ))}
                       </ul>
-                      <div className="mt-5 flex items-end justify-between gap-4 border-t border-white/10 pt-5">
+                      <div className="mt-5 flex items-end justify-between gap-4 border-t border-slate-200 pt-5">
                         <div>
-                          <div className="text-[10px] uppercase tracking-wider text-gray-500">From</div>
-                          <div className="font-mono text-xl font-black text-white">{formatMoney(room.nightlyRate, room.currency)}<span className="font-sans text-xs font-medium text-gray-500"> / night</span></div>
-                          <div className="mt-1 text-[10px] text-gray-600">Taxes calculated before confirmation</div>
+                          <div className="text-[10px] uppercase font-bold tracking-wider text-slate-500">From</div>
+                          <div className="font-mono text-xl font-extrabold text-slate-900">{formatMoney(room.nightlyRate, room.currency)}<span className="font-sans text-xs font-semibold text-slate-500"> / night</span></div>
+                          <div className="mt-1 text-[10px] font-semibold text-slate-500">Taxes calculated before confirmation</div>
                         </div>
-                        <button type="button" onClick={() => chooseRoom(room)} disabled={loading} className="btn-primary shrink-0 text-xs disabled:cursor-not-allowed disabled:opacity-60">
+                        <button type="button" onClick={() => chooseRoom(room)} disabled={loading} className="btn-primary shrink-0 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-60">
                           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Select <ArrowRight className="h-3.5 w-3.5" /></>}
                         </button>
                       </div>
@@ -573,79 +572,79 @@ export const BookingEngine: React.FC<BookingEngineProps> = ({
 
         {step === 3 && quote && (
           <div>
-            <button type="button" onClick={() => { setStep(2); setError(''); }} className="mb-3 inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-amber-300">
+            <button type="button" onClick={() => { setStep(2); setError(''); }} className="mb-3 inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-amber-800">
               <ArrowLeft className="h-3.5 w-3.5" /> Choose another room
             </button>
-            <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">Complete your reservation</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Complete your reservation</h1>
+            <p className="mt-1 text-xs font-semibold text-slate-500">
               Your price is held until {new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date(quote.expiresAt))} while you finish.
             </p>
 
             <form onSubmit={completeBooking} className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-              <div className="glass-panel rounded-3xl p-5 sm:p-7">
+              <div className="surface-panel bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-xs">
                 <div className="mb-5 flex items-center gap-2">
-                  <UserRound className="h-4 w-4 text-amber-300" />
-                  <h2 className="text-sm font-extrabold text-white">Who is staying?</h2>
+                  <UserRound className="h-4 w-4 text-amber-700" />
+                  <h2 className="text-sm font-bold text-slate-900">Who is staying?</h2>
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="direct-first-name" className="mb-1.5 block text-xs font-bold text-gray-400">First name</label>
-                    <input id="direct-first-name" value={firstName} onChange={(event) => setFirstName(event.target.value)} autoComplete="given-name" maxLength={80} className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-3 text-sm text-gray-100" required />
+                    <label htmlFor="direct-first-name" className="mb-1.5 block text-xs font-bold text-slate-700">First name</label>
+                    <input id="direct-first-name" value={firstName} onChange={(event) => setFirstName(event.target.value)} autoComplete="given-name" maxLength={80} className="field-control text-xs" required />
                   </div>
                   <div>
-                    <label htmlFor="direct-last-name" className="mb-1.5 block text-xs font-bold text-gray-400">Last name</label>
-                    <input id="direct-last-name" value={lastName} onChange={(event) => setLastName(event.target.value)} autoComplete="family-name" maxLength={80} className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-3 text-sm text-gray-100" required />
+                    <label htmlFor="direct-last-name" className="mb-1.5 block text-xs font-bold text-slate-700">Last name</label>
+                    <input id="direct-last-name" value={lastName} onChange={(event) => setLastName(event.target.value)} autoComplete="family-name" maxLength={80} className="field-control text-xs" required />
                   </div>
                   <div>
-                    <label htmlFor="direct-email" className="mb-1.5 block text-xs font-bold text-gray-400">Email address</label>
+                    <label htmlFor="direct-email" className="mb-1.5 block text-xs font-bold text-slate-700">Email address</label>
                     <div className="relative">
-                      <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600" />
-                      <input id="direct-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" maxLength={254} className="w-full rounded-xl border border-white/10 bg-slate-900 py-3 pl-10 pr-3 text-sm text-gray-100" required />
+                      <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input id="direct-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" maxLength={254} className="field-control !pl-10 text-xs" required />
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="direct-phone" className="mb-1.5 block text-xs font-bold text-gray-400">Phone <span className="font-normal text-gray-600">(optional)</span></label>
+                    <label htmlFor="direct-phone" className="mb-1.5 block text-xs font-bold text-slate-700">Phone <span className="font-normal text-slate-500">(optional)</span></label>
                     <div className="relative">
-                      <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600" />
-                      <input id="direct-phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" maxLength={40} className="w-full rounded-xl border border-white/10 bg-slate-900 py-3 pl-10 pr-3 text-sm text-gray-100" />
+                      <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input id="direct-phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" maxLength={40} className="field-control !pl-10 text-xs" />
                     </div>
                   </div>
                 </div>
                 <div className="mt-4">
-                  <label htmlFor="direct-requests" className="mb-1.5 block text-xs font-bold text-gray-400">Special requests <span className="font-normal text-gray-600">(optional)</span></label>
-                  <textarea id="direct-requests" rows={3} value={specialRequests} onChange={(event) => setSpecialRequests(event.target.value)} maxLength={500} placeholder="Arrival time, accessibility needs, dietary notes…" className="w-full resize-y rounded-xl border border-white/10 bg-slate-900 px-3 py-3 text-sm text-gray-100 placeholder:text-gray-700" />
+                  <label htmlFor="direct-requests" className="mb-1.5 block text-xs font-bold text-slate-700">Special requests <span className="font-normal text-slate-500">(optional)</span></label>
+                  <textarea id="direct-requests" rows={3} value={specialRequests} onChange={(event) => setSpecialRequests(event.target.value)} maxLength={500} placeholder="Arrival time, accessibility needs, dietary notes…" className="field-control text-xs resize-y" />
                 </div>
-                <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-white/[0.025] p-4">
-                  <input type="checkbox" checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} className="mt-0.5 h-4 w-4 accent-amber-400" required />
-                  <span className="text-xs leading-5 text-gray-400">I agree to the flexible booking policy and understand that the full balance is payable at the property.</span>
+                <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <input type="checkbox" checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} className="mt-0.5 h-4 w-4 accent-amber-600" required />
+                  <span className="text-xs leading-relaxed font-semibold text-slate-700">I agree to the flexible booking policy and understand that the full balance is payable at the property.</span>
                 </label>
               </div>
 
-              <aside className="h-fit rounded-3xl border border-amber-300/20 bg-gradient-to-b from-amber-300/[0.08] to-slate-900 p-5 lg:sticky lg:top-5">
+              <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-5 lg:sticky lg:top-5 shadow-xs">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-amber-300">{quote.ratePlan} rate</div>
-                    <h2 className="mt-1 text-lg font-black text-white">{quote.roomType}</h2>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-amber-800">{quote.ratePlan} rate</div>
+                    <h2 className="mt-1 text-lg font-extrabold text-slate-900">{quote.roomType}</h2>
                   </div>
-                  <BedDouble className="h-7 w-7 text-amber-300" />
+                  <BedDouble className="h-7 w-7 text-amber-700" />
                 </div>
-                {quotedRoom && <p className="mt-3 text-xs leading-5 text-gray-500">{quotedRoom.description}</p>}
-                <dl className="mt-5 space-y-3 border-y border-white/10 py-5 text-xs">
-                  <div className="flex justify-between gap-3"><dt className="text-gray-500">Stay</dt><dd className="text-right font-semibold text-gray-300">{formatDate(quote.checkIn)}<br />to {formatDate(quote.checkOut)}</dd></div>
-                  <div className="flex justify-between gap-3"><dt className="text-gray-500">Guests</dt><dd className="font-semibold text-gray-300">{quote.guests}</dd></div>
-                  <div className="flex justify-between gap-3"><dt className="text-gray-500">Room · {quote.nights} night{quote.nights === 1 ? '' : 's'}</dt><dd className="font-mono text-gray-300">{formatMoney(quote.roomTotal, quote.currency)}</dd></div>
-                  <div className="flex justify-between gap-3"><dt className="text-gray-500">Taxes & fees</dt><dd className="font-mono text-gray-300">{formatMoney(quote.taxAmount, quote.currency)}</dd></div>
+                {quotedRoom && <p className="mt-3 text-xs font-medium leading-relaxed text-slate-600">{quotedRoom.description}</p>}
+                <dl className="mt-5 space-y-3 border-y border-slate-200 py-5 text-xs font-semibold">
+                  <div className="flex justify-between gap-3"><dt className="text-slate-500 font-bold">Stay</dt><dd className="text-right font-bold text-slate-900">{formatDate(quote.checkIn)}<br />to {formatDate(quote.checkOut)}</dd></div>
+                  <div className="flex justify-between gap-3"><dt className="text-slate-500 font-bold">Guests</dt><dd className="font-bold text-slate-900">{quote.guests}</dd></div>
+                  <div className="flex justify-between gap-3"><dt className="text-slate-500 font-bold">Room · {quote.nights} night{quote.nights === 1 ? '' : 's'}</dt><dd className="font-mono text-slate-900">{formatMoney(quote.roomTotal, quote.currency)}</dd></div>
+                  <div className="flex justify-between gap-3"><dt className="text-slate-500 font-bold">Taxes & fees</dt><dd className="font-mono text-slate-900">{formatMoney(quote.taxAmount, quote.currency)}</dd></div>
                 </dl>
                 <div className="flex items-end justify-between gap-3 pt-5">
-                  <div><div className="text-xs text-gray-500">Total stay</div><div className="mt-1 text-[10px] text-emerald-300">Due now: {formatMoney(quote.paymentDueNow, quote.currency)}</div></div>
-                  <div className="font-mono text-2xl font-black text-white">{formatMoney(quote.grandTotal, quote.currency)}</div>
+                  <div><div className="text-xs font-bold text-slate-500">Total stay</div><div className="mt-1 text-[10px] font-bold text-emerald-800">Due now: {formatMoney(quote.paymentDueNow, quote.currency)}</div></div>
+                  <div className="font-mono text-2xl font-extrabold text-slate-900">{formatMoney(quote.grandTotal, quote.currency)}</div>
                 </div>
-                <button type="submit" disabled={loading || !termsAccepted} className="btn-primary mt-5 w-full justify-center py-3 text-sm disabled:cursor-not-allowed disabled:opacity-50">
+                <button type="submit" disabled={loading || !termsAccepted} className="btn-primary mt-5 w-full justify-center py-3 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50">
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
                   {loading ? 'Confirming safely…' : 'Confirm reservation'}
                 </button>
-                <div className="mt-3 flex items-start gap-2 text-[10px] leading-4 text-gray-600">
-                  <LockKeyhole className="mt-0.5 h-3 w-3 shrink-0" /> No payment details are collected in this pay-at-property flow.
+                <div className="mt-3 flex items-start gap-2 text-[10px] font-semibold leading-relaxed text-slate-500">
+                  <LockKeyhole className="mt-0.5 h-3 w-3 shrink-0 text-slate-400" /> No payment details are collected in this pay-at-property flow.
                 </div>
               </aside>
             </form>

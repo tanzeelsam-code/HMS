@@ -17,15 +17,15 @@ interface MaintenanceBoardProps {
 }
 
 const priorityStyles: Record<MaintenanceWorkOrder['priority'], string> = {
-  Urgent: 'border-rose-400/20 bg-rose-400/10 text-rose-300',
-  High: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
-  Normal: 'border-sky-400/20 bg-sky-400/10 text-sky-300',
+  Urgent: 'border-rose-300 bg-rose-100 text-rose-900',
+  High: 'border-amber-300 bg-amber-100 text-amber-900',
+  Normal: 'border-sky-300 bg-sky-100 text-sky-900',
 };
 
 const statusStyles: Record<MaintenanceWorkOrder['status'], string> = {
-  Open: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
-  'In-Progress': 'border-sky-400/20 bg-sky-400/10 text-sky-300',
-  Resolved: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+  Open: 'border-amber-300 bg-amber-100 text-amber-900',
+  'In-Progress': 'border-sky-300 bg-sky-100 text-sky-900',
+  Resolved: 'border-emerald-300 bg-emerald-100 text-emerald-900',
 };
 
 export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
@@ -95,37 +95,37 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
   ).length;
   const resolvedCount = orders.filter((order) => order.status === 'Resolved').length;
   const summaryCards = [
-    { label: 'Open orders', value: openCount, icon: Wrench, tone: 'text-amber-300' },
-    { label: 'In progress', value: progressCount, icon: Clock, tone: 'text-sky-300' },
-    { label: 'Urgent attention', value: urgentCount, icon: AlertTriangle, tone: 'text-rose-300' },
-    { label: 'Resolved', value: resolvedCount, icon: CheckCircle2, tone: 'text-emerald-300' },
+    { label: 'Open orders', value: openCount, icon: Wrench, tone: 'text-amber-800' },
+    { label: 'In progress', value: progressCount, icon: Clock, tone: 'text-sky-800' },
+    { label: 'Urgent attention', value: urgentCount, icon: AlertTriangle, tone: 'text-rose-800' },
+    { label: 'Resolved', value: resolvedCount, icon: CheckCircle2, tone: 'text-emerald-800' },
   ];
 
   return (
     <div className="mx-auto w-full max-w-[1680px] space-y-6 pb-10 animate-slide-up">
-      <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/65 shadow-[0_18px_50px_rgba(0,0,0,0.22)]">
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
         <div className="p-6">
-          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-300/80">
-            <Wrench className="h-4 w-4" /> Engineering operations
+          <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-800">
+            <Wrench className="h-4 w-4 text-purple-700" /> Engineering operations
           </div>
-          <h2 className="text-2xl font-semibold tracking-tight text-white">Maintenance</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Maintenance</h2>
+          <p className="mt-2 max-w-2xl text-xs leading-relaxed font-medium text-slate-600">
             Dispatch engineering work, monitor SLA exposure, and close completed repairs.
           </p>
         </div>
 
-        <div className="grid border-t border-white/[0.07] sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid border-t border-slate-200 bg-slate-50 sm:grid-cols-2 xl:grid-cols-4">
           {summaryCards.map(({ label, value, icon: Icon, tone }, index) => (
             <div
               key={label}
-              className={`flex items-center gap-3 px-6 py-4 ${index > 0 ? 'border-t border-white/[0.07] sm:border-l sm:border-t-0' : ''} ${index === 2 ? 'sm:border-l-0 xl:border-l' : ''}`}
+              className={`flex items-center gap-3 px-6 py-4 ${index > 0 ? 'border-t border-slate-200 sm:border-l sm:border-t-0' : ''} ${index === 2 ? 'sm:border-l-0 xl:border-l' : ''}`}
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04]">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white shadow-xs">
                 <Icon className={`h-4 w-4 ${tone}`} />
               </div>
               <div>
-                <div className={`text-lg font-semibold leading-none ${tone}`}>{value}</div>
-                <div className="mt-1 text-xs text-slate-500">{label}</div>
+                <div className={`text-lg font-extrabold leading-none ${tone}`}>{value}</div>
+                <div className="mt-1 text-xs font-semibold text-slate-500">{label}</div>
               </div>
             </div>
           ))}
@@ -133,23 +133,23 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(360px,0.72fr)_minmax(0,1.28fr)]">
-        <section className="h-fit rounded-2xl border border-white/[0.08] bg-slate-900/55 shadow-[0_12px_35px_rgba(0,0,0,0.16)] xl:sticky xl:top-6">
-          <div className="border-b border-white/[0.07] px-5 py-5 xl:px-6">
-            <h3 className="flex items-center gap-2 font-semibold text-slate-100">
-              <Plus className="h-4 w-4 text-violet-300" /> New work order
+        <section className="h-fit rounded-2xl border border-slate-200 bg-white shadow-xs xl:sticky xl:top-6">
+          <div className="border-b border-slate-200 px-5 py-5 xl:px-6">
+            <h3 className="flex items-center gap-2 font-bold text-slate-900">
+              <Plus className="h-4 w-4 text-purple-700" /> New work order
             </h3>
-            <p className="mt-1 text-xs text-slate-500">Create and route an engineering request</p>
+            <p className="mt-1 text-xs font-semibold text-slate-500">Create and route an engineering request</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5 p-5 text-sm xl:p-6">
+          <form onSubmit={handleSubmit} className="space-y-5 p-5 text-xs xl:p-6">
             {error && (
-              <div role="alert" className="rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-xs leading-5 text-rose-200">
+              <div role="alert" className="rounded-xl border border-rose-300 bg-rose-50 p-3 text-xs leading-relaxed font-bold text-rose-900">
                 {error}
               </div>
             )}
 
             <div>
-              <label htmlFor="maintenance-room" className="mb-2 block text-xs font-medium text-slate-400">Room number</label>
+              <label htmlFor="maintenance-room" className="mb-2 block text-xs font-bold text-slate-700">Room number</label>
               <input
                 id="maintenance-room"
                 type="text"
@@ -158,14 +158,14 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
                   setRoomNumber(event.target.value);
                   resetPendingRequest();
                 }}
-                className="min-h-11 w-full rounded-xl border border-white/[0.09] bg-slate-950/50 px-3 font-mono font-semibold text-slate-100 outline-none transition-colors focus:border-violet-300/40"
+                className="field-control text-xs font-mono font-bold text-amber-900"
                 required
               />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="maintenance-category" className="mb-2 block text-xs font-medium text-slate-400">Category</label>
+                <label htmlFor="maintenance-category" className="mb-2 block text-xs font-bold text-slate-700">Category</label>
                 <select
                   id="maintenance-category"
                   value={category}
@@ -173,7 +173,7 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
                     setCategory(event.target.value as MaintenanceWorkOrder['category']);
                     resetPendingRequest();
                   }}
-                  className="min-h-11 w-full rounded-xl border border-white/[0.09] bg-slate-950/50 px-3 text-slate-100 outline-none focus:border-violet-300/40"
+                  className="field-control text-xs"
                 >
                   <option value="Plumbing">Plumbing</option>
                   <option value="Electrical">Electrical</option>
@@ -184,7 +184,7 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
               </div>
 
               <div>
-                <label htmlFor="maintenance-priority" className="mb-2 block text-xs font-medium text-slate-400">SLA priority</label>
+                <label htmlFor="maintenance-priority" className="mb-2 block text-xs font-bold text-slate-700">SLA priority</label>
                 <select
                   id="maintenance-priority"
                   value={priority}
@@ -192,7 +192,7 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
                     setPriority(event.target.value as MaintenanceWorkOrder['priority']);
                     resetPendingRequest();
                   }}
-                  className="min-h-11 w-full rounded-xl border border-white/[0.09] bg-slate-950/50 px-3 text-slate-100 outline-none focus:border-violet-300/40"
+                  className="field-control text-xs"
                 >
                   <option value="Urgent">Urgent · 30 min</option>
                   <option value="High">High · 60 min</option>
@@ -202,7 +202,7 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
             </div>
 
             <div>
-              <label htmlFor="maintenance-description" className="mb-2 block text-xs font-medium text-slate-400">Issue description</label>
+              <label htmlFor="maintenance-description" className="mb-2 block text-xs font-bold text-slate-700">Issue description</label>
               <textarea
                 id="maintenance-description"
                 rows={5}
@@ -212,12 +212,12 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
                   setIssueDescription(event.target.value);
                   resetPendingRequest();
                 }}
-                className="w-full resize-y rounded-xl border border-white/[0.09] bg-slate-950/50 p-3 text-slate-100 outline-none transition-colors placeholder:text-slate-600 focus:border-violet-300/40"
+                className="field-control text-xs resize-y"
                 required
               />
             </div>
 
-            <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${safetyCritical ? 'border-rose-400/30 bg-rose-400/[0.08]' : 'border-white/[0.08] bg-slate-950/30 hover:bg-white/[0.03]'}`}>
+            <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${safetyCritical ? 'border-rose-300 bg-rose-50' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'}`}>
               <input
                 type="checkbox"
                 checked={safetyCritical}
@@ -225,75 +225,75 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
                   setSafetyCritical(event.target.checked);
                   resetPendingRequest();
                 }}
-                className="mt-0.5 h-4 w-4 accent-rose-500"
+                className="mt-0.5 h-4 w-4 accent-rose-600"
               />
               <span>
-                <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                  <ShieldAlert className="h-3.5 w-3.5 text-rose-300" /> Safety-critical escalation
+                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                  <ShieldAlert className="h-3.5 w-3.5 text-rose-700" /> Safety-critical escalation
                 </span>
-                <span className="mt-1 block text-[11px] leading-5 text-slate-500">
+                <span className="mt-1 block text-[11px] leading-relaxed font-semibold text-slate-600">
                   Requires General Manager approval before the engineering task executes.
                 </span>
               </span>
             </label>
 
-            <button type="submit" disabled={posting} className="btn-primary min-h-11 w-full justify-center text-sm disabled:cursor-not-allowed disabled:opacity-50">
+            <button type="submit" disabled={posting} className="btn-primary min-h-11 w-full justify-center text-xs font-bold disabled:cursor-not-allowed disabled:opacity-50">
               <Plus className="h-4 w-4" /> {posting ? 'Dispatching…' : 'Dispatch work order'}
             </button>
           </form>
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/55 shadow-[0_12px_35px_rgba(0,0,0,0.16)]">
-          <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-5 xl:px-6">
+        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+          <div className="flex items-center justify-between border-b border-slate-200 px-5 py-5 xl:px-6">
             <div>
-              <h3 className="flex items-center gap-2 font-semibold text-slate-100">
-                <Clock className="h-4 w-4 text-violet-300" /> Work order queue
+              <h3 className="flex items-center gap-2 font-bold text-slate-900">
+                <Clock className="h-4 w-4 text-purple-700" /> Work order queue
               </h3>
-              <p className="mt-1 text-xs text-slate-500">Engineering ownership and SLA status</p>
+              <p className="mt-1 text-xs font-semibold text-slate-500">Engineering ownership and SLA status</p>
             </div>
-            <span className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs text-slate-400">
+            <span className="rounded-full border border-slate-300 bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
               {orders.length} total
             </span>
           </div>
 
           {orders.length > 0 ? (
-            <div className="divide-y divide-white/[0.06]">
+            <div className="divide-y divide-slate-200">
               {orders.map((order) => (
-                <article key={order.id} className="p-5 transition-colors hover:bg-white/[0.02] xl:p-6">
+                <article key={order.id} className="p-5 transition-colors hover:bg-slate-50 xl:p-6">
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex min-w-0 items-start gap-4">
-                      <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-violet-400/15 bg-violet-400/[0.06]">
-                        <span className="text-[9px] uppercase tracking-wider text-slate-500">Room</span>
-                        <span className="font-mono text-sm font-semibold text-violet-200">{order.roomNumber}</span>
+                      <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl border border-purple-300 bg-purple-50">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">Room</span>
+                        <span className="font-mono text-sm font-extrabold text-purple-900">{order.roomNumber}</span>
                       </div>
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h4 className="font-semibold text-white">{order.category}</h4>
-                          <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${priorityStyles[order.priority]}`}>{order.priority}</span>
-                          <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${statusStyles[order.status]}`}>{order.status}</span>
+                          <h4 className="font-bold text-slate-900">{order.category}</h4>
+                          <span className={`rounded-full border px-2 py-1 text-[10px] font-bold ${priorityStyles[order.priority]}`}>{order.priority}</span>
+                          <span className={`rounded-full border px-2 py-1 text-[10px] font-bold ${statusStyles[order.status]}`}>{order.status}</span>
                           {order.safetyCritical && (
-                            <span className="flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-400/10 px-2 py-1 text-[10px] font-semibold text-rose-300">
-                              <ShieldAlert className="h-3 w-3" /> Safety critical
+                            <span className="flex items-center gap-1 rounded-full border border-rose-300 bg-rose-100 px-2 py-1 text-[10px] font-bold text-rose-900">
+                              <ShieldAlert className="h-3 w-3 text-rose-700" /> Safety critical
                             </span>
                           )}
                         </div>
-                        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">{order.issueDescription}</p>
-                        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500">
-                          <span className="flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> {order.assignedEngineer}</span>
+                        <p className="mt-3 max-w-2xl text-xs leading-relaxed font-semibold text-slate-700">{order.issueDescription}</p>
+                        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold text-slate-500">
+                          <span className="flex items-center gap-1.5"><User className="h-3.5 w-3.5 text-slate-400" /> {order.assignedEngineer}</span>
                           <span>Reported by {order.reportedBy}</span>
                           <span>{order.reportedTime}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex shrink-0 items-center justify-between gap-4 border-t border-white/[0.06] pt-4 sm:flex-col sm:items-end sm:border-0 sm:pt-0">
+                    <div className="flex shrink-0 items-center justify-between gap-4 border-t border-slate-200 pt-4 sm:flex-col sm:items-end sm:border-0 sm:pt-0">
                       <div className="text-left sm:text-right">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Target SLA</div>
-                        <div className="mt-1 text-sm font-semibold text-slate-200">{order.slaMinutes} minutes</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Target SLA</div>
+                        <div className="mt-1 text-sm font-extrabold text-slate-900">{order.slaMinutes} minutes</div>
                       </div>
                       {order.status !== 'Resolved' && (
-                        <button onClick={() => onResolveOrder(order.id)} className="btn-secondary min-h-9 border-emerald-400/20 px-3 text-xs text-emerald-200 hover:bg-emerald-400/10">
-                          <CheckCircle2 className="h-3.5 w-3.5" /> Mark resolved
+                        <button onClick={() => onResolveOrder(order.id)} className="btn-secondary min-h-9 border-emerald-300 px-3 text-xs font-bold text-emerald-900 hover:bg-emerald-50">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700" /> Mark resolved
                         </button>
                       )}
                     </div>
@@ -303,9 +303,9 @@ export const MaintenanceBoard: React.FC<MaintenanceBoardProps> = ({
             </div>
           ) : (
             <div className="flex min-h-80 flex-col items-center justify-center px-6 text-center">
-              <CheckCircle2 className="h-9 w-9 text-emerald-400/60" />
-              <h4 className="mt-4 font-semibold text-slate-200">No engineering work orders</h4>
-              <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">New requests will appear here with ownership and SLA details.</p>
+              <CheckCircle2 className="h-9 w-9 text-emerald-600" />
+              <h4 className="mt-4 font-bold text-slate-900">No engineering work orders</h4>
+              <p className="mt-1 max-w-sm text-xs leading-relaxed font-semibold text-slate-500">New requests will appear here with ownership and SLA details.</p>
             </div>
           )}
         </section>
