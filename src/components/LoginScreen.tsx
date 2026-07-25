@@ -65,78 +65,78 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
   };
 
   return (
-    <main className="min-h-screen bg-[#0f172a] text-slate-100 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(520px,0.95fr)]">
-      <section className="relative hidden min-h-screen overflow-hidden border-r border-[var(--border-color)] lg:flex lg:flex-col lg:justify-between lg:p-14 xl:p-20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(214,170,80,0.14),transparent_28rem),radial-gradient(circle_at_75%_80%,rgba(74,104,163,0.12),transparent_30rem)]" />
-          <div className="relative">
+    <main className="min-h-screen bg-slate-50 text-slate-900 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(520px,0.95fr)]">
+      <section className="relative hidden min-h-screen overflow-hidden border-r border-slate-200 bg-white lg:flex lg:flex-col lg:justify-between lg:p-14 xl:p-20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(217,119,6,0.06),transparent_28rem),radial-gradient(circle_at_75%_80%,rgba(37,99,235,0.05),transparent_30rem)]" />
+        <div className="relative">
           <div className="flex items-center gap-4">
-            <BrandMark className="h-16 w-16 drop-shadow-[0_12px_30px_rgba(245,158,11,0.25)]" />
+            <BrandMark className="h-16 w-16 drop-shadow-[0_4px_16px_rgba(217,119,6,0.2)]" />
             <div>
-              <div className="text-2xl font-black tracking-[-0.03em] text-slate-50 leading-none">
-                Nexus <span className="text-amber-400">HOS</span>
+              <div className="text-2xl font-black tracking-[-0.03em] text-slate-900 leading-none">
+                Nexus <span className="text-amber-600">HOS</span>
               </div>
-              <div className="mt-1.5 text-xs font-bold uppercase tracking-[0.2em] text-slate-300 leading-none">Hotel operating system</div>
+              <div className="mt-1.5 text-xs font-bold uppercase tracking-[0.2em] text-slate-500 leading-none">Hotel operating system</div>
             </div>
           </div>
 
           <div className="mt-24 max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-300">Property operations, without the noise</p>
-            <h1 className="mt-5 text-5xl font-semibold leading-[1.08] tracking-[-0.055em] text-slate-50 xl:text-6xl">
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-amber-600">Property operations, without the noise</p>
+            <h1 className="mt-5 text-5xl font-bold leading-[1.08] tracking-[-0.055em] text-slate-900 xl:text-6xl">
               Every stay, team, and decision in one calm workspace.
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-7 text-slate-400">
+            <p className="mt-6 max-w-xl text-base leading-7 text-slate-600">
               Run front office, service delivery, finance, and guest operations from a secure system designed for fast, confident work.
             </p>
           </div>
 
           <div className="mt-14 grid max-w-2xl gap-4">
             {platformHighlights.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="flex items-start gap-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4">
-                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-300/10 text-amber-300">
+              <div key={title} className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-xs">
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
                   <Icon className="h-4 w-4" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-slate-100">{title}</div>
-                  <p className="mt-1 text-xs leading-5 text-slate-400">{description}</p>
+                  <div className="text-sm font-bold text-slate-900">{title}</div>
+                  <p className="mt-1 text-xs leading-5 text-slate-600">{description}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative flex items-center gap-2 text-xs text-slate-400">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+        <div className="relative flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
           Local property services are operational
         </div>
       </section>
 
-      <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
+      <section className="flex min-h-screen items-center justify-center bg-slate-50 px-5 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-[480px]">
           <div className="mb-9 flex items-center gap-3.5 lg:hidden">
             <BrandMark className="h-14 w-14" />
             <div>
-              <div className="text-xl font-black text-slate-50 leading-none">
-                Nexus <span className="text-amber-400">HOS</span>
+              <div className="text-xl font-black text-slate-900 leading-none">
+                Nexus <span className="text-amber-600">HOS</span>
               </div>
-              <div className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-300 leading-none">Hotel operating system</div>
+              <div className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-500 leading-none">Hotel operating system</div>
             </div>
           </div>
 
           <div className="mb-8">
-            <BrandMark className="mb-5 h-16 w-16 drop-shadow-[0_12px_30px_rgba(245,158,11,0.25)]" />
-            <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-50">Welcome back</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-400">Sign in to continue to your property workspace.</p>
+            <BrandMark className="mb-5 h-16 w-16 drop-shadow-[0_4px_16px_rgba(217,119,6,0.2)]" />
+            <h2 className="text-3xl font-bold tracking-[-0.04em] text-slate-900">Welcome back</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Sign in to continue to your property workspace.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5" aria-label="Staff sign in">
             {error && (
-              <div role="alert" className="flex items-start gap-3 rounded-xl border border-rose-400/25 bg-rose-400/[0.08] px-4 py-3 text-sm text-rose-200">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              <div role="alert" className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 font-semibold">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
                 <span>{error}</span>
               </div>
             )}
 
-            <label htmlFor="login-email" className="block text-xs font-semibold text-gray-300">
+            <label htmlFor="login-email" className="block text-xs font-bold text-slate-700">
               Work email
               <span className="relative mt-2 block">
                 <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -154,7 +154,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
               </span>
             </label>
 
-            <label htmlFor="login-password" className="block text-xs font-semibold text-gray-300">
+            <label htmlFor="login-password" className="block text-xs font-bold text-slate-700">
               Password
               <span className="relative mt-2 block">
                 <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -178,20 +178,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
 
             {onBookStay && (
               <button type="button" onClick={onBookStay} className="btn-secondary h-12 w-full text-sm">
-                <CalendarDays className="h-4 w-4" />
+                <CalendarDays className="h-4 w-4 text-amber-600" />
                 Open guest booking
               </button>
             )}
           </form>
 
           {showDemoAccounts && (
-            <section className="mt-8 border-t border-[var(--border-color)] pt-6" aria-labelledby="demo-accounts-title">
+            <section className="mt-8 border-t border-slate-200 pt-6" aria-labelledby="demo-accounts-title">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <h3 id="demo-accounts-title" className="text-xs font-semibold text-gray-300">Local demo access</h3>
-                  <p className="mt-1 text-[11px] text-slate-400">Choose a role to fill the local credentials.</p>
+                  <h3 id="demo-accounts-title" className="text-xs font-bold text-slate-800">Local demo access</h3>
+                  <p className="mt-1 text-[11px] text-slate-500">Choose a role to fill the local credentials.</p>
                 </div>
-                <span className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.08] px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-emerald-300">Local only</span>
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[9px] font-extrabold uppercase tracking-wider text-emerald-700">Local only</span>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {SEED_CREDENTIALS.map((credential) => (
@@ -203,10 +203,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
                       setPassword(credential.password);
                       setError('');
                     }}
-                    className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-3 text-left transition-colors hover:border-amber-300/30 hover:bg-[var(--bg-surface-elevated)]"
+                    className="rounded-xl border border-slate-200 bg-white p-3 text-left transition-colors hover:border-amber-300 hover:bg-slate-50 shadow-xs"
                   >
-                    <span className="block text-xs font-semibold text-gray-200">{credential.role}</span>
-                    <span className="mt-1 block truncate text-[10px] text-slate-400">{credential.email}</span>
+                    <span className="block text-xs font-bold text-slate-900">{credential.role}</span>
+                    <span className="mt-1 block truncate text-[10px] text-slate-500">{credential.email}</span>
                   </button>
                 ))}
               </div>

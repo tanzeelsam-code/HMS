@@ -72,12 +72,12 @@ const ModuleLoading = () => (
 );
 
 const FullScreenLoading: React.FC<{ label: string }> = ({ label }) => (
-  <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] text-gray-100 gap-5">
-    <div className="w-14 h-14 rounded-2xl bg-[#d6aa50] flex items-center justify-center text-[#090d14] font-black text-xl tracking-tighter shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+  <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-900 gap-5">
+    <div className="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center text-white font-black text-xl tracking-tighter shadow-lg">
       N
     </div>
-    <div className="flex items-center gap-3 text-sm text-gray-400 font-medium" role="status">
-      <span className="h-2 w-2 rounded-full bg-amber-300 animate-pulse" />
+    <div className="flex items-center gap-3 text-sm text-slate-500 font-medium" role="status">
+      <span className="h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse" />
       {label}
     </div>
   </div>
@@ -436,7 +436,7 @@ export const App: React.FC = () => {
 
   if (publicBooking) {
     return (
-      <div className="min-h-screen bg-[#0f172a] p-3 sm:p-6 lg:p-8">
+      <div className="min-h-screen bg-slate-100 p-3 sm:p-6 lg:p-8">
         <Suspense fallback={<ModuleLoading />}>
           <BookingEngine
             propertyName="Nexus Luxury Resort & Spa"
@@ -484,10 +484,10 @@ export const App: React.FC = () => {
 
   if (loadError && !metrics) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] text-gray-100 gap-5 p-6">
-        <div className="surface-panel max-w-lg p-8 text-center">
-          <p className="text-lg font-semibold text-gray-100">We could not load the property workspace</p>
-          <p className="mt-2 text-sm text-rose-300" role="alert">{loadError}</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-900 gap-5 p-6">
+        <div className="surface-panel max-w-lg p-8 text-center bg-white shadow-xl border border-slate-200">
+          <p className="text-lg font-bold text-slate-900">We could not load the property workspace</p>
+          <p className="mt-2 text-sm text-rose-600 font-semibold" role="alert">{loadError}</p>
         </div>
         <div className="flex gap-3">
           <button onClick={() => void loadAll()} className="btn-primary">Retry</button>
@@ -502,7 +502,7 @@ export const App: React.FC = () => {
   const canManageReservations = ['General Manager', 'Front Desk'].includes(currentUser.role);
 
   return (
-    <div className="app-shell min-h-screen flex flex-col text-gray-100">
+    <div className="app-shell min-h-screen flex flex-col text-slate-900 bg-slate-50">
       {metrics && (
         <Navbar
           metrics={metrics}

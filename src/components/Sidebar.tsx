@@ -180,8 +180,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      <div className="sticky top-[72px] z-30 w-full border-b border-[var(--border-color)] bg-[#1f2937]/95 px-4 py-3 backdrop-blur-xl md:hidden">
-        <label htmlFor="mobile-navigation" className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">
+      <div className="sticky top-[72px] z-30 w-full border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-xl md:hidden">
+        <label htmlFor="mobile-navigation" className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">
           Workspace
         </label>
         <div className="relative">
@@ -189,7 +189,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             id="mobile-navigation"
             value={activeTab}
             onChange={(event) => setActiveTab(event.target.value as ActiveTab)}
-            className="h-11 w-full appearance-none rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3.5 pr-10 text-sm font-semibold text-slate-100 shadow-sm focus:border-[var(--accent-gold)]/45 focus:outline-none focus:ring-2 focus:ring-[var(--accent-gold)]/10"
+            className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 pr-10 text-sm font-bold text-slate-900 shadow-xs focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/10"
             aria-label="Choose hotel workspace"
           >
             {visibleGroups.map((group) => (
@@ -204,10 +204,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <aside className="sticky top-[72px] hidden h-[calc(100vh-72px)] w-[280px] shrink-0 flex-col border-r border-[var(--border-color)] bg-[#1f2937] md:flex">
-        <div className="border-b border-[var(--border-color)] px-5 py-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.17em] text-slate-500">Workspace</p>
-          <p className="mt-1 text-sm font-semibold text-slate-200">Property operations</p>
+      <aside className="sticky top-[72px] hidden h-[calc(100vh-72px)] w-[280px] shrink-0 flex-col border-r border-slate-200 bg-slate-50/90 md:flex">
+        <div className="border-b border-slate-200 px-5 py-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-slate-500">Workspace</p>
+          <p className="mt-1 text-sm font-bold text-slate-900">Property operations</p>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Hotel operations navigation">
@@ -216,7 +216,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <section key={group.label} aria-labelledby={`nav-${group.label.replace(/\s+/g, '-').toLowerCase()}`}>
                 <h2
                   id={`nav-${group.label.replace(/\s+/g, '-').toLowerCase()}`}
-                  className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.17em] text-slate-500"
+                  className="mb-2 px-3 text-[9px] font-extrabold uppercase tracking-[0.17em] text-slate-500"
                 >
                   {group.label}
                 </h2>
@@ -231,17 +231,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         type="button"
                         onClick={() => setActiveTab(item.id)}
                         aria-current={isActive ? 'page' : undefined}
-                        className={`group relative flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/50 ${
+                        className={`group relative flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[12px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40 ${
                           isActive
-                            ? 'bg-[var(--bg-surface-elevated)] text-slate-50 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.055)]'
-                            : 'text-slate-400 hover:bg-[var(--bg-surface)] hover:text-slate-200'
+                            ? 'bg-amber-500/10 text-amber-950 shadow-xs border border-amber-300/40'
+                            : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
                         }`}
                       >
-                        {isActive && <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-amber-300" />}
+                        {isActive && <span className="absolute inset-y-2 left-0 w-1 rounded-full bg-amber-600" />}
                         <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${
                           isActive
-                            ? 'bg-[var(--accent-gold-soft)] text-amber-300'
-                            : 'bg-[var(--bg-card)] text-slate-500 group-hover:text-slate-300'
+                            ? 'bg-amber-200/70 text-amber-700'
+                            : 'bg-slate-200/60 text-slate-500 group-hover:text-slate-700'
                         }`}>
                           <Icon className="h-4 w-4" />
                         </span>
@@ -252,8 +252,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             title={item.countLabel}
                             className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
                               item.countTone === 'rose'
-                                ? 'bg-rose-400/[0.12] text-rose-300'
-                                : 'bg-amber-300/[0.12] text-amber-200'
+                                ? 'bg-rose-100 text-rose-700 border border-rose-200'
+                                : 'bg-amber-100 text-amber-800 border border-amber-200'
                             }`}
                           >
                             {item.count}
@@ -268,10 +268,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </nav>
 
-        <div className="border-t border-[var(--border-color)] p-4">
-          <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+        <div className="border-t border-slate-200 p-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-xs">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
               Core services operational
             </div>
             <p className="mt-1.5 pl-6 text-[10px] leading-4 text-slate-500">Live property data is connected and current.</p>

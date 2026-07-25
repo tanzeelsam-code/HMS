@@ -47,34 +47,34 @@ export const Navbar: React.FC<NavbarProps> = ({
   const canSearch = ['General Manager', 'Front Desk', 'Finance'].includes(userRole);
 
   return (
-    <header className="sticky top-0 z-40 flex h-[76px] w-full items-center gap-3 border-b border-[var(--border-color)] bg-[#111827]/95 px-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)] backdrop-blur-xl sm:px-5 lg:gap-5 lg:px-6">
+    <header className="sticky top-0 z-40 flex h-[76px] w-full items-center gap-3 border-b border-slate-200 bg-white/95 px-4 shadow-sm backdrop-blur-xl sm:px-5 lg:gap-5 lg:px-6">
       <div className="flex shrink-0 items-center gap-3.5" aria-label="Nexus HOS hotel operating system">
-        <BrandMark className="h-[52px] w-[52px] drop-shadow-[0_10px_28px_rgba(245,158,11,0.28)]" />
+        <BrandMark className="h-[52px] w-[52px] drop-shadow-[0_4px_16px_rgba(217,119,6,0.2)]" />
         <div className="hidden sm:block">
-          <div className="text-[22px] font-black tracking-[-0.03em] text-slate-50 leading-none">
-            Nexus <span className="text-amber-400">HOS</span>
+          <div className="text-[22px] font-black tracking-[-0.03em] text-slate-900 leading-none">
+            Nexus <span className="text-amber-600">HOS</span>
           </div>
-          <p className="mt-1 text-[11.5px] font-bold uppercase tracking-[0.2em] text-slate-300 leading-none">
+          <p className="mt-1 text-[11.5px] font-bold uppercase tracking-[0.2em] text-slate-500 leading-none">
             Hotel operating system
           </p>
         </div>
       </div>
 
-      <div className="hidden h-8 w-px shrink-0 bg-slate-500/30 sm:block" />
+      <div className="hidden h-8 w-px shrink-0 bg-slate-200 sm:block" />
 
       <button
         type="button"
-        className="hidden shrink-0 items-center gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3.5 py-2 text-left transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-elevated)] 2xl:flex"
+        className="hidden shrink-0 items-center gap-3 rounded-xl border border-slate-200 bg-slate-100/70 px-3.5 py-2 text-left transition-colors hover:border-slate-300 hover:bg-slate-200/60 2xl:flex"
         title={selectedProperty}
       >
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400/[0.09] text-amber-300">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
           <Building2 className="h-4 w-4" />
         </span>
         <span>
           <span className="block text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">Property</span>
-          <span className="mt-0.5 block whitespace-nowrap text-xs font-semibold text-slate-200">{selectedProperty}</span>
+          <span className="mt-0.5 block whitespace-nowrap text-xs font-semibold text-slate-800">{selectedProperty}</span>
         </span>
-        <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
+        <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
       </button>
 
       <div className="flex min-w-0 flex-1 items-center justify-center gap-3">
@@ -90,32 +90,37 @@ export const Navbar: React.FC<NavbarProps> = ({
             <label htmlFor="global-hotel-search" className="sr-only">
               Search guests, rooms, or reservation codes
             </label>
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               id="global-hotel-search"
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search guests, rooms or reservations"
-              className="h-10 w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] pl-10 pr-4 text-xs text-slate-100 shadow-inner placeholder:text-slate-500 focus:border-amber-300/45 focus:outline-none focus:ring-2 focus:ring-amber-300/10"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-100/80 pl-10 pr-4 text-xs text-slate-900 shadow-inner placeholder:text-slate-400 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/10"
             />
           </form>
         )}
 
-        <div className="hidden shrink-0 items-center gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3.5 py-2 2xl:flex">
-          <Flame className="h-4 w-4 text-amber-300" />
+        <div className="hidden shrink-0 items-center gap-3 rounded-xl border border-slate-200 bg-slate-100/70 px-3.5 py-2 2xl:flex">
+          <Flame className="h-4 w-4 text-amber-600" />
           <div className="min-w-[126px]">
             <div className="flex items-center justify-between gap-4 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
               <span>Occupancy</span>
-              <span className="text-emerald-300">{metrics.occupancyRate}%</span>
+              <span className="text-emerald-600 font-bold">{metrics.occupancyRate}%</span>
             </div>
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-700">
+            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-200">
               <div
-                className="h-full rounded-full bg-emerald-400 transition-[width] duration-500"
+                className="h-full rounded-full bg-emerald-500 transition-[width] duration-500"
                 style={{ width: `${metrics.occupancyRate}%` }}
               />
             </div>
           </div>
+        </div>
+
+        <div className="hidden items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/90 px-3 py-1 text-[11px] font-extrabold text-amber-800 shadow-xs sm:flex">
+          <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+          Presentation Mode
         </div>
       </div>
 
@@ -124,10 +129,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={onRunNightAudit}
-            className="hidden h-10 items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3.5 text-xs font-semibold text-slate-300 transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-elevated)] hover:text-white xl:flex"
+            className="hidden h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-700 shadow-xs transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 xl:flex"
             title="Run the idempotent daily financial audit"
           >
-            <Moon className="h-4 w-4 text-indigo-300" />
+            <Moon className="h-4 w-4 text-indigo-600" />
             Night audit
           </button>
         )}
@@ -136,7 +141,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={onOpenNewBooking}
-            className="flex h-10 items-center gap-2 rounded-xl bg-amber-400 px-3 text-xs font-bold text-[#111827] shadow-[0_8px_22px_rgba(226,177,83,0.18)] transition-colors hover:bg-amber-300 sm:px-4"
+            className="flex h-10 items-center gap-2 rounded-xl bg-amber-600 px-3 text-xs font-bold text-white shadow-md transition-colors hover:bg-amber-700 sm:px-4"
             aria-label="Create new reservation"
           >
             <CalendarPlus className="h-4 w-4" />
@@ -148,48 +153,48 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => setShowNotifications((isOpen) => !isOpen)}
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] text-slate-400 transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-elevated)] hover:text-slate-100"
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-xs transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
             aria-label="Show operational snapshot"
             aria-expanded={showNotifications}
           >
             <Bell className="h-[18px] w-[18px]" />
             {(metrics.arrivalsToday > 0 || metrics.dirtyRooms > 0) && (
-              <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-amber-300 ring-2 ring-[#111827]" />
+              <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-amber-500 ring-2 ring-white" />
             )}
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 top-full z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-[0_24px_70px_rgba(0,0,0,0.55)] animate-slide-up">
-              <div className="flex items-start justify-between border-b border-[var(--border-color)] pb-3">
+            <div className="absolute right-0 top-full z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-xl animate-slide-up">
+              <div className="flex items-start justify-between border-b border-slate-100 pb-3">
                 <div>
-                  <h2 className="text-sm font-semibold text-slate-100">Today at a glance</h2>
+                  <h2 className="text-sm font-bold text-slate-900">Today at a glance</h2>
                   <p className="mt-1 text-[11px] text-slate-500">Live property operations</p>
                 </div>
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-emerald-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-emerald-600">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                   Live
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2.5 py-3">
-                <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">In house</p>
-                  <p className="mt-1 text-xl font-semibold text-slate-100">{metrics.inHouseGuests}</p>
+                  <p className="mt-1 text-xl font-bold text-slate-900">{metrics.inHouseGuests}</p>
                   <p className="mt-0.5 text-[10px] text-slate-500">registered guests</p>
                 </div>
-                <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Occupancy</p>
-                  <p className="mt-1 text-xl font-semibold text-emerald-300">{metrics.occupancyRate}%</p>
+                  <p className="mt-1 text-xl font-bold text-emerald-600">{metrics.occupancyRate}%</p>
                   <p className="mt-0.5 text-[10px] text-slate-500">current inventory</p>
                 </div>
               </div>
-              <div className="space-y-2 border-t border-[var(--border-color)] pt-3 text-xs">
-                <div className="flex items-center justify-between text-slate-400">
+              <div className="space-y-2 border-t border-slate-100 pt-3 text-xs">
+                <div className="flex items-center justify-between text-slate-600">
                   <span>Arrivals / departures</span>
-                  <span className="font-semibold text-slate-200">{metrics.arrivalsToday} / {metrics.departuresToday}</span>
+                  <span className="font-bold text-slate-900">{metrics.arrivalsToday} / {metrics.departuresToday}</span>
                 </div>
-                <div className="flex items-center justify-between text-slate-400">
+                <div className="flex items-center justify-between text-slate-600">
                   <span>Rooms awaiting service</span>
-                  <span className={metrics.dirtyRooms > 0 ? 'font-semibold text-amber-300' : 'font-semibold text-emerald-300'}>
+                  <span className={metrics.dirtyRooms > 0 ? 'font-bold text-amber-600' : 'font-bold text-emerald-600'}>
                     {metrics.dirtyRooms}
                   </span>
                 </div>
@@ -198,18 +203,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
 
-        <div className="ml-1 flex items-center gap-2.5 border-l border-[var(--border-color)] pl-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-amber-300/25 bg-amber-300/[0.08] text-[11px] font-bold text-amber-200">
+        <div className="ml-1 flex items-center gap-2.5 border-l border-slate-200 pl-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-amber-300 bg-amber-100 text-[11px] font-bold text-amber-800">
             {initials}
           </div>
           <div className="hidden min-w-0 2xl:block">
-            <div className="whitespace-nowrap text-xs font-semibold text-slate-200">{userName}</div>
-            <div className="mt-0.5 whitespace-nowrap text-[10px] text-slate-500">{userRole}</div>
+            <div className="whitespace-nowrap text-xs font-bold text-slate-900">{userName}</div>
+            <div className="mt-0.5 whitespace-nowrap text-[10px] font-medium text-slate-500">{userRole}</div>
           </div>
           <button
             type="button"
             onClick={onChangePassword}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-amber-300/[0.08] hover:text-amber-200"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
             aria-label={`Change password for ${userName}`}
             title="Change password"
           >
@@ -218,7 +223,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => void onLogout()}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-rose-400/[0.08] hover:text-rose-300"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
             aria-label={`Sign out ${userName}`}
             title="Sign out"
           >
