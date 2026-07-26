@@ -29,23 +29,23 @@ const SEED_CREDENTIALS = [
 const platformHighlights = [
   {
     icon: CalendarCheck2,
-    title: 'Stay operations',
-    description: 'Bookings, rooms, folios, and housekeeping.',
+    title: 'Front desk & reservations',
+    description: 'Manage bookings, rooms, check-ins, and guest folios.',
   },
   {
     icon: BedDouble,
     title: 'Guest experience',
-    description: 'Profiles, requests, groups, and reputation.',
+    description: 'Know every guest, handle requests, and build loyalty.',
   },
   {
     icon: ChartNoAxesCombined,
-    title: 'Business control',
-    description: 'Revenue, finance, channels, and analytics.',
+    title: 'Revenue & finance',
+    description: 'Control rates, channels, accounting, and performance.',
   },
   {
     icon: BrainCircuit,
-    title: 'AI intelligence',
-    description: 'Smart pricing, forecasts, and a staff copilot.',
+    title: 'AI hotel assistant',
+    description: 'Forecast demand, optimize rates, and support your team.',
   },
 ];
 
@@ -77,72 +77,86 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 lg:grid lg:grid-cols-[minmax(0,1.08fr)_minmax(500px,0.92fr)]">
       <section className="relative hidden min-h-screen overflow-hidden border-r border-slate-200 bg-white lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16 2xl:p-20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_27%_24%,rgba(34,211,238,0.08),transparent_25rem),radial-gradient(circle_at_12%_8%,rgba(217,119,6,0.08),transparent_30rem),radial-gradient(circle_at_80%_85%,rgba(37,99,235,0.05),transparent_30rem)]" />
-        <div className="relative">
-          <div className="flex items-center gap-4">
-            <Logo className="h-16 w-16 object-contain drop-shadow-[0_6px_18px_rgba(14,116,144,0.2)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_16%,rgba(34,211,238,0.11),transparent_27rem),radial-gradient(circle_at_8%_3%,rgba(217,119,6,0.09),transparent_30rem),radial-gradient(circle_at_88%_88%,rgba(37,99,235,0.05),transparent_30rem)]" />
+        <div className="relative flex min-h-[calc(100vh-6rem)] flex-col xl:min-h-[calc(100vh-8rem)] 2xl:min-h-[calc(100vh-10rem)]">
+          <header className="flex items-center gap-7 xl:gap-9">
+            <div className="relative shrink-0">
+              <div className="absolute inset-3 rounded-full bg-cyan-400/15 blur-3xl" />
+              <Logo className="relative h-36 w-36 object-contain drop-shadow-[0_20px_42px_rgba(14,116,144,0.22)] xl:h-44 xl:w-44" />
+            </div>
             <div>
-              <div className="text-2xl font-black tracking-[-0.03em] text-slate-900 leading-none">
+              <div className="text-4xl font-black leading-none tracking-[-0.045em] text-slate-950 xl:text-5xl">
                 Nexus <span className="text-amber-600">HOS</span>
               </div>
-              <div className="mt-1.5 text-xs font-bold uppercase tracking-[0.2em] text-slate-500 leading-none">Hotel operating system</div>
-            </div>
-          </div>
-
-          <div className="mt-12 flex max-w-3xl items-center gap-8 xl:mt-16 xl:gap-10">
-            <div className="relative shrink-0">
-              <div className="absolute inset-3 rounded-full bg-cyan-400/10 blur-3xl" />
-              <Logo className="relative h-40 w-40 object-contain drop-shadow-[0_22px_44px_rgba(14,116,144,0.2)] xl:h-48 xl:w-48" />
-            </div>
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-cyan-800">
-                <Sparkles className="h-3 w-3" />
-                AI-powered hotel operations
+              <div className="mt-3 text-xl font-extrabold uppercase leading-tight tracking-[0.11em] text-slate-600 xl:text-2xl">
+                Hotel Operating System
               </div>
-              <p className="mt-4 max-w-sm text-sm leading-6 text-slate-600">
-                One intelligent system for every stay, team, and decision.
-              </p>
             </div>
+          </header>
+
+          <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3 xl:mt-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3.5 py-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-cyan-800">
+              <Sparkles className="h-3.5 w-3.5" />
+              AI-powered hotel operations
+            </div>
+            <p className="text-sm font-semibold text-slate-600">
+              One intelligent platform for every stay, every team, and every decision.
+            </p>
           </div>
 
-          <div className="mt-10 max-w-3xl xl:mt-12">
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-amber-600">Property operations, without the noise</p>
-            <h1 className="mt-5 text-4xl font-bold leading-[1.08] tracking-[-0.055em] text-slate-900 xl:text-5xl 2xl:text-6xl">
-              Every stay, team, and decision in one calm workspace.
+          <div className="mt-9 max-w-3xl xl:mt-11">
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-amber-600">Built for modern hotels</p>
+            <h1 className="mt-4 text-4xl font-black leading-[1.06] tracking-[-0.055em] text-slate-950 xl:text-5xl">
+              Run your entire hotel from one intelligent platform.
             </h1>
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600 xl:text-base xl:leading-7">
+              Connect your front desk, guest services, housekeeping, revenue, and finance in one complete hotel management system.
+            </p>
           </div>
 
-          <div className="mt-10 grid max-w-3xl grid-cols-2 gap-3">
+          <div className="mt-8 grid max-w-3xl grid-cols-2 gap-3 xl:mt-9">
             {platformHighlights.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/85 p-3.5 shadow-xs">
-                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
-                  <Icon className="h-4 w-4" />
+              <div key={title} className="flex items-start gap-3.5 rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.05)]">
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+                  <Icon className="h-[18px] w-[18px]" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-slate-900">{title}</div>
-                  <p className="mt-0.5 text-[11px] leading-4 text-slate-600">{description}</p>
+                  <div className="text-sm font-extrabold text-slate-900">{title}</div>
+                  <p className="mt-1 text-[11px] leading-[1.45] text-slate-600">{description}</p>
                 </div>
               </div>
             ))}
           </div>
-        </div>
 
-        <div className="relative flex items-center gap-2 text-xs font-semibold text-slate-500">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-          Local property services are operational
+          <div className="mt-auto flex items-center gap-2 pt-8 text-xs font-semibold text-slate-500">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            Secure, connected, and ready for your team
+          </div>
         </div>
       </section>
 
       <section className="flex min-h-screen items-center justify-center bg-slate-50 px-5 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-[480px]">
-          <div className="mb-8 flex items-center gap-3.5 lg:hidden">
-            <Logo className="h-16 w-16 object-contain drop-shadow-[0_6px_18px_rgba(14,116,144,0.18)]" />
+          <div className="mb-7 flex items-center gap-5 lg:hidden">
+            <Logo className="h-24 w-24 shrink-0 object-contain drop-shadow-[0_10px_24px_rgba(14,116,144,0.2)]" />
             <div>
-              <div className="text-xl font-black text-slate-900 leading-none">
+              <div className="text-3xl font-black leading-none tracking-[-0.04em] text-slate-950">
                 Nexus <span className="text-amber-600">HOS</span>
               </div>
-              <div className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-500 leading-none">Hotel operating system</div>
+              <div className="mt-2 text-sm font-extrabold uppercase leading-tight tracking-[0.1em] text-slate-600">
+                Hotel Operating System
+              </div>
             </div>
+          </div>
+
+          <div className="mb-7 lg:hidden">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-[0.14em] text-cyan-800">
+              <Sparkles className="h-3 w-3" />
+              AI-powered hotel operations
+            </div>
+            <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
+              One intelligent platform for every stay, every team, and every decision.
+            </p>
           </div>
 
           <div className="mb-8">
@@ -154,7 +168,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
             {platformHighlights.map(({ icon: Icon, title }) => (
               <div key={title} className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-xs">
                 <Icon className="h-3.5 w-3.5 shrink-0 text-amber-600" />
-                <span className="text-[11px] font-bold text-slate-700">{title}</span>
+                <span className="text-[10px] font-bold leading-tight text-slate-700">{title}</span>
               </div>
             ))}
           </section>
