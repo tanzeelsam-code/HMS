@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import {
   AlertTriangle,
   ArrowRight,
+  BedDouble,
+  BrainCircuit,
   CalendarCheck2,
   CalendarDays,
+  ChartNoAxesCombined,
   CheckCircle2,
   Lock,
   Mail,
-  ShieldCheck,
-  Workflow,
+  Sparkles,
 } from 'lucide-react';
 import { login, AuthUser } from '../api';
-import { BrandMark } from './BrandMark';
 
 interface LoginScreenProps {
   onLogin: (user: AuthUser) => void;
@@ -28,20 +29,29 @@ const SEED_CREDENTIALS = [
 const platformHighlights = [
   {
     icon: CalendarCheck2,
-    title: 'Live property operations',
-    description: 'Reservations, rooms, folios, and service work in one current view.',
+    title: 'Stay operations',
+    description: 'Bookings, rooms, folios, and housekeeping.',
   },
   {
-    icon: Workflow,
-    title: 'Controlled automation',
-    description: 'Approval-aware workflows with durable delivery and clear ownership.',
+    icon: BedDouble,
+    title: 'Guest experience',
+    description: 'Profiles, requests, groups, and reputation.',
   },
   {
-    icon: ShieldCheck,
-    title: 'Evidence built in',
-    description: 'Role-scoped access, secure sessions, and an immutable activity trail.',
+    icon: ChartNoAxesCombined,
+    title: 'Business control',
+    description: 'Revenue, finance, channels, and analytics.',
+  },
+  {
+    icon: BrainCircuit,
+    title: 'AI intelligence',
+    description: 'Smart pricing, forecasts, and a staff copilot.',
   },
 ];
+
+const Logo = ({ className }: { className: string }) => (
+  <img src="/assets/nexus-emblem.png" alt="Nexus HOS emblem" className={className} />
+);
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay }) => {
   const [email, setEmail] = useState('');
@@ -65,12 +75,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(520px,0.95fr)]">
-      <section className="relative hidden min-h-screen overflow-hidden border-r border-slate-200 bg-white lg:flex lg:flex-col lg:justify-between lg:p-14 xl:p-20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(217,119,6,0.06),transparent_28rem),radial-gradient(circle_at_75%_80%,rgba(37,99,235,0.05),transparent_30rem)]" />
+    <main className="min-h-screen bg-slate-50 text-slate-900 lg:grid lg:grid-cols-[minmax(0,1.08fr)_minmax(500px,0.92fr)]">
+      <section className="relative hidden min-h-screen overflow-hidden border-r border-slate-200 bg-white lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16 2xl:p-20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_27%_24%,rgba(34,211,238,0.08),transparent_25rem),radial-gradient(circle_at_12%_8%,rgba(217,119,6,0.08),transparent_30rem),radial-gradient(circle_at_80%_85%,rgba(37,99,235,0.05),transparent_30rem)]" />
         <div className="relative">
           <div className="flex items-center gap-4">
-            <BrandMark className="h-16 w-16 drop-shadow-[0_4px_16px_rgba(217,119,6,0.2)]" />
+            <Logo className="h-16 w-16 object-contain drop-shadow-[0_6px_18px_rgba(14,116,144,0.2)]" />
             <div>
               <div className="text-2xl font-black tracking-[-0.03em] text-slate-900 leading-none">
                 Nexus <span className="text-amber-600">HOS</span>
@@ -79,25 +89,38 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
             </div>
           </div>
 
-          <div className="mt-24 max-w-2xl">
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-amber-600">Property operations, without the noise</p>
-            <h1 className="mt-5 text-5xl font-bold leading-[1.08] tracking-[-0.055em] text-slate-900 xl:text-6xl">
-              Every stay, team, and decision in one calm workspace.
-            </h1>
-            <p className="mt-6 max-w-xl text-base leading-7 text-slate-600">
-              Run front office, service delivery, finance, and guest operations from a secure system designed for fast, confident work.
-            </p>
+          <div className="mt-12 flex max-w-3xl items-center gap-8 xl:mt-16 xl:gap-10">
+            <div className="relative shrink-0">
+              <div className="absolute inset-3 rounded-full bg-cyan-400/10 blur-3xl" />
+              <Logo className="relative h-40 w-40 object-contain drop-shadow-[0_22px_44px_rgba(14,116,144,0.2)] xl:h-48 xl:w-48" />
+            </div>
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-cyan-800">
+                <Sparkles className="h-3 w-3" />
+                AI-powered hotel operations
+              </div>
+              <p className="mt-4 max-w-sm text-sm leading-6 text-slate-600">
+                One intelligent system for every stay, team, and decision.
+              </p>
+            </div>
           </div>
 
-          <div className="mt-14 grid max-w-2xl gap-4">
+          <div className="mt-10 max-w-3xl xl:mt-12">
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-amber-600">Property operations, without the noise</p>
+            <h1 className="mt-5 text-4xl font-bold leading-[1.08] tracking-[-0.055em] text-slate-900 xl:text-5xl 2xl:text-6xl">
+              Every stay, team, and decision in one calm workspace.
+            </h1>
+          </div>
+
+          <div className="mt-10 grid max-w-3xl grid-cols-2 gap-3">
             {platformHighlights.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-xs">
-                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+              <div key={title} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/85 p-3.5 shadow-xs">
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
                   <Icon className="h-4 w-4" />
                 </div>
                 <div>
                   <div className="text-sm font-bold text-slate-900">{title}</div>
-                  <p className="mt-1 text-xs leading-5 text-slate-600">{description}</p>
+                  <p className="mt-0.5 text-[11px] leading-4 text-slate-600">{description}</p>
                 </div>
               </div>
             ))}
@@ -112,8 +135,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
 
       <section className="flex min-h-screen items-center justify-center bg-slate-50 px-5 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-[480px]">
-          <div className="mb-9 flex items-center gap-3.5 lg:hidden">
-            <BrandMark className="h-14 w-14" />
+          <div className="mb-8 flex items-center gap-3.5 lg:hidden">
+            <Logo className="h-16 w-16 object-contain drop-shadow-[0_6px_18px_rgba(14,116,144,0.18)]" />
             <div>
               <div className="text-xl font-black text-slate-900 leading-none">
                 Nexus <span className="text-amber-600">HOS</span>
@@ -123,10 +146,18 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
           </div>
 
           <div className="mb-8">
-            <BrandMark className="mb-5 h-16 w-16 drop-shadow-[0_4px_16px_rgba(217,119,6,0.2)]" />
             <h2 className="text-3xl font-bold tracking-[-0.04em] text-slate-900">Welcome back</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">Sign in to continue to your property workspace.</p>
           </div>
+
+          <section className="mb-7 grid grid-cols-2 gap-2 lg:hidden" aria-label="Nexus HOS features">
+            {platformHighlights.map(({ icon: Icon, title }) => (
+              <div key={title} className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-xs">
+                <Icon className="h-3.5 w-3.5 shrink-0 text-amber-600" />
+                <span className="text-[11px] font-bold text-slate-700">{title}</span>
+              </div>
+            ))}
+          </section>
 
           <form onSubmit={handleSubmit} className="space-y-5" aria-label="Staff sign in">
             {error && (
