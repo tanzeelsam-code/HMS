@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { CheckCircle2, KeyRound, LogOut, ShieldCheck } from 'lucide-react';
 import { ApiError, AuthUser, changePassword } from '../api';
+import { VisiblePasswordInput } from './VisiblePasswordInput';
 
 interface ChangePasswordScreenProps {
   user: AuthUser;
@@ -59,41 +60,53 @@ export const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
         </div>
 
         <form onSubmit={submit} className="mt-7 space-y-4">
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            Temporary password
-            <input
-              type="password"
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400" htmlFor="temporary-password">
+              Temporary password
+            </label>
+            <VisiblePasswordInput
+              id="temporary-password"
               value={currentPassword}
               onChange={(event) => setCurrentPassword(event.target.value)}
               autoComplete="current-password"
               required
-              className="mt-1.5 w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-3 text-sm text-gray-100 outline-none focus:border-amber-400"
+              wrapperClassName="relative mt-1.5"
+              className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-3 pr-10 text-sm text-gray-100 outline-none focus:border-amber-400"
+              toggleClassName="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-500 transition-colors hover:bg-slate-800 hover:text-amber-300 disabled:opacity-40"
             />
-          </label>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            New password
-            <input
-              type="password"
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400" htmlFor="new-password">
+              New password
+            </label>
+            <VisiblePasswordInput
+              id="new-password"
               value={nextPassword}
               onChange={(event) => setNextPassword(event.target.value)}
               autoComplete="new-password"
               minLength={12}
               maxLength={128}
               required
-              className="mt-1.5 w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-3 text-sm text-gray-100 outline-none focus:border-amber-400"
+              wrapperClassName="relative mt-1.5"
+              className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-3 pr-10 text-sm text-gray-100 outline-none focus:border-amber-400"
+              toggleClassName="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-500 transition-colors hover:bg-slate-800 hover:text-amber-300 disabled:opacity-40"
             />
-          </label>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            Confirm new password
-            <input
-              type="password"
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400" htmlFor="confirm-new-password">
+              Confirm new password
+            </label>
+            <VisiblePasswordInput
+              id="confirm-new-password"
               value={confirmation}
               onChange={(event) => setConfirmation(event.target.value)}
               autoComplete="new-password"
               required
-              className="mt-1.5 w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-3 text-sm text-gray-100 outline-none focus:border-amber-400"
+              wrapperClassName="relative mt-1.5"
+              className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-3 pr-10 text-sm text-gray-100 outline-none focus:border-amber-400"
+              toggleClassName="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-500 transition-colors hover:bg-slate-800 hover:text-amber-300 disabled:opacity-40"
             />
-          </label>
+          </div>
 
           <div className="grid grid-cols-2 gap-2" aria-label="Password requirements">
             {checks.map(([label, passed]) => (

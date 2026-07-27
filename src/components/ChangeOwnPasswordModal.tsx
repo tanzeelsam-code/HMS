@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { CheckCircle2, KeyRound, ShieldCheck, X } from 'lucide-react';
 import { ApiError, AuthUser, changePassword } from '../api';
+import { VisiblePasswordInput } from './VisiblePasswordInput';
 
 interface ChangeOwnPasswordModalProps {
   user: AuthUser;
@@ -72,41 +73,50 @@ export const ChangeOwnPasswordModal: React.FC<ChangeOwnPasswordModalProps> = ({
         </div>
 
         <form onSubmit={submit} className="mt-7 space-y-4">
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
-            Current password
-            <input
-              type="password"
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700" htmlFor="current-password">
+              Current password
+            </label>
+            <VisiblePasswordInput
+              id="current-password"
               value={currentPassword}
               onChange={(event) => setCurrentPassword(event.target.value)}
               autoComplete="current-password"
               required
-              className="field-control text-xs mt-1.5 font-bold"
+              wrapperClassName="relative mt-1.5"
+              className="field-control text-xs font-bold pr-10"
             />
-          </label>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
-            New password
-            <input
-              type="password"
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700" htmlFor="own-new-password">
+              New password
+            </label>
+            <VisiblePasswordInput
+              id="own-new-password"
               value={nextPassword}
               onChange={(event) => setNextPassword(event.target.value)}
               autoComplete="new-password"
               minLength={12}
               maxLength={128}
               required
-              className="field-control text-xs mt-1.5 font-bold"
+              wrapperClassName="relative mt-1.5"
+              className="field-control text-xs font-bold pr-10"
             />
-          </label>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
-            Confirm new password
-            <input
-              type="password"
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700" htmlFor="own-confirm-password">
+              Confirm new password
+            </label>
+            <VisiblePasswordInput
+              id="own-confirm-password"
               value={confirmation}
               onChange={(event) => setConfirmation(event.target.value)}
               autoComplete="new-password"
               required
-              className="field-control text-xs mt-1.5 font-bold"
+              wrapperClassName="relative mt-1.5"
+              className="field-control text-xs font-bold pr-10"
             />
-          </label>
+          </div>
 
           <div className="grid grid-cols-2 gap-2" aria-label="Password requirements">
             {checks.map(([label, passed]) => (

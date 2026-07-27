@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { login, AuthUser } from '../api';
+import { VisiblePasswordInput } from './VisiblePasswordInput';
 
 interface LoginScreenProps {
   onLogin: (user: AuthUser) => void;
@@ -203,13 +204,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onBookStay })
               Password
               <span className="relative mt-2 block">
                 <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
+                <VisiblePasswordInput
                   id="login-password"
-                  type="password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="field-control h-12 !pl-10 text-sm"
+                  className="field-control h-12 !pl-10 !pr-11 text-sm"
+                  toggleClassName="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900 disabled:opacity-40"
                   required
                   autoComplete="current-password"
                 />
